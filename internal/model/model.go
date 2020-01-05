@@ -60,3 +60,43 @@ type Serdes struct {
 	Serializer
 	Deserializer
 }
+
+type Metadata struct {
+	Size        int
+	KeysBytes   int
+	ValuesBytes int
+	Errors      errors
+}
+
+func NewMetadata() Metadata {
+	return Metadata{
+		Errors: make([]error, 0),
+	}
+}
+
+// Merge combines 2 metadtaa instances into one
+func (m *Metadata) Merge(metadata Metadata) {
+	m.Size += metadata.Size
+	m.KeysBytes += metadata.KeysBytes
+	m.ValuesBytes += metadata.ValuesBytes
+}
+
+// Add increments the metadata state for an extra element
+func (m *Metadata) Add(element Element) {
+	m.Size++
+	m.KeysBytes += len(element.Key())
+	m.ValuesBytes += len(element.Value())
+}
+
+// Error adds the provided error to the metadata instance
+func (m *Metadata) Error(err error) {
+	if err != nil {
+		m.Errors = append(m.Errors, err)
+	}
+}
+
+type errors []error
+
+func (err *errors) append(currentErr error) {
+	*err = append(*err, currentErr)
+}

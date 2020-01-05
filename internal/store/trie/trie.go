@@ -2,6 +2,7 @@ package trie
 
 import (
 	"fmt"
+	"lachesis/internal/model"
 )
 
 // TODO : abstract the usage with appropriate interfaces
@@ -14,8 +15,8 @@ type Trie struct {
 }
 
 // NewTrie creates a new Trie
-func NewTrie(b byte) Trie {
-	return Trie{
+func NewTrie(b byte) *Trie {
+	return &Trie{
 		key:   b,
 		value: make([]byte, 0),
 		tries: make(map[byte]Trie),
@@ -39,7 +40,7 @@ func (t *Trie) add(key []byte, value []byte) error {
 	b := key[0]
 	trie := NewTrie(b)
 	if len(key) > 1 {
-		t.tries[b] = trie
+		t.tries[b] = *trie
 		return trie.add(key[1:], value)
 	}
 	t.tries[b] = trie.with(value)
@@ -80,4 +81,18 @@ func (t *Trie) Read(key []byte) ([]byte, bool) {
 		}
 	}
 	return nil, false
+}
+
+func Metadata(trie *Trie) model.Metadata {
+	metadata := model.NewMetadata()
+	for _, t := range trie.tries {
+		metadata.Merge(Metadata(&t))
+		metadata.KeysBytes++
+	}
+	if trie.value != nil && len(trie.value) > 0 {
+		metadata.Size++
+		metadata.ValuesBytes += len(trie.value)
+	}
+	metadata.KeysBytes++
+	return metadata
 }

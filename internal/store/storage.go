@@ -6,6 +6,7 @@ import "lachesis/internal/model"
 type Storage interface {
 	Put(element model.Element) error
 	Get(element model.Element) (model.Element, error)
+	Metadata() model.Metadata
 	Close() error
 }
 

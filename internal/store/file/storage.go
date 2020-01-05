@@ -1,59 +1,36 @@
 package file
 
 import (
+	"bufio"
 	"encoding/binary"
 	"fmt"
 	"lachesis/internal/model"
-	"lachesis/internal/store/trie"
+	"lachesis/internal/store/mem"
 	"lachesis/pkg"
 	"os"
 	"strconv"
+	"sync"
 	"time"
 
 	"github.com/rs/zerolog/log"
 )
-
-//type errors []error
-//
-//func (err *errors) append(currentErr error) {
-//	*err = append(*err, currentErr)
-//}
 
 // SB is a single file wrapper for storing key value pairs
 // it uses a Trie for storing the keys as an index for the file
 type SB struct {
 	wrFile *os.File
 	rdFile *os.File
-	//err    errors
-	// we store in the index a slice of bytes representing the stored object [size,size]
-	index trie.Trie
+	// we store in the index a slice of bytes representing the stored object [Size,Size]
+	index *mem.SyncTrie
 	// we use this to encapsulate our serialization / deserialization logic
 	serdes   model.Serdes
-	size     int
+	offset   int
 	filename string
-}
-
-// Close closes the file and completes all clean-up operations needed
-func (sb *SB) Close() error {
-
-	log.Debug().
-		Str("filename", sb.wrFile.Name()).
-		Int("size", sb.size).
-		Msg("Close ScratchPad Storage")
-
-	wrErr := sb.wrFile.Close()
-	rdErr := sb.rdFile.Close()
-
-	if wrErr != nil || rdErr != nil {
-		return fmt.Errorf("could not close SB [%v,%v]", wrErr, rdErr)
-	}
-
-	return nil
 }
 
 // TODO : make a builder
 // NewTrie creates a new SB instance
-func New(path string) (*SB, error) {
+func NewSB(path string) (*SB, error) {
 	// TODO : make the randmness better and dont let it overflow
 	fileName := fmt.Sprintf("%s/%s.%s", path, strconv.FormatInt(time.Now().UnixNano(), 10), "lac")
 	wrFile, err := os.OpenFile(fileName, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
@@ -65,11 +42,29 @@ func New(path string) (*SB, error) {
 		return nil, fmt.Errorf("could not create read file for SB %w", err)
 	}
 	// TODO : we should build the index from the file ... but for that we need to store also the key
-	index := trie.NewTrie('0')
+	index := mem.NewSyncTrie()
 	log.Debug().
 		Str("filename", wrFile.Name()).
 		Msg("Open ScratchPad Storage")
 	return &SB{wrFile: wrFile, rdFile: rdFile, serdes: createSerdes(), index: index, filename: fileName}, nil
+}
+
+// Close closes the file and completes all clean-up operations needed
+func (sb *SB) Close() error {
+
+	log.Debug().
+		Str("filename", sb.wrFile.Name()).
+		Int("Offset", sb.offset).
+		Msg("Close ScratchPad Storage")
+
+	wrErr := sb.wrFile.Close()
+	rdErr := sb.rdFile.Close()
+
+	if wrErr != nil || rdErr != nil {
+		return fmt.Errorf("could not close SB [%v,%v]", wrErr, rdErr)
+	}
+
+	return nil
 }
 
 // Put adds an element to the store
@@ -94,57 +89,112 @@ func (sb *SB) Put(element model.Element) error {
 		// TODO : handle the file corruption -> open new file
 		return fmt.Errorf("write failed '%d' != %d", n, len(bytes))
 	}
-	index, err := createIndex(sb.size, n)
+
+	index, err := createIndex(sb.offset, n)
 	if err != nil {
 		return fmt.Errorf("could not create index '%v' %w", index, err)
 	}
+	sb.offset += n
 
 	log.Trace().
-		Int64("size", index.Offset()).
-		Int("size", index.Size()).
+		Int64("offset", index.Offset()).
+		Int("Size", index.Size()).
 		Bytes("key", element.Key()).
 		Msg("Write_Index")
 
-	sb.size += n
-
-	log.Trace().
-		Int("size", sb.size).
-		Msg("ScratchPad")
-
-	return sb.index.Commit(element.Key(), index.bytes)
+	return sb.index.Put(model.NewObject(element.Key(), index.bytes))
 }
 
 // Get retrieves the element corresponding to the provided key
 // if a value is not found, it will return an error
 func (sb *SB) Get(element model.Element) (model.Element, error) {
-	if bytes, ok := sb.index.Read(element.Key()); ok {
-
-		index, err := readIndex(bytes)
-		if err != nil {
-			return nil, fmt.Errorf("cannot read index '%v' %w", index, err)
-		}
-
-		log.Trace().
-			Int64("size", index.Offset()).
-			Int("size", index.Size()).
-			Bytes("key", element.Key()).
-			Msg("Read_Index")
-
-		data := make([]byte, index.Size())
-		n, err := sb.rdFile.ReadAt(data, index.Offset())
-		if err != nil {
-			return nil, fmt.Errorf("cannot read at '%d' bytes '%d' found '%d' %w", index.Offset(), index.Size(), n, err)
-		}
-		if n != index.Size() {
-			return nil, fmt.Errorf("cannot read at '%d' bytes '%d' found '%d'", index.Offset(), index.Size(), n)
-		}
-		result, err := sb.serdes.Deserializer(element, data)
-		if err != nil {
-			return nil, fmt.Errorf("cannot deserialize '%v' %w", data, err)
-		}
-		return result, nil
+	bytes, err := sb.index.Get(element)
+	if err != nil {
+		return nil, fmt.Errorf("cannot find index for element '%v'", element)
 	}
-	return nil, fmt.Errorf("cannot find index for element '%v'", element)
+
+	index, err := readIndex(bytes.Value())
+	if err != nil {
+		return nil, fmt.Errorf("cannot read index '%v' %w", index, err)
+	}
+
+	log.Trace().
+		Int64("offset", index.Offset()).
+		Int("Size", index.Size()).
+		Bytes("key", element.Key()).
+		Msg("Read_Index")
+
+	data := make([]byte, index.Size())
+	n, err := sb.rdFile.ReadAt(data, index.Offset())
+	if err != nil {
+		return nil, fmt.Errorf("cannot read at '%d' bytes '%d' found '%d' %w", index.Offset(), index.Size(), n, err)
+	}
+	if n != index.Size() {
+		return nil, fmt.Errorf("cannot read at '%d' bytes '%d' found '%d'", index.Offset(), index.Size(), n)
+	}
+	result, err := sb.serdes.Deserializer(element, data)
+	if err != nil {
+		return nil, fmt.Errorf("cannot deserialize '%v' %w", data, err)
+	}
+	return result, nil
+}
+
+// Metadata returns implementation statistics
+func (sb *SB) Metadata() model.Metadata {
+	file, _ := os.Open(sb.filename)
+	fileScanner := bufio.NewScanner(file)
+	l := 0
+	b := 0
+	for fileScanner.Scan() {
+		l++
+		b += len(fileScanner.Bytes())
+	}
+	keyMetadata := sb.index.Metadata()
+	return model.Metadata{
+		Size:        l,
+		KeysBytes:   keyMetadata.ValuesBytes + keyMetadata.KeysBytes,
+		ValuesBytes: b,
+		Errors:      make([]error, 0),
+	}
+}
+
+type SyncSB struct {
+	sb    *SB
+	mutex sync.RWMutex
+}
+
+// Put adds an element to the store while using a write lock
+func (ssb *SyncSB) Put(element model.Element) error {
+	ssb.mutex.Lock()
+	defer ssb.mutex.Unlock()
+	return ssb.sb.Put(element)
+}
+
+// Get retrieves an element from the store while using a read lock
+func (ssb *SyncSB) Get(element model.Element) (model.Element, error) {
+	ssb.mutex.RLock()
+	defer ssb.mutex.RUnlock()
+	return ssb.sb.Get(element)
+}
+
+// Close does any clean up
+func (ssb *SyncSB) Close() error {
+	return ssb.sb.Close()
+}
+
+// Metadata returns implementation statistics
+func (ssb *SyncSB) Metadata() model.Metadata {
+	return ssb.sb.Metadata()
+}
+
+func NewSyncSB(path string) (*SyncSB, error) {
+	sb, err := NewSB(path)
+	if err != nil {
+		return nil, err
+	}
+	return &SyncSB{
+		sb: sb,
+	}, nil
 }
 
 // Handle the SB index

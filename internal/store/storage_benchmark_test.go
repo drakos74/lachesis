@@ -39,7 +39,7 @@ func put(storage Storage, elements []model.Element) {
 	for _, element := range elements {
 		err := storage.Put(element)
 		if err != nil {
-			log.Fatal()
+			log.Fatalf("error : %v", err)
 		}
 	}
 }
@@ -48,7 +48,7 @@ func read(storage Storage, elements []model.Element) {
 	for _, element := range elements {
 		result, err := storage.Get(element)
 		if err != nil {
-			log.Fatal()
+			log.Fatalf("error : %v", err)
 		}
 		consume(result)
 	}
@@ -61,7 +61,17 @@ func consume(element model.Element) {
 
 func BenchmarkSB(b *testing.B) {
 	executeBenchmark(b, func() Storage {
-		db, err := file.New("../../test/testdata/bench")
+		db, err := file.NewSB("../../test/testdata/bench")
+		if err != nil {
+			log.Fatal()
+		}
+		return db
+	})
+}
+
+func BenchmarkSyncSB(b *testing.B) {
+	executeBenchmark(b, func() Storage {
+		db, err := file.NewSyncSB("../../test/testdata/bench")
 		if err != nil {
 			log.Fatal()
 		}
@@ -75,25 +85,40 @@ func BenchmarkMemory(b *testing.B) {
 	})
 }
 
+func BenchmarkSyncMemory(b *testing.B) {
+	executeBenchmark(b, func() Storage {
+		return mem.NewSyncCache()
+	})
+}
+
 func BenchmarkTrie(b *testing.B) {
 	executeBenchmark(b, func() Storage {
 		return mem.NewTrie()
 	})
 }
 
+func BenchmarkSyncTrie(b *testing.B) {
+	executeBenchmark(b, func() Storage {
+		return mem.NewSyncTrie()
+	})
+}
+
 func executeBenchmark(b *testing.B, store func() Storage) {
+
+	sizes := [][]int{{2, 10}, {2, 100}, {2, 1000}, {4, 10}, {4, 100}, {4, 1000}, {8, 10}, {8, 100}, {8, 1000}, {16, 100}, {16, 1000}}
 
 	zerolog.SetGlobalLevel(zerolog.InfoLevel)
 
-	for k := 0; k <= 3; k++ {
+	for k := 0; k <= 5; k++ {
 
-		for l := 10; l <= 10; l++ {
+		for _, size := range sizes {
 
 			storage := store()
 
 			num := int(math.Pow10(k))
-			key := 10 * l
-			value := key * 10
+
+			key := size[0]
+			value := size[1]
 
 			elements := generate(num, key, value)
 

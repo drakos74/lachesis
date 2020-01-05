@@ -5,7 +5,10 @@ Lachesis is the second of the 3 Fates from ancient mythology (https://en.wikiped
 She is responsible for maintaining and storing the thread of life.
 
 ## Benchmarks
+Note : To run the tests and benchmarks for the file storage the following folders must be present :
 
+- test/testdata/bench
+- test/testdata/unit
 ```
 $ go test ./... -gcflags=-N -run=xxx -bench=. -benchmem
 goos: darwin
