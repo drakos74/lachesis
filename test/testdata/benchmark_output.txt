@@ -1,0 +1,47 @@
+GOROOT=/usr/local/go #gosetup
+GOPATH=/Users/drakos74/go #gosetup
+/usr/local/go/bin/go test -c -o /private/var/folders/9f/x47mxqs91ng21njz8nrt5d2m0000gq/T/___gobench_github_com_drakos74_lachesis_internal_store github.com/drakos74/lachesis/internal/store #gosetup
+/private/var/folders/9f/x47mxqs91ng21njz8nrt5d2m0000gq/T/___gobench_github_com_drakos74_lachesis_internal_store -test.v -test.bench . -test.run ^$ #gosetup
+goos: darwin
+goarch: amd64
+pkg: github.com/drakos74/lachesis/internal/store
+BenchmarkSB/*file.SB:put/num:5,size-key:4,size-value:100-16         	   47479	     25682 ns/op
+BenchmarkSB/*file.SB:get/num:5,size-key:4,size-value:100-16         	  118945	     10142 ns/op
+BenchmarkSyncSB/*file.SyncSB:put/num:5,size-key:4,size-value:100-16 	   46078	     25564 ns/op
+BenchmarkSyncSB/*file.SyncSB:get/num:5,size-key:4,size-value:100-16 	  119863	     10106 ns/op
+BenchmarkMemory/*mem.Cache:put/num:5,size-key:4,size-value:100-16   	 4704082	       242 ns/op
+BenchmarkMemory/*mem.Cache:get/num:5,size-key:4,size-value:100-16   	 3315614	       358 ns/op
+BenchmarkSyncMemory/*mem.SyncCache:put/num:5,size-key:4,size-value:100-16         	 1300797	       918 ns/op
+BenchmarkSyncMemory/*mem.SyncCache:get/num:5,size-key:4,size-value:100-16         	 2214336	       511 ns/op
+BenchmarkTrie/*mem.Trie:put/num:5,size-key:4,size-value:100-16                    	 1453714	       807 ns/op
+BenchmarkTrie/*mem.Trie:get/num:5,size-key:4,size-value:100-16                    	 1479003	       804 ns/op
+BenchmarkSyncTrie/*mem.SyncTrie:put/num:5,size-key:4,size-value:100-16            	 1000000	      1026 ns/op
+BenchmarkSyncTrie/*mem.SyncTrie:get/num:5,size-key:4,size-value:100-16            	 1201034	      1009 ns/op
+BenchmarkMemBadger/*badger.Store:put/num:5,size-key:4,size-value:100-16           	   13212	     90958 ns/op
+BenchmarkMemBadger/*badger.Store:get/num:5,size-key:4,size-value:100-16           	  165724	      7257 ns/op
+badger 2020/04/12 15:43:14 DEBUG: Storing value log head: {Fid:0 Len:0 Offset:0}
+badger 2020/04/12 15:43:14 INFO: Got compaction priority: {level:0 score:1.73 dropPrefix:[]}
+badger 2020/04/12 15:43:14 INFO: Running for level: 0
+badger 2020/04/12 15:43:14 DEBUG: LOG Compact. Added 6 keys. Skipped 116560 keys. Iteration took: 43.559143ms
+badger 2020/04/12 15:43:14 DEBUG: Discard stats: map[]
+badger 2020/04/12 15:43:14 INFO: LOG Compact 0->1, del 1 tables, add 1 tables, took 43.666393ms
+badger 2020/04/12 15:43:14 INFO: Compaction for level: 0 DONE
+badger 2020/04/12 15:43:14 INFO: Force compaction on level 0 done
+/Users/drakos74/Projects/lachesis/internal/store
+badger 2020/04/12 15:43:14 INFO: All 1 tables opened in 0s
+badger 2020/04/12 15:43:14 INFO: Replaying file id: 0 at offset: 72586358
+badger 2020/04/12 15:43:14 INFO: Replay took: 7.83µs
+badger 2020/04/12 15:43:14 DEBUG: Value log discard stats empty
+BenchmarkFileBadger/*badger.Store:put/num:5,size-key:4,size-value:100-16          	    1896	    591234 ns/op
+BenchmarkFileBadger/*badger.Store:get/num:5,size-key:4,size-value:100-16          	  138204	      8044 ns/op
+badger 2020/04/12 15:43:16 DEBUG: Storing value log head: {Fid:0 Len:34 Offset:74133999}
+badger 2020/04/12 15:43:16 INFO: Got compaction priority: {level:0 score:1.73 dropPrefix:[]}
+badger 2020/04/12 15:43:16 INFO: Running for level: 0
+badger 2020/04/12 15:43:16 DEBUG: LOG Compact. Added 82 keys. Skipped 9981 keys. Iteration took: 35.198594ms
+badger 2020/04/12 15:43:16 DEBUG: Discard stats: map[0:1207580]
+badger 2020/04/12 15:43:16 INFO: LOG Compact 0->1, del 2 tables, add 1 tables, took 49.898604ms
+badger 2020/04/12 15:43:16 INFO: Compaction for level: 0 DONE
+badger 2020/04/12 15:43:16 INFO: Force compaction on level 0 done
+PASS
+
+Process finished with exit code 0
