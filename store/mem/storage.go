@@ -2,9 +2,10 @@ package mem
 
 import (
 	"fmt"
-	"lachesis/internal/model"
-	"lachesis/internal/store/trie"
 	"sync"
+
+	"github.com/drakos74/lachesis/model"
+	"github.com/drakos74/lachesis/store/trie"
 )
 
 type payload []byte

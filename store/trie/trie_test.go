@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func new() Trie {
+func new() *Trie {
 	k := byte('A')
 	trie := NewTrie(k)
 	return trie
@@ -127,7 +127,7 @@ func TestTrie_ReadNotFoundWithin(t *testing.T) {
 	assert.Nil(t, v)
 }
 
-func assertRead(t *testing.T, trie Trie, key []byte, value []byte) {
+func assertRead(t *testing.T, trie *Trie, key []byte, value []byte) {
 	v, ok := trie.Read(key)
 	assert.True(t, ok)
 	assert.Equal(t, value, v)

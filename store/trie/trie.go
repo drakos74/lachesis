@@ -2,7 +2,8 @@ package trie
 
 import (
 	"fmt"
-	"lachesis/internal/model"
+
+	"github.com/drakos74/lachesis/model"
 )
 
 // TODO : abstract the usage with appropriate interfaces

@@ -2,14 +2,17 @@ package store
 
 import (
 	"fmt"
-	"lachesis/internal/model"
-	"lachesis/internal/store/file"
-	"lachesis/internal/store/mem"
 	"log"
 	"math"
 	"math/rand"
 	"reflect"
 	"testing"
+
+	"github.com/drakos74/lachesis/store/badger"
+
+	"github.com/drakos74/lachesis/model"
+	"github.com/drakos74/lachesis/store/file"
+	"github.com/drakos74/lachesis/store/mem"
 
 	"github.com/rs/zerolog"
 )
@@ -103,13 +106,36 @@ func BenchmarkSyncTrie(b *testing.B) {
 	})
 }
 
+func BenchmarkMemBadger(b *testing.B) {
+	executeBenchmark(b, func() Storage {
+		db, err := badger.NewMem()
+		if err != nil {
+			log.Fatal()
+		}
+		return db
+	})
+}
+
+func BenchmarkFileBadger(b *testing.B) {
+	executeBenchmark(b, func() Storage {
+		db, err := badger.NewFile("../../test/testdata/bench")
+		if err != nil {
+			log.Fatal()
+		}
+		return db
+	})
+}
+
 func executeBenchmark(b *testing.B, store func() Storage) {
 
-	sizes := [][]int{{2, 10}, {2, 100}, {2, 1000}, {4, 10}, {4, 100}, {4, 1000}, {8, 10}, {8, 100}, {8, 1000}, {16, 100}, {16, 1000}}
+	sizes := [][]int{
+		//{2, 10}, {2, 100}, {2, 1000}, {4, 10},
+		{4, 100},
+	} //{4, 1000}, {8, 10}, {8, 100}, {8, 1000}, {16, 100}, {16, 1000}
 
 	zerolog.SetGlobalLevel(zerolog.InfoLevel)
 
-	for k := 0; k <= 5; k++ {
+	for k := 3; k <= 3; k++ {
 
 		for _, size := range sizes {
 
@@ -122,13 +148,13 @@ func executeBenchmark(b *testing.B, store func() Storage) {
 
 			elements := generate(num, key, value)
 
-			b.Run(fmt.Sprintf("%s:%s/num:%d,size-key:%d,size-value:%d", reflect.TypeOf(storage).String(), "put", num, key, value), func(b *testing.B) {
+			b.Run(fmt.Sprintf("%s|%s|num-objects:%d|size-key:%d|size-value:%d|", reflect.TypeOf(storage).String(), "put", num, key, value), func(b *testing.B) {
 				for i := 0; i < b.N; i++ {
 					put(storage, elements)
 				}
 			})
 
-			b.Run(fmt.Sprintf("%s:%s/num:%d,size-key:%d,size-value:%d", reflect.TypeOf(storage).String(), "get", num, key, value), func(b *testing.B) {
+			b.Run(fmt.Sprintf("%s|%s|num-objects:%d|size-key:%d|size-value:%d|", reflect.TypeOf(storage).String(), "get", num, key, value), func(b *testing.B) {
 				for i := 0; i < b.N; i++ {
 					read(storage, elements)
 				}

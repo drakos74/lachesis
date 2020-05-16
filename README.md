@@ -41,3 +41,15 @@ BenchmarkTrie/*mem.Trie:get/num:1000,size-key:100,size-value:1000-16            
 PASS
 ok      lachesis/internal/store 43.969s
 ```
+
+### Cache
+
+- simplest but harder to scale/improve
+
+### Trie
+
+- lower size than the keys and values added together
+
+### File
+
+- need to do clean up tasks (for updates etc ...)

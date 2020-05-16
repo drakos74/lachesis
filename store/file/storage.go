@@ -4,13 +4,15 @@ import (
 	"bufio"
 	"encoding/binary"
 	"fmt"
-	"lachesis/internal/model"
-	"lachesis/internal/store/mem"
-	"lachesis/pkg"
 	"os"
 	"strconv"
 	"sync"
 	"time"
+
+	"github.com/drakos74/lachesis/internal"
+
+	"github.com/drakos74/lachesis/model"
+	"github.com/drakos74/lachesis/store/mem"
 
 	"github.com/rs/zerolog/log"
 )
@@ -31,7 +33,7 @@ type SB struct {
 // TODO : make a builder
 // NewTrie creates a new SB instance
 func NewSB(path string) (*SB, error) {
-	// TODO : make the randmness better and dont let it overflow
+	// TODO : make the randomness better and dont let it overflow
 	fileName := fmt.Sprintf("%s/%s.%s", path, strconv.FormatInt(time.Now().UnixNano(), 10), "lac")
 	wrFile, err := os.OpenFile(fileName, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
@@ -227,7 +229,7 @@ func createIndex(offset int, size int) (index, error) {
 	binary.LittleEndian.PutUint16(s, ss)
 	o := make([]byte, 4)
 	binary.LittleEndian.PutUint32(o, oo)
-	b, err := pkg.Concat(6, o, s)
+	b, err := internal.Concat(6, o, s)
 	if err != nil {
 		return index{}, fmt.Errorf("could not create index for [%d,%d] %w", offset, size, err)
 	}
@@ -265,7 +267,7 @@ func createSerdes() model.Serdes {
 	nl := []byte{byte('\n')}
 	return model.Serdes{
 		Serializer: func(element model.Element) ([]byte, error) {
-			b, err := pkg.Concat(len(element.Value())+len(nl), element.Value(), nl)
+			b, err := internal.Concat(len(element.Value())+len(nl), element.Value(), nl)
 			if err != nil {
 				return nil, fmt.Errorf("could not serialize value %w", err)
 			}

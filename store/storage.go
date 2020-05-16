@@ -1,6 +1,6 @@
 package store
 
-import "lachesis/internal/model"
+import "github.com/drakos74/lachesis/model"
 
 // Storage is the low level interface for interacting with the underlying storage in bytes
 type Storage interface {

@@ -14,6 +14,7 @@
 # project specific test files
 test/testdata/unit/*
 test/testdata/bench/*
+test/testdata/badger/*
 
 # idea
 .idea
