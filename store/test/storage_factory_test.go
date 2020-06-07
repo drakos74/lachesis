@@ -13,6 +13,7 @@ func TestRandom(t *testing.T) {
 		newBytes := RandomBytes(10)
 		assert.NotEqual(t, bytes, newBytes)
 		bytes = newBytes
+		assert.Equal(t, bytes, newBytes)
 	}
 
 }
