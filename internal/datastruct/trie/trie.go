@@ -3,14 +3,13 @@ package trie
 import (
 	"fmt"
 
-	"github.com/drakos74/lachesis/model"
+	"github.com/drakos74/lachesis/store"
 )
 
-// TODO : abstract the usage with appropriate interfaces
-// Trie is a tries structure with keys and values made of byte arrays
+// TODO : review based on theory
+// Trie is a trie structure with keys and values made of byte arrays
 type Trie struct {
-	key byte
-	// leave the index value to be represented by the specific interface the implementation chooses, backed by a generic byte-slice
+	key   byte
 	value []byte
 	tries map[byte]Trie
 }
@@ -22,31 +21,6 @@ func NewTrie(b byte) *Trie {
 		value: make([]byte, 0),
 		tries: make(map[byte]Trie),
 	}
-}
-
-// with will directly override the value of the trie node.
-func (t *Trie) with(value []byte) Trie {
-	t.value = value
-	return *t
-}
-
-// String prints the contents of the whole Tries
-func (t *Trie) String() string {
-	return fmt.Sprintf("key:%v,value:%v,tries:\n\t-> %v", t.key, t.value, t.tries)
-}
-
-// add will add the value to the first and only child of the trie
-func (t *Trie) add(key []byte, value []byte) error {
-
-	b := key[0]
-	trie := NewTrie(b)
-	if len(key) > 1 {
-		t.tries[b] = *trie
-		return trie.add(key[1:], value)
-	}
-	t.tries[b] = trie.with(value)
-
-	return nil
 }
 
 // Commit adds the corresponding key-value pair to the Trie
@@ -84,8 +58,28 @@ func (t *Trie) Read(key []byte) ([]byte, bool) {
 	return nil, false
 }
 
-func Metadata(trie *Trie) model.Metadata {
-	metadata := model.NewMetadata()
+// with will directly override the value of the trie node.
+func (t *Trie) with(value []byte) Trie {
+	t.value = value
+	return *t
+}
+
+// add will add the value to the first and only child of the trie
+func (t *Trie) add(key []byte, value []byte) error {
+
+	b := key[0]
+	trie := NewTrie(b)
+	if len(key) > 1 {
+		t.tries[b] = *trie
+		return trie.add(key[1:], value)
+	}
+	t.tries[b] = trie.with(value)
+
+	return nil
+}
+
+func Metadata(trie *Trie) store.Metadata {
+	metadata := store.NewMetadata()
 	for _, t := range trie.tries {
 		metadata.Merge(Metadata(&t))
 		metadata.KeysBytes++
@@ -96,4 +90,9 @@ func Metadata(trie *Trie) model.Metadata {
 	}
 	metadata.KeysBytes++
 	return metadata
+}
+
+// String prints the contents of the whole Tries
+func (t *Trie) String() string {
+	return fmt.Sprintf("key:%v,value:%v,tries:\n\t-> %v", t.key, t.value, t.tries)
 }

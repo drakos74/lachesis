@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func new() *Trie {
+func newTestTrie() *Trie {
 	k := byte('A')
 	trie := NewTrie(k)
 	return trie
@@ -14,7 +14,7 @@ func new() *Trie {
 
 func TestTrie_add(t *testing.T) {
 
-	trie := new()
+	trie := newTestTrie()
 
 	b := byte('s')
 
@@ -27,7 +27,7 @@ func TestTrie_add(t *testing.T) {
 
 func TestTrie_addOverwrite(t *testing.T) {
 
-	trie := new()
+	trie := newTestTrie()
 
 	b := byte('s')
 
@@ -46,7 +46,7 @@ func TestTrie_addOverwrite(t *testing.T) {
 
 func TestTrie_Commit(t *testing.T) {
 
-	trie := new()
+	trie := newTestTrie()
 
 	b := []byte("demo")
 
@@ -58,7 +58,7 @@ func TestTrie_Commit(t *testing.T) {
 
 func TestTrie_MultiCommit(t *testing.T) {
 
-	trie := new()
+	trie := newTestTrie()
 
 	b1 := []byte("demo1")
 	b2 := []byte("demo2")
@@ -81,7 +81,7 @@ func TestTrie_MultiCommit(t *testing.T) {
 
 func TestTrie_CommitOvewrite(t *testing.T) {
 
-	trie := new()
+	trie := newTestTrie()
 
 	b := []byte("demo")
 
@@ -96,7 +96,7 @@ func TestTrie_CommitOvewrite(t *testing.T) {
 }
 
 func TestTrie_ReadNotFoundExtended(t *testing.T) {
-	trie := new()
+	trie := newTestTrie()
 
 	b := []byte("demo")
 
@@ -112,7 +112,7 @@ func TestTrie_ReadNotFoundExtended(t *testing.T) {
 }
 
 func TestTrie_ReadNotFoundWithin(t *testing.T) {
-	trie := new()
+	trie := newTestTrie()
 
 	b := []byte("demo")
 
