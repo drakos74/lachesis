@@ -15,14 +15,15 @@ func RandomBytes(size int) []byte {
 }
 
 func Random(keySize, valueSize int) Factory {
-	key := RandomBytes(keySize)
-	value := RandomBytes(valueSize)
 	return func() store.Element {
+		key := RandomBytes(keySize)
+		value := RandomBytes(valueSize)
 		return store.NewElement(key, value)
 	}
 }
 
-func RandomValue(key []byte, valueSize int) Factory {
+func RandomValue(keySize, valueSize int) Factory {
+	key := RandomBytes(keySize)
 	return func() store.Element {
 		return store.NewElement(key, RandomBytes(valueSize))
 	}

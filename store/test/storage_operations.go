@@ -90,3 +90,38 @@ func ReadOverwriteOperation(t *testing.T, storage store.Storage, generate Factor
 	err = storage.Close()
 	assert.NoError(t, err)
 }
+
+const num = 1000000 // should be one million
+func MultiReadWriteOperations(t *testing.T, storage store.Storage, generate Factory) {
+
+	metadata := store.NewMetadata()
+
+	// generate the elements
+	elements := make([]store.Element, 0)
+
+	for i := 0; i < num; i++ {
+		element := generate()
+		metadata.Add(element)
+		elements = append(elements, element)
+	}
+
+	//  write path
+	for _, element := range elements {
+		err := storage.Put(element)
+		assert.NoError(t, err)
+	}
+
+	// read path
+	for _, element := range elements {
+		value, err := storage.Get(element.Key)
+		assert.NoError(t, err)
+		assert.Equal(t, element.Value, value.Value)
+	}
+
+	// assert internal stats
+	assert.Equal(t, metadata.Size, storage.Metadata().Size)
+
+	// wrap up
+	err := storage.Close()
+	assert.NoError(t, err)
+}

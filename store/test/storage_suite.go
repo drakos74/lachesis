@@ -31,7 +31,12 @@ func (suite *Suite) TestPutOperation() {
 
 func (suite *Suite) TestReadOverwriteOperation() {
 	storage := suite.newStorage()
-	ReadOverwriteOperation(suite.t, storage, RandomValue(RandomBytes(10), 20))
+	ReadOverwriteOperation(suite.t, storage, RandomValue(10, 20))
+}
+
+func (suite *Suite) TestMultiReadWriteOperations() {
+	storage := suite.newStorage()
+	MultiReadWriteOperations(suite.t, storage, Random(10, 20))
 }
 
 // In order for 'go test' to run this suite, we need to create
