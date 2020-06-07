@@ -5,7 +5,7 @@ import (
 	"os"
 	"sync/atomic"
 
-	"github.com/drakos74/lachesis/model"
+	"github.com/drakos74/lachesis/store"
 
 	"github.com/dgraph-io/badger/v2"
 )
@@ -14,19 +14,18 @@ type Store struct {
 	db *badger.DB
 }
 
-func (s *Store) Put(element model.Element) error {
+func (s *Store) Put(element store.Element) error {
 	return s.db.Update(func(txn *badger.Txn) error {
-		err := txn.Set(element.Key(), element.Value())
+		err := txn.Set(element.Key, element.Value)
 		return err
 	})
 }
 
-func (s *Store) Get(element model.Element) (model.Element, error) {
-	var key []byte
+func (s *Store) Get(key store.Key) (store.Element, error) {
 	var value []byte
 
 	err := s.db.View(func(txn *badger.Txn) error {
-		item, err := txn.Get(element.Key())
+		item, err := txn.Get(key)
 		if err != nil {
 			return err
 		}
@@ -39,18 +38,19 @@ func (s *Store) Get(element model.Element) (model.Element, error) {
 		return nil
 	})
 	if err != nil {
-		return nil, err
+		return store.Element{}, err
 	}
-	return model.NewObject(key, value), nil
+	return store.NewElement(key, value), nil
 }
 
-func (s *Store) Metadata() model.Metadata {
+// Metadata returns internal statistics about the storage
+// It s not meant to serve anny functionality, but used only for testing
+func (s *Store) Metadata() store.Metadata {
 	var count int32
 	err := s.db.View(func(txn *badger.Txn) error {
 		itr := txn.NewIterator(badger.DefaultIteratorOptions)
 		defer itr.Close()
-		itr.Rewind()
-		for itr.Item(); itr.Valid(); itr.Next() {
+		for itr.Rewind(); itr.Valid(); itr.Next() {
 			atomic.AddInt32(&count, 1)
 		}
 		return nil
@@ -60,7 +60,7 @@ func (s *Store) Metadata() model.Metadata {
 		println(fmt.Sprintf("err = %v", err))
 	}
 
-	return model.Metadata{
+	return store.Metadata{
 		Size: int(count),
 	}
 }
@@ -69,21 +69,21 @@ func (s *Store) Close() error {
 	return s.db.Close()
 }
 
-func NewFile(f string) (*Store, error) {
+func NewFileStore(f string) (*Store, error) {
 	dir, err := os.Getwd()
 	if err != nil {
 		return nil, err
 	}
 	println(fmt.Sprintf("dir = %s", dir))
-	return new(badger.Open(badger.DefaultOptions(f)))
+	return newBadger(badger.Open(badger.DefaultOptions(f)))
 }
 
-func NewMem() (*Store, error) {
-	return new(badger.Open(badger.DefaultOptions("").WithInMemory(true)))
+func NewMemoryStore() (*Store, error) {
+	return newBadger(badger.Open(badger.DefaultOptions("").WithInMemory(true)))
 
 }
 
-func new(db *badger.DB, err error) (*Store, error) {
+func newBadger(db *badger.DB, err error) (*Store, error) {
 	if err != nil {
 		return nil, fmt.Errorf("could not create store: %w", err)
 	}
