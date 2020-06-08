@@ -1,6 +1,8 @@
 package test
 
 import (
+	"bytes"
+	"fmt"
 	"math/rand"
 
 	"github.com/drakos74/lachesis/store"
@@ -34,4 +36,12 @@ func RandomValue(keySize, valueSize int) Factory {
 	return func() store.Element {
 		return store.NewElement(key, RandomBytes(valueSize))
 	}
+}
+
+func Equals(expected, actual []byte) error {
+	res := bytes.Compare(expected, actual)
+	if res == 0 {
+		return nil
+	}
+	return fmt.Errorf("expected: %v\nactual: %v", expected, actual)
 }

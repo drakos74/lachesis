@@ -1,6 +1,9 @@
 package test
 
 import (
+	"fmt"
+	"sync"
+	"sync/atomic"
 	"testing"
 
 	"github.com/drakos74/lachesis/store"
@@ -91,7 +94,8 @@ func ReadOverwriteOperation(t *testing.T, storage store.Storage, generate Factor
 	assert.NoError(t, err)
 }
 
-const num = 1000000 // should be one million
+const num = 100000
+
 func MultiReadWriteOperations(t *testing.T, storage store.Storage, generate Factory) {
 
 	metadata := store.NewMetadata()
@@ -124,4 +128,56 @@ func MultiReadWriteOperations(t *testing.T, storage store.Storage, generate Fact
 	// wrap up
 	err := storage.Close()
 	assert.NoError(t, err)
+}
+
+func MultiConcurrentReadWriteOperations(t *testing.T, storage store.Storage, generate Factory) {
+
+	wg := sync.WaitGroup{}
+
+	var r int32
+	var w int32
+
+	for i := 0; i < num; i++ {
+
+		wg.Add(1)
+
+		// TODO : try to make this linear
+		// each element cycle is done in a different routine to generate more contention
+		go func(storage store.Storage) {
+			element := generate()
+
+			// put
+			err := storage.Put(element)
+			if err != nil {
+				t.Fail()
+			}
+			atomic.AddInt32(&w, 1)
+
+			// make sure we call read after the write finished
+			go func() {
+				// read
+				key := element.Key
+				result, err := storage.Get(key)
+				if err != nil {
+					panic(fmt.Sprintf("error on read: %w", err))
+				}
+				atomic.AddInt32(&r, 1)
+				wg.Done()
+				assert.Equal(t, element.Value, result.Value)
+			}()
+
+		}(storage)
+
+	}
+
+	wg.Wait()
+
+	// flush path
+	err := storage.Close()
+	assert.NoError(t, err)
+
+	// NOTE : We might have key overlaps ... but the different stores will behave differently
+	// so for now we just assert based on the read and write operations, and not the embedded metadata
+	assert.Equal(t, w, r)
+
 }

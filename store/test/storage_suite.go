@@ -39,6 +39,11 @@ func (suite *Suite) TestMultiReadWriteOperations() {
 	MultiReadWriteOperations(suite.t, storage, Random(10, 20))
 }
 
+func (suite *Suite) TestMultiConcurrentReadWriteOperations() {
+	storage := suite.newStorage()
+	MultiConcurrentReadWriteOperations(suite.t, storage, Random(10, 20))
+}
+
 // In order for 'go test' to run this suite, we need to create
 // a normal test function and pass our suite to suite.Run
 func Execute(t *testing.T, factory func() store.Storage) {
