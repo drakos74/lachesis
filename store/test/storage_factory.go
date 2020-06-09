@@ -38,6 +38,16 @@ func RandomValue(keySize, valueSize int) Factory {
 	}
 }
 
+// Elements will create the given number of elements with the provided factory
+// it will return the elements in a slice
+func Elements(n int, generate Factory) []store.Element {
+	elements := make([]store.Element, n)
+	for i := 0; i < n; i++ {
+		elements[i] = generate()
+	}
+	return elements
+}
+
 func Equals(expected, actual []byte) error {
 	res := bytes.Compare(expected, actual)
 	if res == 0 {
