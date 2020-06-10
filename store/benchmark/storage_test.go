@@ -120,7 +120,7 @@ func executeBenchmark(b *testing.B, storage store.Storage, scenario BenchmarkSce
 		elements := test.Elements(currentScenario.Num, test.Random(currentScenario.KeySize, currentScenario.ValueSize))
 
 		for _, exec := range execution {
-			b.Run(fmt.Sprintf("name:%s|operation:%s|num-objects:%d|size-key:%d|size-value:%d|", reflect.TypeOf(storage).String(), getFuncName(exec), scenario.Num, scenario.KeySize, scenario.ValueSize), func(b *testing.B) {
+			b.Run(fmt.Sprintf("%s|%s|num-objects:%d|size-key:%d|size-value:%d|", reflect.TypeOf(storage).String(), getFuncName(exec), scenario.Num, scenario.KeySize, scenario.ValueSize), func(b *testing.B) {
 				for i := 0; i < b.N; i++ {
 					exec(storage, elements)
 				}
