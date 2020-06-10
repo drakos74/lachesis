@@ -15,39 +15,50 @@ type Suite struct {
 
 // Make sure that VariableThatShouldStartAtFive is set to five
 // before each test
-func (suite *Suite) SetupTest() {
+func (s *Suite) SetupTest() {
 	// TODO : remove if nothing else todo here
 }
 
-func (suite *Suite) TestVoidReadOperation() {
-	storage := suite.newStorage()
-	VoidReadOperation(suite.t, storage)
+type KeyValue struct {
+	Suite
 }
 
-func (suite *Suite) TestPutOperation() {
-	storage := suite.newStorage()
-	ReadWriteOperation(suite.t, storage, Random(10, 20))
+func (s *KeyValue) TestVoidReadOperation() {
+	storage := s.newStorage()
+	VoidReadOperation(s.t, storage)
 }
 
-func (suite *Suite) TestReadOverwriteOperation() {
-	storage := suite.newStorage()
-	ReadOverwriteOperation(suite.t, storage, RandomValue(10, 20))
+func (s *KeyValue) TestPutOperation() {
+	storage := s.newStorage()
+	ReadWriteOperation(s.t, storage, Random(10, 20))
 }
 
-func (suite *Suite) TestMultiReadWriteOperations() {
-	storage := suite.newStorage()
-	MultiReadWriteOperations(suite.t, storage, Random(10, 20))
+func (s *KeyValue) TestReadOverwriteOperation() {
+	storage := s.newStorage()
+	ReadOverwriteOperation(s.t, storage, RandomValue(10, 20))
 }
 
-func (suite *Suite) TestMultiConcurrentReadWriteOperations() {
-	storage := suite.newStorage()
-	MultiConcurrentReadWriteOperations(suite.t, storage, Random(10, 20))
+func (s *KeyValue) TestMultiReadWriteOperations() {
+	storage := s.newStorage()
+	MultiReadWriteOperations(s.t, storage, Random(10, 20))
 }
 
-// In order for 'go test' to run this suite, we need to create
-// a normal test function and pass our suite to suite.Run
-func Execute(t *testing.T, factory func() store.Storage) {
-	s := new(Suite)
+func (s *KeyValue) Run(t *testing.T, factory func() store.Storage) {
+	s.t = t
+	s.newStorage = factory
+	suite.Run(t, s)
+}
+
+type Concurrent struct {
+	Suite
+}
+
+func (s *Concurrent) TestMultiConcurrentReadWriteOperations() {
+	storage := s.newStorage()
+	MultiConcurrentReadWriteOperations(s.t, storage, Random(10, 20))
+}
+
+func (s *Concurrent) Run(t *testing.T, factory func() store.Storage) {
 	s.t = t
 	s.newStorage = factory
 	suite.Run(t, s)

@@ -18,8 +18,14 @@ func newFileStore() *Store {
 	return s
 }
 
-func TestBadgerFileImplementation(t *testing.T) {
-	test.Execute(t, func() store.Storage {
+func TestBadgerFile_KeyValueImplementation(t *testing.T) {
+	new(test.KeyValue).Run(t, func() store.Storage {
+		return newFileStore()
+	})
+}
+
+func TestBadgerFile_SyncImplementation(t *testing.T) {
+	new(test.Concurrent).Run(t, func() store.Storage {
 		return newFileStore()
 	})
 }

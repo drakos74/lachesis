@@ -8,8 +8,14 @@ import (
 	"github.com/drakos74/lachesis/store/test"
 )
 
-func TestCacheImplementation(t *testing.T) {
-	test.Execute(t, func() store.Storage {
+func TestCache_KeyValueImplementation(t *testing.T) {
+	new(test.KeyValue).Run(t, func() store.Storage {
+		return NewCache()
+	})
+}
+
+func testCache_SyncImplementation(t *testing.T) {
+	new(test.Concurrent).Run(t, func() store.Storage {
 		return NewCache()
 	})
 }

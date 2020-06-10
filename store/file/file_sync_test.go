@@ -17,7 +17,13 @@ func newSyncScratchPad() *SyncScratchPad {
 }
 
 func TestSyncFileImplementation(t *testing.T) {
-	test.Execute(t, func() store.Storage {
+	new(test.KeyValue).Run(t, func() store.Storage {
+		return newSyncScratchPad()
+	})
+}
+
+func TestSyncFile_SyncImplementation(t *testing.T) {
+	new(test.Concurrent).Run(t, func() store.Storage {
 		return newSyncScratchPad()
 	})
 }

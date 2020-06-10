@@ -17,8 +17,14 @@ func newMemStore() *Store {
 	return s
 }
 
-func TestBadgerInMemImplementation(t *testing.T) {
-	test.Execute(t, func() store.Storage {
+func TestBadgerInMem_KeyValueImplementation(t *testing.T) {
+	new(test.KeyValue).Run(t, func() store.Storage {
+		return newMemStore()
+	})
+}
+
+func TestBadgerInMem_SyncImplementation(t *testing.T) {
+	new(test.Concurrent).Run(t, func() store.Storage {
 		return newMemStore()
 	})
 }

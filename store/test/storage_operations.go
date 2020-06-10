@@ -94,7 +94,7 @@ func ReadOverwriteOperation(t *testing.T, storage store.Storage, generate Factor
 	assert.NoError(t, err)
 }
 
-const num = 100000
+const num = 1000
 
 func MultiReadWriteOperations(t *testing.T, storage store.Storage, generate Factory) {
 

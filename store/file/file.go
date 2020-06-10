@@ -83,7 +83,8 @@ func (s *ScratchPad) Put(element store.Element) error {
 		Int("Size", index.Size()).
 		Bytes("key", element.Key).
 		Msg("Write_Index")
-
+	// Note : we overwrite the element only in the key struct,
+	// so the old value is not reachable from the outside world
 	return s.index.Put(store.NewElement(element.Key, index.bytes))
 }
 
@@ -134,7 +135,7 @@ func (s *ScratchPad) Metadata() store.Metadata {
 	}
 	keyMetadata := s.index.Metadata()
 	return store.Metadata{
-		Size:        l,
+		Size:        keyMetadata.Size,
 		KeysBytes:   keyMetadata.ValuesBytes + keyMetadata.KeysBytes,
 		ValuesBytes: b,
 		Errors:      make([]error, 0),
