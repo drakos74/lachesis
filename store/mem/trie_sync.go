@@ -29,7 +29,7 @@ func (st *SyncTrie) Get(key store.Key) (store.Element, error) {
 	if data, ok := st.storage.Read(key); ok {
 		return store.NewElement(key, data), nil
 	}
-	return store.Element{}, fmt.Errorf("could not find element for key %v", key)
+	return store.Element{}, fmt.Errorf(store.NoValue, key)
 }
 
 // Close will run any maintainance operations

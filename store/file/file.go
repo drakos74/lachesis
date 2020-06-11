@@ -93,7 +93,7 @@ func (s *ScratchPad) Put(element store.Element) error {
 func (s *ScratchPad) Get(key store.Key) (store.Element, error) {
 	keyBytes, err := s.index.Get(key)
 	if err != nil {
-		return store.Element{}, fmt.Errorf("cannot find fileIndex for element '%v'", key)
+		return store.Element{}, fmt.Errorf(store.NoValue, key)
 	}
 
 	index, err := readIndex(keyBytes.Value)
@@ -128,10 +128,10 @@ func (s *ScratchPad) Metadata() store.Metadata {
 	file, _ := os.Open(s.filename)
 	fileScanner := bufio.NewScanner(file)
 	l := 0
-	b := 0
+	var b uint64
 	for fileScanner.Scan() {
 		l++
-		b += len(fileScanner.Bytes())
+		b += uint64(len(fileScanner.Bytes()))
 	}
 	keyMetadata := s.index.Metadata()
 	return store.Metadata{

@@ -21,7 +21,7 @@ func VoidReadOperation(t *testing.T, storage store.Storage) {
 	assert.Equal(t, store.Element{}, testElement)
 
 	// check if store is empty
-	assert.Equal(t, 0, storage.Metadata().Size)
+	assertMeta(t, 0, 0, 0, storage.Metadata())
 
 	// wrap up
 	err = storage.Close()
@@ -42,12 +42,12 @@ func IntermediateReadOperation(t *testing.T, storage store.Storage, key store.Ke
 
 // ReadWriteOperation performs a write and a following read on the storage
 // it asserts that we got back the value that was put into the store
-func ReadWriteOperation(t *testing.T, storage store.Storage, generate Factory) {
+func ReadWriteOperation(t *testing.T, storage store.Storage, generator RandomFactory) {
 
-	element := generate()
+	element := generator.Factory()
 
 	// check if store is empty
-	assert.Equal(t, 0, storage.Metadata().Size)
+	assertMeta(t, 0, 0, 0, storage.Metadata())
 
 	// write path
 	err := storage.Put(element)
@@ -58,21 +58,21 @@ func ReadWriteOperation(t *testing.T, storage store.Storage, generate Factory) {
 	assert.Equal(t, element, savedElement)
 
 	// check the metadata
-	assert.Equal(t, 1, storage.Metadata().Size)
+	assertMeta(t, 1, uint64(generator.KeySize), uint64(generator.ValueSize), storage.Metadata())
 
 	// wrap up
 	err = storage.Close()
 	assert.NoError(t, err)
 }
 
-func ReadOverwriteOperation(t *testing.T, storage store.Storage, generate Factory) {
+func ReadOverwriteOperation(t *testing.T, storage store.Storage, generator RandomFactory) {
 
-	element1 := generate()
-	element2 := generate()
+	element1 := generator.Factory()
+	element2 := generator.Factory()
 	assert.NotEqual(t, element1, element2)
 
 	// check if store is empty
-	assert.Equal(t, 0, storage.Metadata().Size)
+	assertMeta(t, 0, 0, 0, storage.Metadata())
 
 	// write path
 	err := storage.Put(element1)
@@ -87,7 +87,7 @@ func ReadOverwriteOperation(t *testing.T, storage store.Storage, generate Factor
 	assert.Equal(t, element2, savedElement)
 
 	// check the metadata
-	assert.Equal(t, 1, storage.Metadata().Size)
+	assert.Equal(t, uint64(1), storage.Metadata().Size)
 
 	// wrap up
 	err = storage.Close()
@@ -96,15 +96,15 @@ func ReadOverwriteOperation(t *testing.T, storage store.Storage, generate Factor
 
 const num = 1000
 
-func MultiReadWriteOperations(t *testing.T, storage store.Storage, generate Factory) {
+func MultiReadWriteOperations(t *testing.T, storage store.Storage, generator RandomFactory) {
 
 	metadata := store.NewMetadata()
 
-	// generate the elements
+	// generator the elements
 	elements := make([]store.Element, 0)
 
 	for i := 0; i < num; i++ {
-		element := generate()
+		element := generator.Factory()
 		metadata.Add(element)
 		elements = append(elements, element)
 	}
@@ -130,7 +130,7 @@ func MultiReadWriteOperations(t *testing.T, storage store.Storage, generate Fact
 	assert.NoError(t, err)
 }
 
-func MultiConcurrentReadWriteOperations(t *testing.T, storage store.Storage, generate Factory) {
+func MultiConcurrentReadWriteOperations(t *testing.T, storage store.Storage, generator RandomFactory) {
 
 	wg := sync.WaitGroup{}
 
@@ -142,9 +142,9 @@ func MultiConcurrentReadWriteOperations(t *testing.T, storage store.Storage, gen
 		wg.Add(1)
 
 		// TODO : try to make this linear
-		// each element cycle is done in a different routine to generate more contention
+		// each element cycle is done in a different routine to generator more contention
 		go func(storage store.Storage) {
-			element := generate()
+			element := generator.Factory()
 
 			// put
 			err := storage.Put(element)
@@ -180,4 +180,12 @@ func MultiConcurrentReadWriteOperations(t *testing.T, storage store.Storage, gen
 	// so for now we just assert based on the read and write operations, and not the embedded metadata
 	assert.Equal(t, w, r)
 
+}
+
+func assertMeta(t *testing.T, size, keysSize, vaLuesSize uint64, meta store.Metadata) {
+	assert.Equal(t, size, meta.Size)
+	// TODO : assert on the volume of the store
+	//assert.Equal(t, keysSize, meta.KeysBytes)
+	//assert.Equal(t, vaLuesSize, meta.ValuesBytes)
+	assert.Equal(t, 0, len(meta.Errors))
 }

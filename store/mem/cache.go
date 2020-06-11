@@ -29,7 +29,7 @@ func (c *Cache) Get(key store.Key) (store.Element, error) {
 		element := store.NewElement(key, result)
 		return element, nil
 	}
-	return store.Element{}, fmt.Errorf("could not find element for key %v", key)
+	return store.Element{}, fmt.Errorf(store.NoValue, key)
 }
 
 // Close will run any maintenance operations for the store
@@ -40,14 +40,14 @@ func (c *Cache) Close() error {
 // Metadata returns internal statistics about the storage
 // It s not meant to serve anny functionality, but used only for testing
 func (c *Cache) Metadata() store.Metadata {
-	keyBytes := 0
-	valueBytes := 0
+	var keyBytes uint64
+	var valueBytes uint64
 	for k, v := range c.storage {
-		keyBytes += len(k)
-		valueBytes += len(v)
+		keyBytes += uint64(len(k))
+		valueBytes += uint64(len(v))
 	}
 	return store.Metadata{
-		Size:        len(c.storage),
+		Size:        uint64(len(c.storage)),
 		KeysBytes:   keyBytes,
 		ValuesBytes: valueBytes,
 		Errors:      make([]error, 0),

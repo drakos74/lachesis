@@ -2,6 +2,12 @@ package store
 
 import "fmt"
 
+const (
+	NoValue       = "could not find element for key %v"
+	NoIndex       = "could not find index for key %v"
+	InternalError = "could not complete operation %v for %v: %w"
+)
+
 // Storage is the low level interface for interacting with the underlying implementation in bytes
 type Storage interface {
 	Put(element Element) error
@@ -39,9 +45,9 @@ func NewElement(key, value []byte) Element {
 
 // Metadata stores internal statistics specific to the underlying storage implementation
 type Metadata struct {
-	Size        int
-	KeysBytes   int
-	ValuesBytes int
+	Size        uint64
+	KeysBytes   uint64
+	ValuesBytes uint64
 	Errors      errors
 }
 
@@ -61,8 +67,8 @@ func (m *Metadata) Merge(metadata Metadata) {
 // Add increments the metadata state for an extra element
 func (m *Metadata) Add(element Element) {
 	m.Size++
-	m.KeysBytes += len(element.Key)
-	m.ValuesBytes += len(element.Value)
+	m.KeysBytes += uint64(len(element.Key))
+	m.ValuesBytes += uint64(len(element.Value))
 }
 
 // Error adds the provided error to the metadata instance

@@ -29,7 +29,7 @@ func (sc *SyncCache) Get(key store.Key) (store.Element, error) {
 	if result, ok := sc.storage.Load(string(key)); ok {
 		return store.NewElement(key, result.(store.Value)), nil
 	}
-	return store.Element{}, fmt.Errorf("could not find element for key %v", key)
+	return store.Element{}, fmt.Errorf(store.NoValue, key)
 }
 
 // Close will run any maintenance operations
@@ -44,8 +44,8 @@ func (sc *SyncCache) Metadata() store.Metadata {
 	sc.storage.Range(func(key, value interface{}) bool {
 		meta.Merge(store.Metadata{
 			Size:        1,
-			KeysBytes:   len(key.(string)), // TODO : not exact count, but should do for now
-			ValuesBytes: len(value.(store.Value)),
+			KeysBytes:   uint64(len(key.(store.Key))),
+			ValuesBytes: uint64(len(value.(store.Value))),
 			Errors:      nil,
 		})
 		return true

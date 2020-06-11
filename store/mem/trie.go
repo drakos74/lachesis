@@ -22,7 +22,7 @@ func (t *Trie) Get(key store.Key) (store.Element, error) {
 	if data, ok := t.storage.Read(key); ok {
 		return store.NewElement(key, data), nil
 	}
-	return store.Element{}, fmt.Errorf("could not find element for key %v", key)
+	return store.Element{}, fmt.Errorf(store.NoValue, key)
 }
 
 // Close will run any maintenance operations

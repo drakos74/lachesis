@@ -86,7 +86,7 @@ func Metadata(trie *Trie) store.Metadata {
 	}
 	if trie.value != nil && len(trie.value) > 0 {
 		metadata.Size++
-		metadata.ValuesBytes += len(trie.value)
+		metadata.ValuesBytes += uint64(len(trie.value))
 	}
 	metadata.KeysBytes++
 	return metadata

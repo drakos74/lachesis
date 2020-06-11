@@ -11,6 +11,12 @@ import (
 // Factory generates a store.Element
 type Factory func() store.Element
 
+type RandomFactory struct {
+	Factory
+	KeySize   int
+	ValueSize int
+}
+
 // RandomBytes generates an array of random bytes of the given size
 func RandomBytes(size int) []byte {
 	bb := make([]byte, size)
@@ -20,21 +26,29 @@ func RandomBytes(size int) []byte {
 
 // Random returns a factory for generating a elements with a random key and value
 // key and value sizes are provided as input arguments
-func Random(keySize, valueSize int) Factory {
-	return func() store.Element {
-		key := RandomBytes(keySize)
-		value := RandomBytes(valueSize)
-		return store.NewElement(key, value)
+func Random(keySize, valueSize int) RandomFactory {
+	return RandomFactory{
+		Factory: func() store.Element {
+			key := RandomBytes(keySize)
+			value := RandomBytes(valueSize)
+			return store.NewElement(key, value)
+		},
+		KeySize:   keySize,
+		ValueSize: valueSize,
 	}
 }
 
 // RandomValue returns a factory for generating elements with random values
 // but always with the same 'random' key
 // key and value sizes are provided as input arguments
-func RandomValue(keySize, valueSize int) Factory {
+func RandomValue(keySize, valueSize int) RandomFactory {
 	key := RandomBytes(keySize)
-	return func() store.Element {
-		return store.NewElement(key, RandomBytes(valueSize))
+	return RandomFactory{
+		Factory: func() store.Element {
+			return store.NewElement(key, RandomBytes(valueSize))
+		},
+		KeySize:   keySize,
+		ValueSize: valueSize,
 	}
 }
 
