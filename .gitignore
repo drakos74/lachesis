@@ -17,6 +17,7 @@ store/benchmark/testdata/sync-file/*
 store/benchmark/testdata/badger/*
 store/benchmark/testdata/bolt/*
 
+# storage specific test files
 store/file/data/*
 store/file/sync-data/*
 store/bolt/data/*
