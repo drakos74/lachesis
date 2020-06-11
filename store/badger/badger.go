@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"sync/atomic"
+	"time"
 
 	"github.com/rs/zerolog/log"
 
@@ -87,16 +88,33 @@ func newBadger(db *badger.DB, err error) (*Store, error) {
 	return &Store{db: db}, nil
 }
 
-func NewFileStore(f string) (*Store, error) {
+// BadgerFileFactory generates a badger file storage implementation
+func BadgerFileFactory(path string) store.StorageFactory {
+	// use nano, in order to create a new store each time (we want the tests to remain independent at this stage)
 	dir, err := os.Getwd()
 	if err != nil {
-		return nil, err
+		panic(fmt.Sprintf("error during badger store creation: %v", err))
 	}
 	log.Info().Str("badger-dir", dir)
-	return newBadger(badger.Open(badger.DefaultOptions(f)))
+	return func() store.Storage {
+		s, err := newBadger(badger.Open(badger.DefaultOptions(fmt.Sprintf("%s/%v", path, time.Now().UnixNano()))))
+		if err != nil {
+			panic(fmt.Sprintf("error during badger store creation: %v", err))
+		}
+		return s
+	}
+
 }
 
 func NewMemoryStore() (*Store, error) {
 	return newBadger(badger.Open(badger.DefaultOptions("").WithInMemory(true)))
+}
 
+// BadgerMemoryFactory generates a badger in-memory storage implementation
+func BadgerMemoryFactory() store.Storage {
+	s, err := NewMemoryStore()
+	if err != nil {
+		panic(fmt.Sprintf("error during store creation: %v", err))
+	}
+	return s
 }

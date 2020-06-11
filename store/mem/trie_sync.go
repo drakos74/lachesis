@@ -15,6 +15,16 @@ type SyncTrie struct {
 	sync.RWMutex
 }
 
+// NewTrie creates a new Cache instance
+func NewSyncTrie() *SyncTrie {
+	return &SyncTrie{storage: trie.NewTrie(byte(' '))}
+}
+
+// SyncTrieFactory generates a SyncTrie storage implementation
+func SyncTrieFactory() store.Storage {
+	return NewSyncTrie()
+}
+
 // Put adds an element to the trie
 func (st *SyncTrie) Put(element store.Element) error {
 	st.Lock()
@@ -41,9 +51,4 @@ func (st *SyncTrie) Close() error {
 // It s not meant to serve anny functionality, but used only for testing
 func (st *SyncTrie) Metadata() store.Metadata {
 	return trie.Metadata(st.storage)
-}
-
-// NewTrie creates a new Cache instance
-func NewSyncTrie() *SyncTrie {
-	return &SyncTrie{storage: trie.NewTrie(byte(' '))}
 }

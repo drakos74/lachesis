@@ -12,9 +12,16 @@
 *.out
 
 # project specific test files
-test/testdata/unit/*
-test/testdata/bench/*
-test/testdata/badger/*
+store/benchmark/testdata/file/*
+store/benchmark/testdata/sync-file/*
+store/benchmark/testdata/badger/*
+store/benchmark/testdata/bolt/*
+
+store/file/data/*
+store/file/sync-data/*
+store/bolt/data/*
+store/badger/data/*
+
 
 # idea
 .idea

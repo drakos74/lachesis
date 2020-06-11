@@ -108,3 +108,15 @@ func NewFileStore(f string) (*Store, error) {
 	log.Info().Str("bolt-dir", dir)
 	return newBolt(bolt.Open(fmt.Sprintf("%s.db", f), 0600, &bolt.Options{Timeout: 1 * time.Second}))
 }
+
+// BoltFileFactory generates a bolt storage implementation
+func BoltFileFactory(path string) store.StorageFactory {
+	return func() store.Storage {
+		// use nano, in order to create a new store each time (we want the tests to remain independent at this stage)
+		s, err := NewFileStore(fmt.Sprintf("%s/%v", path, time.Now().UnixNano()))
+		if err != nil {
+			panic(fmt.Sprintf("error during store creation: %v", err))
+		}
+		return s
+	}
+}

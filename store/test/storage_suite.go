@@ -43,7 +43,7 @@ func (s *KeyValue) TestMultiReadWriteOperations() {
 	MultiReadWriteOperations(s.t, storage, Random(10, 20))
 }
 
-func (s *KeyValue) Run(t *testing.T, factory func() store.Storage) {
+func (s *KeyValue) Run(t *testing.T, factory store.StorageFactory) {
 	s.t = t
 	s.newStorage = factory
 	suite.Run(t, s)

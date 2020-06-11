@@ -1,6 +1,7 @@
 package file
 
 import (
+	"fmt"
 	"sync"
 
 	"github.com/drakos74/lachesis/store"
@@ -21,6 +22,17 @@ func NewSyncScratchPad(path string) (*SyncScratchPad, error) {
 	return &SyncScratchPad{
 		store: sb,
 	}, nil
+}
+
+// SyncScratchPadFactory generates a synced file storage implementation
+func SyncScratchPadFactory(path string) store.StorageFactory {
+	return func() store.Storage {
+		pad, err := NewSyncScratchPad(path)
+		if err != nil {
+			panic(fmt.Sprintf("error during store creation: %v", err))
+		}
+		return pad
+	}
 }
 
 // Put adds an element to the store while using a write lock

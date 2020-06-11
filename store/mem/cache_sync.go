@@ -18,6 +18,11 @@ func NewSyncCache() *SyncCache {
 	return &SyncCache{}
 }
 
+// SyncCacheFactory generates a SyncCache storage implementation
+func SyncCacheFactory() store.Storage {
+	return NewSyncCache()
+}
+
 // Put adds an element to the cache
 func (sc *SyncCache) Put(element store.Element) error {
 	sc.storage.Store(string(element.Key), element.Value)

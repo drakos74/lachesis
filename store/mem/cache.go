@@ -17,6 +17,11 @@ func NewCache() *Cache {
 	return &Cache{storage: make(map[string]store.Value)}
 }
 
+// CacheFactory generates a Cache storage implementation
+func CacheFactory() store.Storage {
+	return NewCache()
+}
+
 // Put adds an element to the cache
 func (c *Cache) Put(element store.Element) error {
 	c.storage[string(element.Key)] = element.Value

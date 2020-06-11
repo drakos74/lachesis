@@ -8,88 +8,59 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/drakos74/lachesis/store/mem"
-
-	"github.com/drakos74/lachesis/store/test"
+	"github.com/rs/zerolog"
 
 	"github.com/drakos74/lachesis/store"
-
 	"github.com/drakos74/lachesis/store/badger"
-
+	"github.com/drakos74/lachesis/store/bolt"
 	"github.com/drakos74/lachesis/store/file"
-	"github.com/rs/zerolog"
+	"github.com/drakos74/lachesis/store/mem"
+	"github.com/drakos74/lachesis/store/test"
 )
 
 // in-memory
 
 func BenchmarkCache(b *testing.B) {
-	executeBenchmarks(b, func() store.Storage {
-		return mem.NewCache()
-	})
+	executeBenchmarks(b, mem.CacheFactory)
 }
 
 func BenchmarkSyncCache(b *testing.B) {
-	executeBenchmarks(b, func() store.Storage {
-		return mem.NewSyncCache()
-	})
+	executeBenchmarks(b, mem.SyncCacheFactory)
 }
 
 func BenchmarkTrie(b *testing.B) {
-	executeBenchmarks(b, func() store.Storage {
-		return mem.NewTrie()
-	})
+	executeBenchmarks(b, mem.TrieFactory)
 }
 
 func BenchmarkSyncTrie(b *testing.B) {
-	executeBenchmarks(b, func() store.Storage {
-		return mem.NewSyncTrie()
-	})
+	executeBenchmarks(b, mem.SyncTrieFactory)
 }
 
 // file
 
 // BenchmarkScratchPad executes the benchmarks for the file storage
 func BenchmarkScratchPad(b *testing.B) {
-	executeBenchmarks(b, func() store.Storage {
-		db, err := file.NewScratchPad("testdata/file")
-		if err != nil {
-			log.Fatal()
-		}
-		return db
-	})
+	executeBenchmarks(b, file.SyncScratchPadFactory("testdata/sync-scratchpad"))
 }
 
 // BenchmarkSyncScratchPad executes the benchmarks for the thread-safe file storage
 func BenchmarkSyncScratchPad(b *testing.B) {
-	executeBenchmarks(b, func() store.Storage {
-		db, err := file.NewSyncScratchPad("testdata/filesync")
-		if err != nil {
-			log.Fatal()
-		}
-		return db
-	})
+	executeBenchmarks(b, file.ScratchPadFactory("testdata/scratchpad"))
 }
 
 //BenchmarkMemBadger executes the benchmarks for badger in-memory store
 func BenchmarkMemBadger(b *testing.B) {
-	executeBenchmarks(b, func() store.Storage {
-		db, err := badger.NewMemoryStore()
-		if err != nil {
-			log.Fatal()
-		}
-		return db
-	})
+	executeBenchmarks(b, badger.BadgerMemoryFactory)
 }
 
 // BenchmarkFileBadger executes the benchmarks for badger file store
 func BenchmarkFileBadger(b *testing.B) {
-	executeBenchmarks(b, func() store.Storage {
-		db, err := badger.NewFileStore("testdata/badger")
-		if err != nil {
-			log.Fatal()
-		}
-		return db
-	})
+	executeBenchmarks(b, badger.BadgerFileFactory("testdata/badger"))
+}
+
+// BenchmarkFileBolt executes the benchmarks for badger file store
+func BenchmarkFileBolt(b *testing.B) {
+	executeBenchmarks(b, bolt.BoltFileFactory("testdata/bolt"))
 }
 
 func executeBenchmarks(b *testing.B, storageFactory func() store.Storage) {
@@ -128,6 +99,11 @@ func executeBenchmark(b *testing.B, storage store.Storage, scenario BenchmarkSce
 		}
 
 	}
+
+	err := storage.Close()
+	if err != nil {
+		log.Fatal()
+	}
 }
 
 // benchmark utilities
@@ -143,10 +119,6 @@ func put(storage store.Storage, elements []store.Element) {
 			log.Fatalf("error : %v", err)
 		}
 	}
-	err := storage.Close()
-	if err != nil {
-		log.Fatal()
-	}
 }
 
 func get(storage store.Storage, elements []store.Element) {
@@ -157,11 +129,9 @@ func get(storage store.Storage, elements []store.Element) {
 		}
 		consume(result)
 	}
-	err := storage.Close()
-	if err != nil {
-		log.Fatal()
-	}
 }
+
+// TODO : add combination of puts and gets scenario execution
 
 func getFuncName(exec benchmarkExecution) string {
 	execName := runtime.FuncForPC(reflect.ValueOf(exec).Pointer()).Name()

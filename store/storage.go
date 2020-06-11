@@ -16,6 +16,9 @@ type Storage interface {
 	Close() error
 }
 
+// StorageFactory generates a storage object
+type StorageFactory func() Storage
+
 type Key []byte
 type Value []byte
 

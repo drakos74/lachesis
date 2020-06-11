@@ -44,7 +44,7 @@ func IntermediateReadOperation(t *testing.T, storage store.Storage, key store.Ke
 // it asserts that we got back the value that was put into the store
 func ReadWriteOperation(t *testing.T, storage store.Storage, generator RandomFactory) {
 
-	element := generator.Factory()
+	element := generator.ElementFactory()
 
 	// check if store is empty
 	assertMeta(t, 0, 0, 0, storage.Metadata())
@@ -67,8 +67,8 @@ func ReadWriteOperation(t *testing.T, storage store.Storage, generator RandomFac
 
 func ReadOverwriteOperation(t *testing.T, storage store.Storage, generator RandomFactory) {
 
-	element1 := generator.Factory()
-	element2 := generator.Factory()
+	element1 := generator.ElementFactory()
+	element2 := generator.ElementFactory()
 	assert.NotEqual(t, element1, element2)
 
 	// check if store is empty
@@ -104,7 +104,7 @@ func MultiReadWriteOperations(t *testing.T, storage store.Storage, generator Ran
 	elements := make([]store.Element, 0)
 
 	for i := 0; i < num; i++ {
-		element := generator.Factory()
+		element := generator.ElementFactory()
 		metadata.Add(element)
 		elements = append(elements, element)
 	}
@@ -144,7 +144,7 @@ func MultiConcurrentReadWriteOperations(t *testing.T, storage store.Storage, gen
 		// TODO : try to make this linear
 		// each element cycle is done in a different routine to generator more contention
 		go func(storage store.Storage) {
-			element := generator.Factory()
+			element := generator.ElementFactory()
 
 			// put
 			err := storage.Put(element)

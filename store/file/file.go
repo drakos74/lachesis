@@ -48,6 +48,17 @@ func NewScratchPad(path string) (*ScratchPad, error) {
 	return &ScratchPad{wrFile: wrFile, rdFile: rdFile, concat: newConcat(), index: index, filename: fileName}, nil
 }
 
+// ScratchPadFactory generates a file storage implementation
+func ScratchPadFactory(path string) store.StorageFactory {
+	return func() store.Storage {
+		pad, err := NewScratchPad(path)
+		if err != nil {
+			panic(fmt.Sprintf("error during store creation: %v", err))
+		}
+		return pad
+	}
+}
+
 // Put adds an element to the store
 func (s *ScratchPad) Put(element store.Element) error {
 	bytes, err := s.concat.join(element)
