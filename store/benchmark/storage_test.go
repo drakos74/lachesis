@@ -133,6 +133,8 @@ func get(storage store.Storage, elements []store.Element) {
 
 // TODO : add combination of puts and gets scenario execution
 
+// TODO : add sequential get scenario
+
 func getFuncName(exec benchmarkExecution) string {
 	execName := runtime.FuncForPC(reflect.ValueOf(exec).Pointer()).Name()
 	idx := strings.LastIndex(execName, ".")
