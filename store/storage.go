@@ -99,6 +99,16 @@ func IsNil(e Element) bool {
 	return len(e.Key) == 0 && len(e.Value) == 0
 }
 
+// equal
+
+func BytesEqual(a, b []byte) bool {
+	return bytes.Compare(a, b) == 0
+}
+
+func IsEqual(a, b Element) bool {
+	return BytesEqual(a.Key, b.Key) && BytesEqual(a.Value, b.Value)
+}
+
 // ordering
 
 func IsLess(a, b Element) bool {

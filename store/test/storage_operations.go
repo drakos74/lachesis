@@ -12,7 +12,7 @@ import (
 
 // VoidReadOperation performs a read on a non-existing key
 // expecting the results to be an error and an empty element
-func VoidReadOperation(t *testing.T, storage store.Storage) {
+func VoidReadOperation(t *testing.T, storage store.Storage, checkMeta bool) {
 
 	// read path
 	key := RandomBytes(10)
@@ -20,8 +20,10 @@ func VoidReadOperation(t *testing.T, storage store.Storage) {
 	assert.Error(t, err)
 	assert.Equal(t, store.Element{}, testElement)
 
-	// check if store is empty
-	assertMeta(t, 0, 0, 0, storage.Metadata())
+	if checkMeta {
+		// check if store is empty
+		assertMeta(t, 0, 0, 0, storage.Metadata())
+	}
 
 	// wrap up
 	err = storage.Close()
@@ -42,12 +44,14 @@ func IntermediateReadOperation(t *testing.T, storage store.Storage, key store.Ke
 
 // ReadWriteOperation performs a write and a following read on the storage
 // it asserts that we got back the value that was put into the store
-func ReadWriteOperation(t *testing.T, storage store.Storage, generator RandomFactory) {
+func ReadWriteOperation(t *testing.T, storage store.Storage, generator RandomFactory, checkMeta bool) {
 
 	element := generator.ElementFactory()
 
-	// check if store is empty
-	assertMeta(t, 0, 0, 0, storage.Metadata())
+	if checkMeta {
+		// check if store is empty
+		assertMeta(t, 0, 0, 0, storage.Metadata())
+	}
 
 	// write path
 	err := storage.Put(element)
@@ -57,22 +61,26 @@ func ReadWriteOperation(t *testing.T, storage store.Storage, generator RandomFac
 	savedElement := IntermediateReadOperation(t, storage, element.Key, element.Value)
 	assert.Equal(t, element, savedElement)
 
-	// check the metadata
-	assertMeta(t, 1, uint64(generator.KeySize), uint64(generator.ValueSize), storage.Metadata())
+	if checkMeta {
+		// check the metadata
+		assertMeta(t, 1, uint64(generator.KeySize), uint64(generator.ValueSize), storage.Metadata())
+	}
 
 	// wrap up
 	err = storage.Close()
 	assert.NoError(t, err)
 }
 
-func ReadOverwriteOperation(t *testing.T, storage store.Storage, generator RandomFactory) {
+func ReadOverwriteOperation(t *testing.T, storage store.Storage, generator RandomFactory, checkMeta bool) {
 
 	element1 := generator.ElementFactory()
 	element2 := generator.ElementFactory()
 	assert.NotEqual(t, element1, element2)
 
-	// check if store is empty
-	assertMeta(t, 0, 0, 0, storage.Metadata())
+	if checkMeta {
+		// check if store is empty
+		assertMeta(t, 0, 0, 0, storage.Metadata())
+	}
 
 	// write path
 	err := storage.Put(element1)

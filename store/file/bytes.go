@@ -21,7 +21,7 @@ type concat struct {
 }
 
 // Handle the concatenation logic
-func newConcat() concat {
+func newIndexedConcat() concat {
 	nl := []byte{byte('\n')}
 	return concat{
 		join: func(element store.Element) ([]byte, error) {
@@ -34,6 +34,24 @@ func newConcat() concat {
 		split: func(key store.Key, data []byte) (store.Element, error) {
 			n := len(data) - len(nl)
 			return store.NewElement(key, data[0:n]), nil
+		},
+	}
+}
+
+// Handle the concatenation logic
+func newRawConcat() concat {
+	nl := []byte{byte('\n')}
+	return concat{
+		join: func(element store.Element) ([]byte, error) {
+			b, err := Concat(len(element.Value)+len(nl), element.Value, nl)
+			if err != nil {
+				return nil, fmt.Errorf("could not serialize value %w", err)
+			}
+			return b, nil
+		},
+		split: func(key store.Key, data []byte) (store.Element, error) {
+			n := len(data) - len(nl)
+			return store.NewElement(key, data[0:n+1]), nil
 		},
 	}
 }

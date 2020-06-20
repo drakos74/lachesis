@@ -13,3 +13,11 @@ func TestSyncFileImplementation(t *testing.T) {
 func TestSyncFile_SyncImplementation(t *testing.T) {
 	new(test.Concurrent).Run(t, SyncScratchPadFactory("sync-data"))
 }
+
+func TestSyncBTreeFileImplementation(t *testing.T) {
+	new(test.KeyValue).Run(t, SyncTreePadFactory("sync-data"))
+}
+
+func TestSyncBTreeFile_SyncImplementation(t *testing.T) {
+	new(test.Concurrent).Run(t, SyncTreePadFactory("sync-data"))
+}

@@ -19,23 +19,43 @@ func (s *Suite) SetupTest() {
 	// TODO : remove if nothing else todo here
 }
 
+type Simple struct {
+	Suite
+}
+
+func (s *Simple) TestVoidReadOperation() {
+	storage := s.newStorage()
+	VoidReadOperation(s.t, storage, false)
+}
+
+func (s *Simple) TestPutOperation() {
+	storage := s.newStorage()
+	ReadWriteOperation(s.t, storage, Random(10, 20), false)
+}
+
+func (s *Simple) Run(t *testing.T, factory store.StorageFactory) {
+	s.t = t
+	s.newStorage = factory
+	suite.Run(t, s)
+}
+
 type KeyValue struct {
 	Suite
 }
 
 func (s *KeyValue) TestVoidReadOperation() {
 	storage := s.newStorage()
-	VoidReadOperation(s.t, storage)
+	VoidReadOperation(s.t, storage, true)
 }
 
 func (s *KeyValue) TestPutOperation() {
 	storage := s.newStorage()
-	ReadWriteOperation(s.t, storage, Random(10, 20))
+	ReadWriteOperation(s.t, storage, Random(10, 20), true)
 }
 
 func (s *KeyValue) TestReadOverwriteOperation() {
 	storage := s.newStorage()
-	ReadOverwriteOperation(s.t, storage, RandomValue(10, 20))
+	ReadOverwriteOperation(s.t, storage, RandomValue(10, 20), true)
 }
 
 func (s *KeyValue) TestMultiReadWriteOperations() {

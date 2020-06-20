@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/drakos74/lachesis/store/mem"
+
 	"github.com/drakos74/lachesis/store"
 )
 
@@ -14,8 +16,9 @@ type SyncScratchPad struct {
 }
 
 // NewSyncScratchPad creates a new file store that is thread-safe
+// using as an index a trie
 func NewSyncScratchPad(path string) (*SyncScratchPad, error) {
-	sb, err := NewScratchPad(path)
+	sb, err := NewScratchPad(path, mem.SyncTrieFactory)
 	if err != nil {
 		return nil, err
 	}
@@ -28,6 +31,29 @@ func NewSyncScratchPad(path string) (*SyncScratchPad, error) {
 func SyncScratchPadFactory(path string) store.StorageFactory {
 	return func() store.Storage {
 		pad, err := NewSyncScratchPad(path)
+		if err != nil {
+			panic(fmt.Sprintf("error during store creation: %v", err))
+		}
+		return pad
+	}
+}
+
+// NewSyncTreePad creates a new file store that is thread-safe
+// using as an index a Btree
+func NewSyncTreePad(path string) (*SyncScratchPad, error) {
+	sb, err := NewScratchPad(path, mem.SyncBTreeFactory)
+	if err != nil {
+		return nil, err
+	}
+	return &SyncScratchPad{
+		store: sb,
+	}, nil
+}
+
+// SyncScratchPadFactory generates a synced file storage implementation
+func SyncTreePadFactory(path string) store.StorageFactory {
+	return func() store.Storage {
+		pad, err := NewSyncTreePad(path)
 		if err != nil {
 			panic(fmt.Sprintf("error during store creation: %v", err))
 		}
