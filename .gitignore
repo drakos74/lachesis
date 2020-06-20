@@ -12,8 +12,11 @@
 *.out
 
 # project specific test files
+store/benchmark/testdata/file/*
 store/benchmark/testdata/scratchpad/*
 store/benchmark/testdata/sync-scratchpad/*
+store/benchmark/testdata/treepad/*
+store/benchmark/testdata/sync-treepad/*
 store/benchmark/testdata/badger/*
 store/benchmark/testdata/bolt/*
 

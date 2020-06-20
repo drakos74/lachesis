@@ -36,16 +36,39 @@ func BenchmarkSyncTrie(b *testing.B) {
 	executeBenchmarks(b, mem.SyncTrieFactory)
 }
 
+func BenchmarkBTree(b *testing.B) {
+	executeBenchmarks(b, mem.BTreeFactory)
+}
+
+func BenchmarkSyncBTree(b *testing.B) {
+	executeBenchmarks(b, mem.SyncBTreeFactory)
+}
+
 // file
+
+// BenchmarkFileStorage executes the benchmarks for the file storage
+func BenchmarkFileStorage(b *testing.B) {
+	executeBenchmarks(b, file.FileStorageFactory("testdata/file"))
+}
 
 // BenchmarkScratchPad executes the benchmarks for the file storage
 func BenchmarkScratchPad(b *testing.B) {
-	executeBenchmarks(b, file.SyncScratchPadFactory("testdata/sync-scratchpad"))
+	executeBenchmarks(b, file.ScratchPadFactory("testdata/scratchpad"))
 }
 
 // BenchmarkSyncScratchPad executes the benchmarks for the thread-safe file storage
 func BenchmarkSyncScratchPad(b *testing.B) {
-	executeBenchmarks(b, file.ScratchPadFactory("testdata/scratchpad"))
+	executeBenchmarks(b, file.SyncScratchPadFactory("testdata/sync-scratchpad"))
+}
+
+// BenchmarkTreePad executes the benchmarks for the file storage
+func BenchmarkTreePad(b *testing.B) {
+	executeBenchmarks(b, file.TreePadFactory("testdata/treepad"))
+}
+
+// BenchmarkSyncTreePad executes the benchmarks for the thread-safe file storage
+func BenchmarkSyncTreePad(b *testing.B) {
+	executeBenchmarks(b, file.SyncTreePadFactory("testdata/sync-treepad"))
 }
 
 //BenchmarkMemBadger executes the benchmarks for badger in-memory store
