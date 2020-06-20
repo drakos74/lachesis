@@ -1,6 +1,9 @@
 package store
 
-import "fmt"
+import (
+	"bytes"
+	"fmt"
+)
 
 const (
 	NoValue       = "could not find element for key %v"
@@ -86,4 +89,18 @@ type errors []error
 // TODO : test
 func (err *errors) append(currentErr error) {
 	*err = append(*err, currentErr)
+}
+
+// handle nil
+
+var Nil = Element{}
+
+func IsNil(e Element) bool {
+	return len(e.Key) == 0 && len(e.Value) == 0
+}
+
+// ordering
+
+func IsLess(a, b Element) bool {
+	return bytes.Compare(a.Key, b.Key) < 0
 }

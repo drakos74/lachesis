@@ -20,6 +20,7 @@ store/benchmark/testdata/bolt/*
 # storage specific test files
 store/file/data/*
 store/file/sync-data/*
+store/file/bash/database
 store/bolt/data/*
 store/badger/data/*
 

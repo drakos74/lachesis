@@ -49,7 +49,7 @@ func (sc *SyncCache) Metadata() store.Metadata {
 	sc.storage.Range(func(key, value interface{}) bool {
 		meta.Merge(store.Metadata{
 			Size:        1,
-			KeysBytes:   uint64(len(key.(store.Key))),
+			KeysBytes:   uint64(len([]byte(key.(string)))),
 			ValuesBytes: uint64(len(value.(store.Value))),
 			Errors:      nil,
 		})

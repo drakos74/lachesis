@@ -41,6 +41,9 @@ BenchmarkTrie/*mem.Trie:get/num:1000,size-key:100,size-value:1000-16            
 PASS
 ok      lachesis/internal/store 43.969s
 ```
+### terminal Store
+
+#### TODO implement terminal store
 
 ### Cache
 
@@ -50,6 +53,31 @@ ok      lachesis/internal/store 43.969s
 
 - lower size than the keys and values added together
 
+### B-Tree
+
+- https://github.com/google/btree/blob/master/btree.go
+
+### B+Tree
+
+### Skiplist
+
+https://www.memsql.com/blog/what-is-skiplist-why-skiplist-index-for-memsql/
+
+#### TODO
+- implement
+
 ### File
 
 - need to do clean up tasks (for updates etc ...)
+
+#### TDOO
+
+- make choices injectable (e.g. key structure, file serialization etc ... )
+- make transactional store
+- allow for storage of index (so that store works on restart)
+
+### Badger
+
+### Bolt
+
+- sorted key struct (e.g. benchmark range queries)

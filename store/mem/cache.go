@@ -34,7 +34,7 @@ func (c *Cache) Get(key store.Key) (store.Element, error) {
 		element := store.NewElement(key, result)
 		return element, nil
 	}
-	return store.Element{}, fmt.Errorf(store.NoValue, key)
+	return store.Nil, fmt.Errorf(store.NoValue, key)
 }
 
 // Close will run any maintenance operations for the store

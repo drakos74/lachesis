@@ -66,6 +66,7 @@ func (s *ScratchPad) Put(element store.Element) error {
 		return fmt.Errorf("could not serialize element '%v' %w", element, err)
 	}
 	// Note : we leave the overwrites there ... just applying a new fileIndex !!!
+	// We will silently remove them at the next 'compaction' operation
 	n, err := s.wrFile.Write(bytes)
 	if err != nil {
 		return fmt.Errorf("could not write element '%v' %w", element, err)
