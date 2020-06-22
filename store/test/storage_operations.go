@@ -104,7 +104,7 @@ func ReadOverwriteOperation(t *testing.T, storage store.Storage, generator Rando
 
 const num = 1000
 
-func MultiReadWriteOperations(t *testing.T, storage store.Storage, generator RandomFactory) {
+func MultiReadWriteOperations(t *testing.T, storage store.Storage, generator RandomFactory, checkMeta bool) {
 
 	metadata := store.NewMetadata()
 
@@ -130,8 +130,10 @@ func MultiReadWriteOperations(t *testing.T, storage store.Storage, generator Ran
 		assert.Equal(t, element.Value, value.Value)
 	}
 
-	// assert internal stats
-	assert.Equal(t, metadata.Size, storage.Metadata().Size)
+	if checkMeta {
+		// assert internal stats
+		assert.Equal(t, metadata.Size, storage.Metadata().Size)
+	}
 
 	// wrap up
 	err := storage.Close()

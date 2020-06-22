@@ -7,17 +7,17 @@ import (
 )
 
 func TestSyncFileImplementation(t *testing.T) {
-	new(test.KeyValue).Run(t, SyncScratchPadFactory("sync-data"))
+	new(test.ConsistencyWithMeta).Run(t, SyncScratchPadFactory("sync-data"))
 }
 
 func TestSyncFile_SyncImplementation(t *testing.T) {
-	new(test.Concurrent).Run(t, SyncScratchPadFactory("sync-data"))
+	new(test.Concurrency).Run(t, SyncScratchPadFactory("sync-data"))
 }
 
 func TestSyncBTreeFileImplementation(t *testing.T) {
-	new(test.KeyValue).Run(t, SyncTreePadFactory("sync-data"))
+	new(test.ConsistencyWithMeta).Run(t, SyncTreePadFactory("sync-data"))
 }
 
 func TestSyncBTreeFile_SyncImplementation(t *testing.T) {
-	new(test.Concurrent).Run(t, SyncTreePadFactory("sync-data"))
+	new(test.Concurrency).Run(t, SyncTreePadFactory("sync-data"))
 }

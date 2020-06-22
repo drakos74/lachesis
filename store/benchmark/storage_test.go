@@ -94,9 +94,9 @@ func executeBenchmarks(b *testing.B, storageFactory func() store.Storage) {
 	scenarios := []BenchmarkScenario{
 		Benchmark(Evolution().
 			Add(Limit(5)).
-			Add(Num(Pow(2))).
+			Add(Num(Pow(10))).
 			Create(),
-			2, 10, 20),
+			10, 10, 20),
 	}
 
 	storage := storageFactory()

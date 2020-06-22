@@ -93,6 +93,8 @@ func (err *errors) append(currentErr error) {
 
 // handle nil
 
+var NilBytes = make([]byte, 0)
+
 var Nil = Element{}
 
 func IsNil(e Element) bool {

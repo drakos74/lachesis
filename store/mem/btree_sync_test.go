@@ -7,9 +7,9 @@ import (
 )
 
 func TestSyncBTree_KeyValueImplementation(t *testing.T) {
-	new(test.KeyValue).Run(t, SyncBTreeFactory)
+	new(test.ConsistencyWithMeta).Run(t, SyncBTreeFactory)
 }
 
 func TestSyncBTree_SyncImplementation(t *testing.T) {
-	new(test.Concurrent).Run(t, SyncBTreeFactory)
+	new(test.Concurrency).Run(t, SyncBTreeFactory)
 }

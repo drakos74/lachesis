@@ -7,9 +7,9 @@ import (
 )
 
 func TestCache_KeyValueImplementation(t *testing.T) {
-	new(test.KeyValue).Run(t, CacheFactory)
+	new(test.ConsistencyWithMeta).Run(t, CacheFactory)
 }
 
 func testCache_SyncImplementation(t *testing.T) {
-	new(test.Concurrent).Run(t, CacheFactory)
+	new(test.Concurrency).Run(t, CacheFactory)
 }

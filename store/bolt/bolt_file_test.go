@@ -7,9 +7,9 @@ import (
 )
 
 func TestBoltFile_KeyValueImplementation(t *testing.T) {
-	new(test.KeyValue).Run(t, BoltFileFactory("data"))
+	new(test.ConsistencyWithMeta).Run(t, BoltFileFactory("data"))
 }
 
 func TestBoltFile_SyncImplementation(t *testing.T) {
-	new(test.Concurrent).Run(t, BoltFileFactory("data"))
+	new(test.Concurrency).Run(t, BoltFileFactory("data"))
 }

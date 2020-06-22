@@ -7,9 +7,9 @@ import (
 )
 
 func TestBadgerInMem_KeyValueImplementation(t *testing.T) {
-	new(test.KeyValue).Run(t, BadgerMemoryFactory)
+	new(test.ConsistencyWithMeta).Run(t, BadgerMemoryFactory)
 }
 
 func TestBadgerInMem_SyncImplementation(t *testing.T) {
-	new(test.Concurrent).Run(t, BadgerMemoryFactory)
+	new(test.Concurrency).Run(t, BadgerMemoryFactory)
 }

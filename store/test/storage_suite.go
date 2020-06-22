@@ -19,66 +19,71 @@ func (s *Suite) SetupTest() {
 	// TODO : remove if nothing else todo here
 }
 
-type Simple struct {
+type Consistency struct {
 	Suite
 }
 
-func (s *Simple) TestVoidReadOperation() {
+func (s *Consistency) TestVoidReadOperation() {
 	storage := s.newStorage()
 	VoidReadOperation(s.t, storage, false)
 }
 
-func (s *Simple) TestPutOperation() {
+func (s *Consistency) TestPutOperation() {
 	storage := s.newStorage()
 	ReadWriteOperation(s.t, storage, Random(10, 20), false)
 }
 
-func (s *Simple) Run(t *testing.T, factory store.StorageFactory) {
+func (s *Consistency) TestMultiReadWriteOperations() {
+	storage := s.newStorage()
+	MultiReadWriteOperations(s.t, storage, Random(10, 20), false)
+}
+
+func (s *Consistency) Run(t *testing.T, factory store.StorageFactory) {
 	s.t = t
 	s.newStorage = factory
 	suite.Run(t, s)
 }
 
-type KeyValue struct {
+type ConsistencyWithMeta struct {
 	Suite
 }
 
-func (s *KeyValue) TestVoidReadOperation() {
+func (s *ConsistencyWithMeta) TestVoidReadOperation() {
 	storage := s.newStorage()
 	VoidReadOperation(s.t, storage, true)
 }
 
-func (s *KeyValue) TestPutOperation() {
+func (s *ConsistencyWithMeta) TestPutOperation() {
 	storage := s.newStorage()
 	ReadWriteOperation(s.t, storage, Random(10, 20), true)
 }
 
-func (s *KeyValue) TestReadOverwriteOperation() {
+func (s *ConsistencyWithMeta) TestReadOverwriteOperation() {
 	storage := s.newStorage()
 	ReadOverwriteOperation(s.t, storage, RandomValue(10, 20), true)
 }
 
-func (s *KeyValue) TestMultiReadWriteOperations() {
+func (s *ConsistencyWithMeta) TestMultiReadWriteOperations() {
 	storage := s.newStorage()
-	MultiReadWriteOperations(s.t, storage, Random(10, 20))
+	MultiReadWriteOperations(s.t, storage, Random(10, 20), true)
 }
 
-func (s *KeyValue) Run(t *testing.T, factory store.StorageFactory) {
+func (s *ConsistencyWithMeta) Run(t *testing.T, factory store.StorageFactory) {
 	s.t = t
 	s.newStorage = factory
 	suite.Run(t, s)
 }
 
-type Concurrent struct {
+type Concurrency struct {
 	Suite
 }
 
-func (s *Concurrent) TestMultiConcurrentReadWriteOperations() {
+func (s *Concurrency) TestMultiConcurrentReadWriteOperations() {
 	storage := s.newStorage()
 	MultiConcurrentReadWriteOperations(s.t, storage, Random(10, 20))
 }
 
-func (s *Concurrent) Run(t *testing.T, factory func() store.Storage) {
+func (s *Concurrency) Run(t *testing.T, factory func() store.Storage) {
 	s.t = t
 	s.newStorage = factory
 	suite.Run(t, s)

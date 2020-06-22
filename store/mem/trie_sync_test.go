@@ -7,9 +7,9 @@ import (
 )
 
 func TestSyncTrie_KeyValueImplementation(t *testing.T) {
-	new(test.KeyValue).Run(t, SyncTrieFactory)
+	new(test.ConsistencyWithMeta).Run(t, SyncTrieFactory)
 }
 
 func TestSyncTrie_SyncImplementation(t *testing.T) {
-	new(test.Concurrent).Run(t, SyncTrieFactory)
+	new(test.Concurrency).Run(t, SyncTrieFactory)
 }
