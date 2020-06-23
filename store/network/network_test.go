@@ -72,3 +72,8 @@ func TestShardedNetwork_Failure(t *testing.T) {
 func TestReplicaNetwork_Failure(t *testing.T) {
 	new(test.Consistency).Run(t, networkFactory(10, ReplicaPartition, mem.CacheFactory, NewNodeDownEvent(5, 30)))
 }
+
+// fixed failure condition with replica network
+func TestConsistentNetwork_Failure(t *testing.T) {
+	new(test.Consistency).Run(t, networkFactory(10, ConsistentPartition, mem.CacheFactory, NewNodeDownEvent(5, 30)))
+}

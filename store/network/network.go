@@ -186,7 +186,15 @@ func (n *Network) Put(element store.Element) error {
 	for _, id := range ids {
 		// we emulate for now blocking communication
 		n.ports[id] <- cmd
-		response = <-n.reports[id]
+		nodeResponse := <-n.reports[id]
+		if nodeResponse.Err == nil {
+			// pick the non-failing response to send to the client
+			// TODO : investigate also the fail-fast approach by DeRegistering nodes
+			response = nodeResponse
+		} else {
+			// TODO : track these events differently
+			println(fmt.Sprintf("node %d returned an error = %v", id, err))
+		}
 	}
 
 	n.cycle()
@@ -209,6 +217,7 @@ func (n *Network) Get(key store.Key) (store.Element, error) {
 		// we emulate for now blocking communication
 		n.ports[id] <- cmd
 		response = <-n.reports[id]
+		// stop at the first successful response
 		if response.Err == nil {
 			break
 		}

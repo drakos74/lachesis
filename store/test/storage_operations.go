@@ -6,6 +6,8 @@ import (
 	"sync/atomic"
 	"testing"
 
+	"github.com/rs/zerolog/log"
+
 	"github.com/drakos74/lachesis/store"
 	"github.com/stretchr/testify/assert"
 )
@@ -23,6 +25,9 @@ func VoidReadOperation(t *testing.T, storage store.Storage, checkMeta bool) {
 	if checkMeta {
 		// check if store is empty
 		assertMeta(t, 0, 0, 0, storage.Metadata())
+	} else {
+		// print just the metadata
+		log.Info().Msg(fmt.Sprintf("metadata = %v", storage.Metadata()))
 	}
 
 	// wrap up
@@ -64,6 +69,9 @@ func ReadWriteOperation(t *testing.T, storage store.Storage, generator RandomFac
 	if checkMeta {
 		// check the metadata
 		assertMeta(t, 1, uint64(generator.KeySize), uint64(generator.ValueSize), storage.Metadata())
+	} else {
+		// print just the metadata
+		log.Info().Msg(fmt.Sprintf("metadata = %v", storage.Metadata()))
 	}
 
 	// wrap up
@@ -94,8 +102,13 @@ func ReadOverwriteOperation(t *testing.T, storage store.Storage, generator Rando
 	savedElement := IntermediateReadOperation(t, storage, element1.Key, element2.Value)
 	assert.Equal(t, element2, savedElement)
 
-	// check the metadata
-	assert.Equal(t, uint64(1), storage.Metadata().Size)
+	if checkMeta {
+		// check the metadata
+		assert.Equal(t, uint64(1), storage.Metadata().Size)
+	} else {
+		// print just the metadata
+		log.Info().Msg(fmt.Sprintf("metadata = %v", storage.Metadata()))
+	}
 
 	// wrap up
 	err = storage.Close()
@@ -133,6 +146,9 @@ func MultiReadWriteOperations(t *testing.T, storage store.Storage, generator Ran
 	if checkMeta {
 		// assert internal stats
 		assert.Equal(t, metadata.Size, storage.Metadata().Size)
+	} else {
+		// print just the metadata
+		log.Info().Msg(fmt.Sprintf("metadata = %v", storage.Metadata()))
 	}
 
 	// wrap up
