@@ -81,3 +81,7 @@ https://www.memsql.com/blog/what-is-skiplist-why-skiplist-index-for-memsql/
 ### Bolt
 
 - sorted key struct (e.g. benchmark range queries)
+
+### Consistent Hashing
+
+- https://medium.com/@dgryski/consistent-hashing-algorithmic-tradeoffs-ef6b8e2fcae8
