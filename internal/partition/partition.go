@@ -1,4 +1,4 @@
-package network
+package partition
 
 import (
 	"math/big"
@@ -7,10 +7,12 @@ import (
 	"strconv"
 )
 
+type Key []byte
+
 type Switch interface {
 	Register(id int)
 	DeRegister(id int)
-	Route(cmd Command) ([]int, error)
+	Route(key Key) ([]int, error)
 }
 
 type PartitionStrategy func() Switch
@@ -30,7 +32,7 @@ func (u *UnarySwitch) DeRegister(id int) {
 	// nothing to do
 }
 
-func (u UnarySwitch) Route(cmd Command) ([]int, error) {
+func (u UnarySwitch) Route(key Key) ([]int, error) {
 	return []int{0}, nil
 }
 
@@ -50,7 +52,7 @@ func (r *RandomSwitch) DeRegister(id int) {
 	// nothing to do
 }
 
-func (r RandomSwitch) Route(cmd Command) ([]int, error) {
+func (r RandomSwitch) Route(key Key) ([]int, error) {
 	return []int{rand.Intn(r.parallelism)}, nil
 }
 
@@ -70,14 +72,10 @@ func (s *ShardedSwitch) DeRegister(id int) {
 	// nothing to do
 }
 
-func (s ShardedSwitch) Route(cmd Command) ([]int, error) {
-
-	key := cmd.Element().Key
-
+func (s ShardedSwitch) Route(key Key) ([]int, error) {
 	var i big.Int
 	// convert to int
 	hash := i.SetBytes(key).Uint64()
-
 	return []int{int(hash % uint64(s.parallelism))}, nil
 }
 
@@ -98,20 +96,18 @@ func (r *ReplicaSwitch) DeRegister(id int) {
 	// nothing to do
 }
 
-func (r ReplicaSwitch) Route(cmd Command) ([]int, error) {
-
-	key := cmd.Element().Key
-
+func (r ReplicaSwitch) Route(key Key) ([]int, error) {
 	var i big.Int
 	// convert to int
 	hash := i.SetBytes(key).Uint64()
-
 	return []int{mod(hash, r.parallelism), mod(hash+1, r.parallelism), mod(hash+2, r.parallelism)}, nil
 }
 
 func ConsistentPartition() Switch {
 	return &ConsistentSwitch{replicas: 3, nodes: make([]int, 0), hashMap: make(map[int]int)}
 }
+
+const unit = 360
 
 type ConsistentSwitch struct {
 	replicas int
@@ -121,7 +117,7 @@ type ConsistentSwitch struct {
 
 func (c *ConsistentSwitch) Register(id int) {
 	for i := 0; i < c.replicas; i++ {
-		hash := mod(byteHash([]byte(strconv.Itoa(i)+" "+string(id))), 360)
+		hash := mod(byteHash([]byte(strconv.Itoa(i)+" "+string(id))), unit)
 		c.nodes = append(c.nodes, hash)
 		c.hashMap[hash] = id
 	}
@@ -134,13 +130,9 @@ func (c *ConsistentSwitch) DeRegister(id int) {
 	// nothing to do for now ...
 }
 
-func (c ConsistentSwitch) Route(cmd Command) ([]int, error) {
-
-	key := cmd.Element().Key
-
+func (c ConsistentSwitch) Route(key Key) ([]int, error) {
 	// convert to int
-	hash := mod(byteHash(key), len(c.nodes))
-
+	hash := mod(byteHash(key), unit)
 	idx := sort.Search(len(c.nodes), func(i int) bool { return c.nodes[i] >= hash })
 	if idx == len(c.nodes) {
 		idx = 0
@@ -150,7 +142,7 @@ func (c ConsistentSwitch) Route(cmd Command) ([]int, error) {
 
 	for i := range c.nodes {
 		if c.nodes[i] >= hash {
-			nodes = append(nodes, i)
+			nodes = append(nodes, c.hashMap[i])
 			if len(nodes) == c.replicas {
 				break
 			}
@@ -159,7 +151,7 @@ func (c ConsistentSwitch) Route(cmd Command) ([]int, error) {
 
 	if len(nodes) != c.replicas {
 		for i := 0; i < len(nodes)-c.replicas; i++ {
-			nodes = append(nodes)
+			nodes = append(nodes, c.hashMap[i])
 		}
 	}
 

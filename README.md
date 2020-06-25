@@ -61,7 +61,8 @@ ok      lachesis/internal/store 43.969s
 
 ### Skiplist
 
-https://www.memsql.com/blog/what-is-skiplist-why-skiplist-index-for-memsql/
+- https://www.memsql.com/blog/what-is-skiplist-why-skiplist-index-for-memsql/
+- https://www.cl.cam.ac.uk/teaching/2005/Algorithms/skiplists.pdf
 
 #### TODO
 - implement
@@ -85,3 +86,12 @@ https://www.memsql.com/blog/what-is-skiplist-why-skiplist-index-for-memsql/
 ### Consistent Hashing
 
 - https://medium.com/@dgryski/consistent-hashing-algorithmic-tradeoffs-ef6b8e2fcae8
+
+### Raft
+
+- https://blog.container-solutions.com/raft-explained-part-23-overview-core-protocol
+- https://www.usenix.org/system/files/conference/atc14/atc14-paper-ongaro.pdf
+
+### Paxos
+
+- http://www.read.seas.harvard.edu/~kohler/class/08w-dsi/chandra07paxos.pdf

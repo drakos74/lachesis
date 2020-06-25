@@ -6,30 +6,41 @@ import (
 	"fmt"
 	"math"
 
+	"github.com/rs/zerolog/log"
+
+	"github.com/drakos74/lachesis/internal/partition"
+
 	"github.com/drakos74/lachesis/store"
 )
 
+type Port struct {
+	in  chan Command
+	out chan Response
+}
+
+type Meta struct {
+	out chan store.Metadata
+	in  chan struct{}
+}
+
 type Conn struct {
-	ports   []chan Command
-	reports []chan Response
+	ports []Port
 }
 
 type Comm struct {
-	meta     []chan store.Metadata
-	metadata []chan struct{}
+	metadata []Meta
 }
 
 type Network struct {
-	Switch
-	Conn
-	Comm
+	partition.Switch
+	nodes     []*Node
 	eventPool *EventRotation
 	cnl       func()
 	cycles    int
 }
 
 type NetworkFactory struct {
-	router  PartitionStrategy
+	router  partition.PartitionStrategy
 	storage store.StorageFactory
 	nodes   int
 	events  []Event
@@ -49,7 +60,7 @@ func (f *NetworkFactory) Nodes(nodes int) *NetworkFactory {
 	return f
 }
 
-func (f *NetworkFactory) Router(router PartitionStrategy) *NetworkFactory {
+func (f *NetworkFactory) Router(router partition.PartitionStrategy) *NetworkFactory {
 	f.router = router
 	return f
 }
@@ -75,69 +86,31 @@ func (f *NetworkFactory) Create() store.StorageFactory {
 	return networkFactory(f.nodes, f.router, f.storage, f.events...)
 }
 
-func networkFactory(parallelism int, router PartitionStrategy, newStore store.StorageFactory, events ...Event) store.StorageFactory {
+func networkFactory(parallelism int, router partition.PartitionStrategy, newStore store.StorageFactory, events ...Event) store.StorageFactory {
 
 	return func() store.Storage {
 
 		ctx, cnl := context.WithCancel(context.Background())
 
-		partition := router()
+		route := router()
 
-		ports := make([]chan Command, parallelism)
-		reports := make([]chan Response, parallelism)
-
-		meta := make([]chan store.Metadata, parallelism)
-		metadata := make([]chan struct{}, parallelism)
+		nodes := make([]*Node, 0)
 
 		for i := 0; i < parallelism; i++ {
-			port := make(chan Command)
-			report := make(chan Response)
-
-			n := make(chan struct{})
-			m := make(chan store.Metadata)
-
-			// start up node
-			go func() {
-
-				storage := newStore()
-
-				for {
-					select {
-					case c := <-port:
-						element, err := c.Exec()(storage)
-						report <- Response{
-							Element: element,
-							Err:     err,
-						}
-					case <-n:
-						m <- storage.Metadata()
-					case <-ctx.Done():
-						return
-					}
-				}
-
-			}()
-
-			ports[i] = port
-			reports[i] = report
-
-			meta[i] = m
-			metadata[i] = n
-
-			partition.Register(i)
-
+			node := NewNode(newStore)
+			err := node.start(ctx)
+			if err == nil {
+				// TODO : register with nodeId
+				route.Register(len(nodes))
+				nodes = append(nodes, node)
+			} else {
+				// TODO : what can we do here ???
+			}
 		}
 
 		return &Network{
-			Switch: partition,
-			Comm: Comm{
-				meta:     meta,
-				metadata: metadata,
-			},
-			Conn: Conn{
-				ports:   ports,
-				reports: reports,
-			},
+			Switch: route,
+			nodes:  nodes,
 			eventPool: &EventRotation{
 				events: events,
 			},
@@ -164,7 +137,9 @@ func (n *Network) cycle() {
 		idx := n.eventPool.index
 		if idx < len(n.eventPool.events) {
 			// TODO : track differently
-			println(fmt.Sprintf("apply new event at %d - %d = %v", n.cycles, idx, n.eventPool.events[idx]))
+			log.Info().
+				Str("Type", "EVENT").
+				Msg(fmt.Sprintf("apply new event at %d - %d = %v", n.cycles, idx, n.eventPool.events[idx]))
 			event := n.eventPool.events[idx]
 			n.trigger(event)
 			n.eventPool.index++
@@ -175,9 +150,8 @@ func (n *Network) cycle() {
 func (n *Network) Put(element store.Element) error {
 
 	cmd := PutCommand{element: element}
-
 	// emulate a network retry mechanism
-	ids, err := retry(10, n.Route, cmd)
+	ids, err := retry(10, n.Route, cmd.Element().Key)
 	if err != nil {
 		return fmt.Errorf("error during put action: %w", err)
 	}
@@ -185,15 +159,15 @@ func (n *Network) Put(element store.Element) error {
 	var response Response
 	for _, id := range ids {
 		// we emulate for now blocking communication
-		n.ports[id] <- cmd
-		nodeResponse := <-n.reports[id]
+		n.nodes[id].Port.in <- cmd
+		nodeResponse := <-n.nodes[id].Port.out
 		if nodeResponse.Err == nil {
 			// pick the non-failing response to send to the client
 			// TODO : investigate also the fail-fast approach by DeRegistering nodes
 			response = nodeResponse
 		} else {
 			// TODO : track these events differently
-			println(fmt.Sprintf("node %d returned an error = %v", id, err))
+			log.Info().Str("Type", "ERROR").Msg(fmt.Sprintf("node %d returned an error = %v", id, err))
 		}
 	}
 
@@ -205,9 +179,8 @@ func (n *Network) Put(element store.Element) error {
 
 func (n *Network) Get(key store.Key) (store.Element, error) {
 	cmd := GetCommand{key: key}
-
 	// emulate a network retry mechanism
-	ids, err := retry(10, n.Route, cmd)
+	ids, err := retry(10, n.Route, cmd.Element().Key)
 	if err != nil {
 		return store.Nil, fmt.Errorf("error during get action: %w", err)
 	}
@@ -215,8 +188,9 @@ func (n *Network) Get(key store.Key) (store.Element, error) {
 	var response Response
 	for _, id := range ids {
 		// we emulate for now blocking communication
-		n.ports[id] <- cmd
-		response = <-n.reports[id]
+		n.nodes[id].Port.in <- cmd
+		response = <-n.nodes[id].Port.out
+
 		// stop at the first successful response
 		if response.Err == nil {
 			break
@@ -228,11 +202,11 @@ func (n *Network) Get(key store.Key) (store.Element, error) {
 	return response.Element, response.Err
 }
 
-func retry(iterations int, apply func(cmd Command) ([]int, error), cmd Command) ([]int, error) {
+func retry(iterations int, apply func(key partition.Key) ([]int, error), key []byte) ([]int, error) {
 	ids := make([]int, 0)
 	err := errors.New("")
 	for i := 0; i < iterations; i++ {
-		ids, err = apply(cmd)
+		ids, err = apply(key)
 		if err == nil {
 			break
 		}
@@ -246,13 +220,13 @@ func (n *Network) Metadata() store.Metadata {
 
 	// keep track of our distribution factor
 
-	counts := make([]float64, len(n.metadata))
+	counts := make([]float64, len(n.nodes))
 
-	for i, m := range n.metadata {
-		m <- struct{}{}
-		meta := <-n.meta[i]
+	for i, m := range n.nodes {
+		m.Meta.in <- struct{}{}
+		meta := <-m.Meta.out
 		// TODO : expose differently
-		println(fmt.Sprintf("%v meta = %v", i, meta))
+		log.Info().Str("Type", "META").Msg(fmt.Sprintf("%v meta = %v", i, meta))
 		metadata.Merge(meta)
 		counts[i] = float64(meta.Size)
 	}
@@ -278,12 +252,13 @@ func std(num []float64) {
 	// The use of Sqrt math function func Sqrt(x float64) float64
 	sd = math.Sqrt(sd / size)
 	md = dv / size
-	fmt.Println("std : ", sd)
-	fmt.Println("mtd : ", md)
 
 	// TODO : formalize distribution metric
-	println(fmt.Sprintf("distribution-metric = %.2f", md/(sd+0.0001)))
-
+	log.Info().
+		Str("Type", "META").
+		Float64("std", sd).
+		Float64("mtd", md).
+		Msg(fmt.Sprintf("distribution-metric = %.2f", md/(sd+0.0001)))
 }
 
 func (n *Network) Close() error {
