@@ -169,3 +169,26 @@ func byteHash(bytes []byte) uint64 {
 func mod(hash uint64, m int) int {
 	return int(hash % uint64(m))
 }
+
+func LeaderFollowerPartition() Switch {
+	return &CaptainCrewSwitch{replicas: 1}
+}
+
+type CaptainCrewSwitch struct {
+	replicas    int
+	parallelism int
+}
+
+func (r *CaptainCrewSwitch) Register(id int) {
+	// this is always the captain
+	// captain should know about the others
+	r.parallelism = id
+}
+
+func (r *CaptainCrewSwitch) DeRegister(id int) {
+	// nothing to do
+}
+
+func (r CaptainCrewSwitch) Route(key Key) ([]int, error) {
+	return []int{r.parallelism}, nil
+}

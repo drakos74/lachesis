@@ -13,7 +13,11 @@ import (
 	"github.com/drakos74/lachesis/store"
 )
 
-type Port struct {
+const (
+	eventInterval = 100
+)
+
+type Operation struct {
 	in  chan Command
 	out chan Response
 }
@@ -23,31 +27,60 @@ type Meta struct {
 	in  chan struct{}
 }
 
-type Conn struct {
-	ports []Port
+type Operations []Operation
+
+type Metadata []Meta
+
+type WorldClock struct {
+	tick      chan struct{}
+	tock      chan Event
+	eventPool *EventRotation
+	cycles    int
 }
 
-type Comm struct {
-	metadata []Meta
+func (wc WorldClock) startTicking() {
+	for range wc.tick {
+		wc.cycles++
+		// TODO : fix the abstraction
+		// leave some time to warm up, and use the same amount to move to the next events
+		if wc.cycles > wc.eventPool.warmUp {
+			idx := wc.eventPool.index
+			if idx < len(wc.eventPool.events) {
+				// TODO : track differently
+				log.Info().
+					Str("Type", "EVENT").
+					Msg(fmt.Sprintf("apply new event at %d - %d = %v", wc.cycles, idx, wc.eventPool.events[idx]))
+				event := wc.eventPool.events[idx]
+				wc.tock <- event
+				wc.eventPool.index++
+			}
+			wc.cycles = 0
+		}
+	}
 }
 
 type Network struct {
 	partition.Switch
-	nodes     []*Node
-	eventPool *EventRotation
-	cnl       func()
-	cycles    int
+	WorldClock
+	nodes []*StorageNode
+	cnl   func()
 }
 
 type NetworkFactory struct {
-	router  partition.PartitionStrategy
-	storage store.StorageFactory
-	nodes   int
-	events  []Event
+	router      partition.PartitionStrategy
+	storage     store.StorageFactory
+	node        NodeFactory
+	protocol    Protocol
+	parallelism int
+	events      []Event
 }
 
-func Factory() *NetworkFactory {
-	return &NetworkFactory{}
+func Factory(events ...Event) *NetworkFactory {
+	return &NetworkFactory{
+		events:   events,
+		protocol: NoProtocol,
+		node:     SingleNode,
+	}
 }
 
 func (f *NetworkFactory) Storage(storage store.StorageFactory) *NetworkFactory {
@@ -55,8 +88,8 @@ func (f *NetworkFactory) Storage(storage store.StorageFactory) *NetworkFactory {
 	return f
 }
 
-func (f *NetworkFactory) Nodes(nodes int) *NetworkFactory {
-	f.nodes = nodes
+func (f *NetworkFactory) Nodes(parallelism int) *NetworkFactory {
+	f.parallelism = parallelism
 	return f
 }
 
@@ -65,14 +98,14 @@ func (f *NetworkFactory) Router(router partition.PartitionStrategy) *NetworkFact
 	return f
 }
 
-func (f *NetworkFactory) Events(events ...Event) *NetworkFactory {
-	f.events = events
+func (f *NetworkFactory) Protocol(protocol Protocol) *NetworkFactory {
+	f.protocol = protocol
 	return f
 }
 
-func (f *NetworkFactory) Create() store.StorageFactory {
-	if f.nodes == 0 {
-		panic("cannot create network without amount of nodes")
+func (f *NetworkFactory) validate() {
+	if f.parallelism == 0 {
+		panic("cannot create network without amount of parallelism")
 	}
 
 	if f.storage == nil {
@@ -83,39 +116,74 @@ func (f *NetworkFactory) Create() store.StorageFactory {
 		panic("cannot create network without a routing implementation")
 	}
 
-	return networkFactory(f.nodes, f.router, f.storage, f.events...)
+	if f.protocol == nil {
+		panic("cannot create network without a cluster protocol")
+	}
+
+	if f.node == nil {
+		panic("cannot create network without a node implementation")
+	}
 }
 
-func networkFactory(parallelism int, router partition.PartitionStrategy, newStore store.StorageFactory, events ...Event) store.StorageFactory {
+func (f *NetworkFactory) Create() store.StorageFactory {
+	f.validate()
 
 	return func() store.Storage {
 
 		ctx, cnl := context.WithCancel(context.Background())
 
-		route := router()
+		route := f.router()
 
-		nodes := make([]*Node, 0)
+		nodes := make([]*StorageNode, 0)
 
-		for i := 0; i < parallelism; i++ {
-			node := NewNode(newStore)
+		for i := 0; i < f.parallelism; i++ {
+			node := f.node(f.storage, f.protocol)
 			err := node.start(ctx)
 			if err == nil {
 				// TODO : register with nodeId
+				// register node to the network interface
 				route.Register(len(nodes))
 				nodes = append(nodes, node)
+				// emulate the node internal protocol communication layer
+				go func() {
+					for msg := range node.Internal.out {
+						for _, n := range nodes {
+							if n.ID == msg.routingId {
+								n.Internal.in <- msg
+							}
+						}
+					}
+				}()
 			} else {
 				// TODO : what can we do here ???
 			}
 		}
 
-		return &Network{
+		net := &Network{
 			Switch: route,
-			nodes:  nodes,
-			eventPool: &EventRotation{
-				events: events,
+			WorldClock: WorldClock{
+				tick: make(chan struct{}),
+				tock: make(chan Event),
+				eventPool: &EventRotation{
+					warmUp: eventInterval,
+					events: f.events,
+				},
 			},
-			cnl: cnl,
+			nodes: nodes,
+			cnl:   cnl,
 		}
+
+		// listen to the world clock for external events
+		go func() {
+			for ev := range net.tock {
+				net.trigger(ev)
+			}
+		}()
+
+		// start the world clock
+		go net.WorldClock.startTicking()
+
+		return net
 
 	}
 
@@ -130,27 +198,11 @@ func (n *Network) trigger(event Event) {
 	n.Switch = event.Wrap(n.Switch)
 }
 
-func (n *Network) cycle() {
-	n.cycles++
-	// leave some time to
-	if n.cycles%100 == 0 {
-		idx := n.eventPool.index
-		if idx < len(n.eventPool.events) {
-			// TODO : track differently
-			log.Info().
-				Str("Type", "EVENT").
-				Msg(fmt.Sprintf("apply new event at %d - %d = %v", n.cycles, idx, n.eventPool.events[idx]))
-			event := n.eventPool.events[idx]
-			n.trigger(event)
-			n.eventPool.index++
-		}
-	}
-}
-
 func (n *Network) Put(element store.Element) error {
 
 	cmd := PutCommand{element: element}
 	// emulate a network retry mechanism
+	// i.e. to capture cases where node is down
 	ids, err := retry(10, n.Route, cmd.Element().Key)
 	if err != nil {
 		return fmt.Errorf("error during put action: %w", err)
@@ -159,11 +211,11 @@ func (n *Network) Put(element store.Element) error {
 	var response Response
 	for _, id := range ids {
 		// we emulate for now blocking communication
-		n.nodes[id].Port.in <- cmd
-		nodeResponse := <-n.nodes[id].Port.out
+		n.nodes[id].Operation.in <- cmd
+		nodeResponse := <-n.nodes[id].Operation.out
 		if nodeResponse.Err == nil {
 			// pick the non-failing response to send to the client
-			// TODO : investigate also the fail-fast approach by DeRegistering nodes
+			// TODO : investigate also the fail-fast approach by DeRegistering parallelism
 			response = nodeResponse
 		} else {
 			// TODO : track these events differently
@@ -171,7 +223,7 @@ func (n *Network) Put(element store.Element) error {
 		}
 	}
 
-	n.cycle()
+	n.WorldClock.tick <- struct{}{}
 
 	return response.Err
 
@@ -188,8 +240,8 @@ func (n *Network) Get(key store.Key) (store.Element, error) {
 	var response Response
 	for _, id := range ids {
 		// we emulate for now blocking communication
-		n.nodes[id].Port.in <- cmd
-		response = <-n.nodes[id].Port.out
+		n.nodes[id].Operation.in <- cmd
+		response = <-n.nodes[id].Operation.out
 
 		// stop at the first successful response
 		if response.Err == nil {
@@ -197,7 +249,7 @@ func (n *Network) Get(key store.Key) (store.Element, error) {
 		}
 	}
 
-	n.cycle()
+	n.WorldClock.tick <- struct{}{}
 
 	return response.Element, response.Err
 }

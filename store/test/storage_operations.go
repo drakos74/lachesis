@@ -208,6 +208,82 @@ func MultiConcurrentReadWriteOperations(t *testing.T, storage store.Storage, gen
 
 }
 
+type Errors struct {
+	write int32
+	read  int32
+}
+
+func MultiConcurrentFailureRateOperations(t *testing.T, storage store.Storage, generator RandomFactory) (readError, writeError float64) {
+
+	wg := sync.WaitGroup{}
+
+	var r int32
+	var w int32
+
+	var errRead int32
+	var errWrite int32
+
+	for i := 0; i < num; i++ {
+
+		wg.Add(1)
+
+		// TODO : try to make this linear
+		// each element cycle is done in a different routine to generate more contention
+		go func(storage store.Storage) {
+			element := generator.ElementFactory()
+
+			// put
+			err := storage.Put(element)
+
+			if err != nil {
+				atomic.AddInt32(&errWrite, 1)
+			}
+			atomic.AddInt32(&w, 1)
+
+			// make sure we call read after the write finished
+			go func() {
+				// read
+				key := element.Key
+				result, err := storage.Get(key)
+				if err != nil {
+					atomic.AddInt32(&errRead, 1)
+				} else {
+					// we did not account for read error ...
+					// but we still might have retrieved the wrong entry
+					if !assert.ObjectsAreEqual(element.Value, result.Value) {
+						atomic.AddInt32(&errRead, 1)
+					}
+				}
+				atomic.AddInt32(&r, 1)
+				wg.Done()
+			}()
+
+		}(storage)
+
+	}
+
+	wg.Wait()
+
+	// flush path
+	err := storage.Close()
+	assert.NoError(t, err)
+
+	assert.Equal(t, w, r)
+	assert.Equal(t, int(w), num)
+	assert.Equal(t, int(r), num)
+
+	readError = 100 * float64(errWrite) / float64(w)
+	writeError = 100 * float64(errRead) / float64(r)
+
+	log.Info().
+		Str("write", fmt.Sprintf("%.2f", writeError)).
+		Str("read", fmt.Sprintf("%.2f", readError)).
+		Msg("Error Rate")
+
+	return
+
+}
+
 func assertMeta(t *testing.T, size, keysSize, vaLuesSize uint64, meta store.Metadata) {
 	assert.Equal(t, size, meta.Size)
 	// TODO : assert on the volume of the store

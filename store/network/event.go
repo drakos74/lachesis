@@ -7,6 +7,7 @@ import (
 )
 
 type EventRotation struct {
+	warmUp int
 	index  int
 	events []Event
 }

@@ -10,7 +10,13 @@ import (
 type Suite struct {
 	suite.Suite
 	t          *testing.T
+	limit      Limit
 	newStorage func() store.Storage
+}
+
+type Limit struct {
+	Read  float64
+	Write float64
 }
 
 // Make sure that VariableThatShouldStartAtFive is set to five
@@ -86,5 +92,36 @@ func (s *Concurrency) TestMultiConcurrentReadWriteOperations() {
 func (s *Concurrency) Run(t *testing.T, factory func() store.Storage) {
 	s.t = t
 	s.newStorage = factory
+	suite.Run(t, s)
+}
+
+type FailureRate struct {
+	Suite
+}
+
+func (s *FailureRate) TestMultiConcurrentFailureRateOperations() {
+	storage := s.newStorage()
+	r, w := MultiConcurrentFailureRateOperations(s.t, storage, Random(10, 20))
+
+	// check the limits ...
+	// we just need to be careful in terms of logical buffers
+	s.True(r <= s.limit.Read, "error limit of %v breached for read %v", s.limit.Read, r)
+	s.True(w <= s.limit.Write, "error limit of %v breached for write %v", s.limit.Write, w)
+
+	// make sure we bound this also from the bottom
+	// e.g. if we spacified an error limit, we should at least have encountered some errors
+	if s.limit.Read > 0 {
+		s.True(r > 0, "we should have encountered at lest some read error")
+	}
+	if s.limit.Write > 0 {
+		s.True(w > 0, "we should have encountered at lest some write error")
+	}
+
+}
+
+func (s *FailureRate) Run(t *testing.T, factory func() store.Storage, limit Limit) {
+	s.t = t
+	s.newStorage = factory
+	s.limit = limit
 	suite.Run(t, s)
 }

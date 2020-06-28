@@ -2,7 +2,6 @@ package network
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/rs/zerolog/log"
 
@@ -10,50 +9,44 @@ import (
 	"github.com/google/uuid"
 )
 
-type MessageType int
-
-const (
-	Leader = iota + 1
-	Confirm
-)
-
 type Message struct {
-	msgType MessageType
+	routingId uint32
+	content   interface{}
 }
 
-type State struct {
-	id     uint32
-	leader uint32
+type msgProcessor func(in Message) Message
+
+type Internal struct {
+	ID      uint32
+	in      chan Message
+	out     chan Message
+	process msgProcessor
 }
 
-func (s *State) isActive() bool {
-	return s.leader == s.id
+type Protocol func(id uint32) Internal
+
+func NoProtocol(id uint32) Internal {
+	return Internal{}
 }
 
 type Member struct {
-	State
-	Port
+	Operation
 	Meta
-	in  chan Message
-	out chan Message
+	Internal
 }
 
-type Node struct {
+type StorageNode struct {
 	Member
 	store store.Storage
 }
 
-func NewNode(factory store.StorageFactory) *Node {
-	// TODO : for now start as a leader
-	id := uuid.New().ID()
+type NodeFactory func(newStorage store.StorageFactory, newCluster Protocol) *StorageNode
 
-	return &Node{
+func SingleNode(newStorage store.StorageFactory, newCluster Protocol) *StorageNode {
+	id := uuid.New().ID()
+	return &StorageNode{
 		Member: Member{
-			State: State{
-				id:     id,
-				leader: id,
-			},
-			Port: Port{
+			Operation: Operation{
 				in:  make(chan Command),
 				out: make(chan Response),
 			},
@@ -61,26 +54,22 @@ func NewNode(factory store.StorageFactory) *Node {
 				out: make(chan store.Metadata),
 				in:  make(chan struct{}),
 			},
-			in:  make(chan Message),
-			out: make(chan Message),
+			Internal: newCluster(id),
 		},
-		store: factory(),
+		store: newStorage(),
 	}
 }
 
-// Node internals
+// StorageNode internals
 
-func (n *Node) start(ctx context.Context) error {
+func (n *StorageNode) start(ctx context.Context) error {
 
 	// listen to internal cluster events
 	go func() {
 		for {
 			select {
-			case msg := <-n.in:
-				switch msg.msgType {
-				case Leader:
-				case Confirm:
-				}
+			case msg := <-n.Internal.in:
+				n.Internal.out <- n.Internal.process(msg)
 			case <-ctx.Done():
 				log.Debug().Msg("Closing member channel")
 				return
@@ -92,18 +81,11 @@ func (n *Node) start(ctx context.Context) error {
 	go func() {
 		for {
 			select {
-			case cmd := <-n.Port.in:
-				// handle only if we are the leader
-				// for whatever this might mean
-				// Note : we can always have an implementation where the node is fixed as leader e.g. no leader
+			case cmd := <-n.Operation.in:
 				element := store.Nil
 				var err error
-				if n.isActive() {
-					element, err = cmd.Exec()(n)
-				} else {
-					log.Err(fmt.Errorf("node is not active: '%v'", n.State))
-				}
-				n.Port.out <- Response{
+				element, err = cmd.Exec()(n)
+				n.Operation.out <- Response{
 					Element: element,
 					Err:     err,
 				}
@@ -121,18 +103,18 @@ func (n *Node) start(ctx context.Context) error {
 
 // Storage interface
 
-func (n *Node) Put(element store.Element) error {
+func (n *StorageNode) Put(element store.Element) error {
 	return n.store.Put(element)
 }
 
-func (n *Node) Get(key store.Key) (store.Element, error) {
+func (n *StorageNode) Get(key store.Key) (store.Element, error) {
 	return n.store.Get(key)
 }
 
-func (n *Node) Metadata() store.Metadata {
+func (n *StorageNode) Metadata() store.Metadata {
 	return n.store.Metadata()
 }
 
-func (n *Node) Close() error {
+func (n *StorageNode) Close() error {
 	return n.store.Close()
 }
