@@ -8,8 +8,6 @@ import (
 
 	"github.com/rs/zerolog/log"
 
-	"github.com/drakos74/lachesis/internal/partition"
-
 	"github.com/drakos74/lachesis/store"
 )
 
@@ -31,55 +29,27 @@ type Operations []Operation
 
 type Metadata []Meta
 
-type WorldClock struct {
-	tick      chan struct{}
-	tock      chan Event
-	eventPool *EventRotation
-	cycles    int
-}
-
-func (wc WorldClock) startTicking() {
-	for range wc.tick {
-		wc.cycles++
-		// TODO : fix the abstraction
-		// leave some time to warm up, and use the same amount to move to the next events
-		if wc.cycles > wc.eventPool.warmUp {
-			idx := wc.eventPool.index
-			if idx < len(wc.eventPool.events) {
-				// TODO : track differently
-				log.Info().
-					Str("Type", "EVENT").
-					Msg(fmt.Sprintf("apply new event at %d - %d = %v", wc.cycles, idx, wc.eventPool.events[idx]))
-				event := wc.eventPool.events[idx]
-				wc.tock <- event
-				wc.eventPool.index++
-			}
-			wc.cycles = 0
-		}
-	}
-}
-
 type Network struct {
-	partition.Switch
+	Switch
 	WorldClock
 	nodes []*StorageNode
 	cnl   func()
 }
 
 type NetworkFactory struct {
-	router      partition.PartitionStrategy
+	router      PartitionStrategy
 	storage     store.StorageFactory
-	node        NodeFactory
-	protocol    Protocol
+	nodeFactory NodeFactory
+	protocol    ProtocolFactory
 	parallelism int
 	events      []Event
 }
 
 func Factory(events ...Event) *NetworkFactory {
 	return &NetworkFactory{
-		events:   events,
-		protocol: NoProtocol,
-		node:     SingleNode,
+		events:      events,
+		protocol:    NoProtocol,
+		nodeFactory: SingleNode,
 	}
 }
 
@@ -93,13 +63,18 @@ func (f *NetworkFactory) Nodes(parallelism int) *NetworkFactory {
 	return f
 }
 
-func (f *NetworkFactory) Router(router partition.PartitionStrategy) *NetworkFactory {
+func (f *NetworkFactory) Router(router PartitionStrategy) *NetworkFactory {
 	f.router = router
 	return f
 }
 
-func (f *NetworkFactory) Protocol(protocol Protocol) *NetworkFactory {
+func (f *NetworkFactory) Protocol(protocol ProtocolFactory) *NetworkFactory {
 	f.protocol = protocol
+	return f
+}
+
+func (f *NetworkFactory) Node(nodeFactory NodeFactory) *NetworkFactory {
+	f.nodeFactory = nodeFactory
 	return f
 }
 
@@ -120,7 +95,7 @@ func (f *NetworkFactory) validate() {
 		panic("cannot create network without a cluster protocol")
 	}
 
-	if f.node == nil {
+	if f.nodeFactory == nil {
 		panic("cannot create network without a node implementation")
 	}
 }
@@ -137,7 +112,7 @@ func (f *NetworkFactory) Create() store.StorageFactory {
 		nodes := make([]*StorageNode, 0)
 
 		for i := 0; i < f.parallelism; i++ {
-			node := f.node(f.storage, f.protocol)
+			node := f.nodeFactory(f.storage, f.protocol)
 			err := node.start(ctx)
 			if err == nil {
 				// TODO : register with nodeId
@@ -196,6 +171,7 @@ func (n *Network) trigger(event Event) {
 	}
 	// wrap with the new one
 	n.Switch = event.Wrap(n.Switch)
+	n.Switch.DeRegister(event.Index())
 }
 
 func (n *Network) Put(element store.Element) error {
@@ -254,7 +230,7 @@ func (n *Network) Get(key store.Key) (store.Element, error) {
 	return response.Element, response.Err
 }
 
-func retry(iterations int, apply func(key partition.Key) ([]int, error), key []byte) ([]int, error) {
+func retry(iterations int, apply func(key Key) ([]int, error), key []byte) ([]int, error) {
 	ids := make([]int, 0)
 	err := errors.New("")
 	for i := 0; i < iterations; i++ {

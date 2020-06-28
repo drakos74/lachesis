@@ -2,8 +2,6 @@ package network
 
 import (
 	"fmt"
-
-	"github.com/drakos74/lachesis/internal/partition"
 )
 
 type EventRotation struct {
@@ -13,16 +11,17 @@ type EventRotation struct {
 }
 
 type Event interface {
-	partition.Switch
-	Wrap(router partition.Switch) partition.Switch
-	Reset() partition.Switch
+	Switch
+	Wrap(router Switch) Switch
+	Reset() Switch
+	Index() int
 }
 
 type NodeDown struct {
 	index      int
 	iterations int
 	duration   int
-	partition.Switch
+	Switch
 }
 
 func NewNodeDownEvent(index, duration int) *NodeDown {
@@ -32,12 +31,12 @@ func NewNodeDownEvent(index, duration int) *NodeDown {
 	}
 }
 
-func (u *NodeDown) Wrap(router partition.Switch) partition.Switch {
+func (u *NodeDown) Wrap(router Switch) Switch {
 	u.Switch = router
 	return u
 }
 
-func (u *NodeDown) Reset() partition.Switch {
+func (u *NodeDown) Reset() Switch {
 	return u.Switch
 }
 
@@ -45,7 +44,11 @@ func (u *NodeDown) Register(id int) {
 	u.Switch.Register(id)
 }
 
-func (u *NodeDown) Route(key partition.Key) ([]int, error) {
+func (u *NodeDown) Index() int {
+	return u.index
+}
+
+func (u *NodeDown) Route(key Key) ([]int, error) {
 	ids, err := u.Switch.Route(key)
 	liveIds := make([]int, 0)
 	for _, id := range ids {

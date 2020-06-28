@@ -2,6 +2,7 @@ package network
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/rs/zerolog/log"
 
@@ -14,19 +15,27 @@ type Message struct {
 	content   interface{}
 }
 
-type msgProcessor func(in Message) Message
+type MsgProcessor func(in Message) Message
 
 type Internal struct {
 	ID      uint32
 	in      chan Message
 	out     chan Message
-	process msgProcessor
+	Process MsgProcessor
 }
 
-type Protocol func(id uint32) Internal
+func Protocol(process MsgProcessor) Internal {
+	return Internal{
+		in:      make(chan Message),
+		out:     make(chan Message),
+		Process: process,
+	}
+}
+
+type ProtocolFactory func(id uint32) Internal
 
 func NoProtocol(id uint32) Internal {
-	return Internal{}
+	return Internal{ID: id}
 }
 
 type Member struct {
@@ -40,9 +49,11 @@ type StorageNode struct {
 	store store.Storage
 }
 
-type NodeFactory func(newStorage store.StorageFactory, newCluster Protocol) *StorageNode
+type Node func() *StorageNode
 
-func SingleNode(newStorage store.StorageFactory, newCluster Protocol) *StorageNode {
+type NodeFactory func(newStorage store.StorageFactory, newCluster ProtocolFactory) *StorageNode
+
+func SingleNode(newStorage store.StorageFactory, newCluster ProtocolFactory) *StorageNode {
 	id := uuid.New().ID()
 	return &StorageNode{
 		Member: Member{
@@ -69,7 +80,7 @@ func (n *StorageNode) start(ctx context.Context) error {
 		for {
 			select {
 			case msg := <-n.Internal.in:
-				n.Internal.out <- n.Internal.process(msg)
+				n.Internal.out <- n.Internal.Process(msg)
 			case <-ctx.Done():
 				log.Debug().Msg("Closing member channel")
 				return
@@ -82,13 +93,8 @@ func (n *StorageNode) start(ctx context.Context) error {
 		for {
 			select {
 			case cmd := <-n.Operation.in:
-				element := store.Nil
-				var err error
-				element, err = cmd.Exec()(n)
-				n.Operation.out <- Response{
-					Element: element,
-					Err:     err,
-				}
+				response := n.Execute(cmd)
+				n.Operation.out <- response
 			case <-n.Meta.in:
 				n.Meta.out <- n.Metadata()
 			case <-ctx.Done():
@@ -101,9 +107,21 @@ func (n *StorageNode) start(ctx context.Context) error {
 	return nil
 }
 
+// Execute will execute the command and produce the corresponding response
+func (n *StorageNode) Execute(cmd Command) Response {
+	element := store.Nil
+	var err error
+	element, err = cmd.Exec()(n)
+	return Response{
+		Element: element,
+		Err:     err,
+	}
+}
+
 // Storage interface
 
 func (n *StorageNode) Put(element store.Element) error {
+	println(fmt.Sprintf("storage put n = %v", n))
 	return n.store.Put(element)
 }
 

@@ -1,6 +1,10 @@
 package network
 
-import "github.com/drakos74/lachesis/store"
+import (
+	"fmt"
+
+	"github.com/drakos74/lachesis/store"
+)
 
 type CmdType int
 
@@ -24,6 +28,10 @@ type PutCommand struct {
 	element store.Element
 }
 
+func NewPut(element store.Element) Command {
+	return PutCommand{element: element}
+}
+
 func (p PutCommand) Type() CmdType {
 	return Put
 }
@@ -34,6 +42,7 @@ func (p PutCommand) Element() store.Element {
 
 func (p PutCommand) Exec() func(storage store.Storage) (store.Element, error) {
 	return func(storage store.Storage) (element store.Element, e error) {
+		println(fmt.Sprintf("storage = %v", storage))
 		err := storage.Put(p.Element())
 		return store.Nil, err
 	}
@@ -41,6 +50,10 @@ func (p PutCommand) Exec() func(storage store.Storage) (store.Element, error) {
 
 type GetCommand struct {
 	key store.Key
+}
+
+func NewGet(key store.Key) Command {
+	return GetCommand{key: key}
 }
 
 func (p GetCommand) Type() CmdType {
