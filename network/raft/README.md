@@ -1,6 +1,6 @@
 ### Raft Protocol
 
-This is a Raft-like implementation of a consensus protocol.
+This is a naive Raft-like implementation of a consensus protocol.
 For more detailed and concrete implementation ... consider the following references :
 - [raft background](https://raft.github.io/)
 - [etcd](https://github.com/etcd-io/etcd/tree/master/raft)

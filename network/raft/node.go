@@ -125,7 +125,6 @@ func (n *Node) Put(element store.Element) error {
 }
 
 func (n *Node) processSignal(signal Signal, process func() error) error {
-	var err error
 	select {
 	case s := <-n.signal:
 		if s == signal {
@@ -136,7 +135,6 @@ func (n *Node) processSignal(signal Signal, process func() error) error {
 	case <-time.Tick(5 * time.Second):
 		return fmt.Errorf("could not get consensus from cluster")
 	}
-	return err
 }
 
 func (n *Node) Get(key store.Key) (store.Element, error) {

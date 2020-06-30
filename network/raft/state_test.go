@@ -49,7 +49,7 @@ func TestStateVerifyAppend(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, 6, len(machine.states))
 
-	assert.Equal(t, machine.states[len(machine.states)-1], State{
+	assert.Equal(t, machine.states[len(machine.states)-1], &State{
 		term:  10,
 		index: 5,
 	})

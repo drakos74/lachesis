@@ -1,11 +1,10 @@
-package raft
+package paxos
 
 import (
 	"fmt"
 
-	"github.com/rs/zerolog/log"
-
 	"github.com/drakos74/lachesis/network"
+	"github.com/rs/zerolog/log"
 )
 
 const consensusThreshold = 1
@@ -19,10 +18,9 @@ func (c confirmation) reached(id uint32) bool {
 	return c.count[id] < 0 && !c.trigger[id]
 }
 
-// RaftProtocol implements the internal cluster communication requirements,
-// e.g. the leader keeping all the state machines up to date,
-// so that anyone can take over if needed
-func RaftProtocol(group chan Signal) network.ProtocolFactory {
+// PaxosProtocol implements the internal cluster communication requirements,
+// e.g. the proposers and acceptors communication
+func PaxosProtocol(group chan Signal) network.ProtocolFactory {
 	return func(id uint32) network.Internal {
 		// keep some local cache for the leader to count the responses
 		consensus := confirmation{
@@ -34,14 +32,12 @@ func RaftProtocol(group chan Signal) network.ProtocolFactory {
 
 			member, _ := node.(*Node)
 
-			// case it s an AppendRPC message
-			// this means we are a follower
-			// and need to send the message back to 'where it came from'
-			if cmd, ok := msg.Content.(AppendRPC); ok {
+			// acceptor reactions
+
+			if proposal, ok := msg.Content.(Proposal); ok {
 				log.Debug().
-					Str("type", "follower").
-					Str("rpc", "append").
-					Int("index", cmd.HeartBeat.logIndex).
+					Str("type", "acceptor").
+					Str("rpc", "proposal").
 					Uint32("id", msg.ID).
 					Uint32("node", member.Cluster().ID).
 					Uint32("from", msg.Source).
@@ -50,15 +46,14 @@ func RaftProtocol(group chan Signal) network.ProtocolFactory {
 					ID:        msg.ID,
 					Source:    member.Cluster().ID,
 					RoutingId: msg.Source,
-					Content:   member.append(cmd),
+					Content:   member.promise(proposal),
 				}
 			}
 
-			if heartbeat, ok := msg.Content.(HeartBeat); ok {
+			if commit, ok := msg.Content.(Commit); ok {
 				log.Debug().
-					Str("type", "follower").
+					Str("type", "acceptor").
 					Str("rpc", "commit").
-					Int("index", heartbeat.logIndex).
 					Uint32("id", msg.ID).
 					Uint32("node", member.Cluster().ID).
 					Uint32("from", msg.Source).
@@ -67,35 +62,61 @@ func RaftProtocol(group chan Signal) network.ProtocolFactory {
 					ID:        msg.ID,
 					Source:    member.Cluster().ID,
 					RoutingId: msg.Source,
-					Content:   member.commit(heartbeat),
+					Content:   member.accept(commit),
 				}
 			}
 
-			// case it s an ResponseRPC message
-			// this means we are the leader now
-			if rsp, ok := msg.Content.(ResponseRPC); ok {
+			// proposer reactions
+
+			if promise, ok := msg.Content.(Promise); ok {
 				log.Debug().
-					Str("type", "leader").
-					Str("error", fmt.Sprintf("%v ", rsp.response.Err)).
+					Str("type", "proposer").
+					Str("error", fmt.Sprintf("%v ", promise.err)).
 					Uint32("id", msg.ID).
 					Uint32("node", member.Cluster().ID).
 					Uint32("from", msg.Source).
-					Msg("received response")
+					Msg("received promise")
 				if _, ok := consensus.count[msg.ID]; !ok {
 					consensus.count[msg.ID] = int(float64(members-2) * consensusThreshold)
 					consensus.trigger[msg.ID] = false
 				}
 
-				if rsp.response.Err == nil {
+				if promise.err == nil {
 					consensus.count[msg.ID]--
 					if consensus.reached(msg.ID) {
 						log.Debug().
 							Str("type", "leader").
 							Uint32("id", msg.ID).
-							Str("signal", rsp.Signal.String()).
 							Uint32("node", member.Cluster().ID).
 							Msg("received signal")
-						group <- rsp.Signal
+						group <- Prepare
+						consensus.trigger[msg.ID] = true
+					}
+				}
+			}
+
+			if response, ok := msg.Content.(network.Response); ok {
+				log.Debug().
+					Str("type", "proposer").
+					Str("error", fmt.Sprintf("%v ", response.Err)).
+					Uint32("id", msg.ID).
+					Uint32("node", member.Cluster().ID).
+					Uint32("from", msg.Source).
+					Msg("received promise")
+				if _, ok := consensus.count[msg.ID]; !ok {
+					consensus.count[msg.ID] = int(float64(members-2) * consensusThreshold)
+					consensus.trigger[msg.ID] = false
+				}
+
+				if response.Err == nil {
+					consensus.count[msg.ID]--
+					if consensus.reached(msg.ID) {
+						log.Debug().
+							Str("type", "leader").
+							Uint32("id", msg.ID).
+							Uint32("node", member.Cluster().ID).
+							Msg("received accept")
+						group <- Accept
 						consensus.trigger[msg.ID] = true
 					}
 				}

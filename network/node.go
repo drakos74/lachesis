@@ -29,11 +29,13 @@ func (i Internal) Send(msg Message) {
 
 }
 
+const buffer = 0
+
 func Protocol(id uint32, process MsgProcessor) Internal {
 	return Internal{
 		ID:      id,
-		in:      make(chan Message),
-		out:     make(chan Message),
+		in:      make(chan Message, buffer),
+		out:     make(chan Message, buffer),
 		Process: process,
 	}
 }
