@@ -3,7 +3,7 @@ package raft
 import (
 	"fmt"
 
-	"github.com/drakos74/lachesis/store/network"
+	"github.com/drakos74/lachesis/network"
 )
 
 type State struct {

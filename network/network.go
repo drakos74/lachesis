@@ -32,7 +32,7 @@ type Metadata []Meta
 type Network struct {
 	Switch
 	WorldClock
-	nodes []*StorageNode
+	nodes []Storage
 	cnl   func()
 }
 
@@ -109,29 +109,67 @@ func (f *NetworkFactory) Create() store.StorageFactory {
 
 		route := f.router()
 
-		nodes := make([]*StorageNode, 0)
+		nodes := make([]Storage, 0)
 
 		for i := 0; i < f.parallelism; i++ {
 			node := f.nodeFactory(f.storage, f.protocol)
-			err := node.start(ctx)
-			if err == nil {
-				// TODO : register with nodeId
-				// register node to the network interface
-				route.Register(len(nodes))
-				nodes = append(nodes, node)
-				// emulate the node internal protocol communication layer
-				go func() {
-					for msg := range node.Internal.out {
+
+			// listen to internal cluster events
+			go func() {
+				for {
+					select {
+					case msg := <-node.Cluster().Internal.in:
+						node.Cluster().Internal.out <- node.Cluster().Internal.Process(len(route.Members()), node, msg)
+					case <-ctx.Done():
+						log.Debug().Msg("Closing member channel")
+						return
+					}
+				}
+			}()
+
+			// listen to client events
+			go func() {
+				for {
+					select {
+					case cmd := <-node.Cluster().Operation.in:
+						element := store.Nil
+						var err error
+						switch cmd.Type() {
+						case Put:
+							err = node.Put(cmd.Element())
+						case Get:
+							element, err = node.Get(cmd.Element().Key)
+						}
+						node.Cluster().Operation.out <- Response{
+							Element: element,
+							Err:     err,
+						}
+					case <-node.Cluster().Meta.in:
+						node.Cluster().Meta.out <- node.Metadata()
+					case <-ctx.Done():
+						log.Debug().Msg("Closing storage channel")
+						return
+					}
+				}
+			}()
+
+			// TODO : register with nodeId
+			// register node to the network interface
+			route.Register(len(nodes))
+			nodes = append(nodes, node)
+			// emulate the node internal protocol communication layer
+			go func() {
+				for msg := range node.Cluster().Internal.out {
+					// ignore empty messages
+					if msg != Void {
 						for _, n := range nodes {
-							if n.ID == msg.routingId {
-								n.Internal.in <- msg
+							if msg.Source != n.Cluster().Internal.ID && (msg.RoutingId == 0 || n.Cluster().Internal.ID == msg.RoutingId) {
+								n.Cluster().Internal.in <- msg
 							}
 						}
 					}
-				}()
-			} else {
-				// TODO : what can we do here ???
-			}
+				}
+			}()
 		}
 
 		net := &Network{
@@ -171,7 +209,7 @@ func (n *Network) trigger(event Event) {
 	}
 	// wrap with the new one
 	n.Switch = event.Wrap(n.Switch)
-	n.Switch.DeRegister(event.Index())
+	n.DeRegister(event.Index())
 }
 
 func (n *Network) Put(element store.Element) error {
@@ -186,16 +224,15 @@ func (n *Network) Put(element store.Element) error {
 
 	var response Response
 	for _, id := range ids {
-		// we emulate for now blocking communication
-		n.nodes[id].Operation.in <- cmd
-		nodeResponse := <-n.nodes[id].Operation.out
+		n.nodes[id].Cluster().Operation.in <- cmd
+		nodeResponse := <-n.nodes[id].Cluster().Operation.out
 		if nodeResponse.Err == nil {
 			// pick the non-failing response to send to the client
 			// TODO : investigate also the fail-fast approach by DeRegistering parallelism
 			response = nodeResponse
 		} else {
 			// TODO : track these events differently
-			log.Info().Str("Type", "ERROR").Msg(fmt.Sprintf("node %d returned an error = %v", id, err))
+			log.Info().Str("Type", "ERROR").Msg(fmt.Sprintf("node %d returned an error = %v", id, nodeResponse.Err))
 		}
 	}
 
@@ -216,8 +253,8 @@ func (n *Network) Get(key store.Key) (store.Element, error) {
 	var response Response
 	for _, id := range ids {
 		// we emulate for now blocking communication
-		n.nodes[id].Operation.in <- cmd
-		response = <-n.nodes[id].Operation.out
+		n.nodes[id].Cluster().Operation.in <- cmd
+		response = <-n.nodes[id].Cluster().Operation.out
 
 		// stop at the first successful response
 		if response.Err == nil {
@@ -250,9 +287,9 @@ func (n *Network) Metadata() store.Metadata {
 
 	counts := make([]float64, len(n.nodes))
 
-	for i, m := range n.nodes {
-		m.Meta.in <- struct{}{}
-		meta := <-m.Meta.out
+	for i, node := range n.nodes {
+		node.Cluster().Meta.in <- struct{}{}
+		meta := <-node.Cluster().Meta.out
 		// TODO : expose differently
 		log.Info().Str("Type", "META").Msg(fmt.Sprintf("%v meta = %v", i, meta))
 		metadata.Merge(meta)

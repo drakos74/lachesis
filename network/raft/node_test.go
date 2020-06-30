@@ -9,21 +9,21 @@ import (
 
 	"github.com/drakos74/lachesis/store/mem"
 
-	"github.com/drakos74/lachesis/store/network"
+	"github.com/drakos74/lachesis/network"
 )
 
-func singleNode() *network.StorageNode {
+func singleNode(signal chan Signal) network.Storage {
 	return network.SingleNode(mem.CacheFactory, network.NoProtocol)
 }
 
 func TestRaftLeaderFollower_Append(t *testing.T) {
 
-	leader := NewNode(singleNode)
+	leader := node(make(chan Signal), singleNode)
 
 	followers := make([]*Node, 10)
 
 	for i := 0; i < 10; i++ {
-		followers[i] = NewNode(singleNode)
+		followers[i] = node(make(chan Signal), singleNode)
 	}
 
 	for index := 0; index < 10; index++ {
@@ -58,7 +58,7 @@ func newAppendCommand(leader *Node, newElement test.ElementFactory) AppendRPC {
 	return AppendRPC{
 		HeartBeat: HeartBeat{
 			Epoch: Epoch{
-				leaderID: leader.ID,
+				leaderID: leader.Cluster().ID,
 			},
 			Log: Log{
 				prevLogIndex: leader.commitIndex - 1,

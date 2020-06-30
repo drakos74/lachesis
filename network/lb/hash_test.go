@@ -3,7 +3,7 @@ package lb
 import (
 	"testing"
 
-	"github.com/drakos74/lachesis/store/network"
+	"github.com/drakos74/lachesis/network"
 
 	"github.com/drakos74/lachesis/store"
 	"github.com/drakos74/lachesis/store/mem"

@@ -12,4 +12,6 @@ In that sense , this is not a complete concensus protocol,
 but only highlights some of the aspects related to maintaining a distributed state machine
 ```
 
+TODO : benchmark raft with different consensus thresholds
+
  

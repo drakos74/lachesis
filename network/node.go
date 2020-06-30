@@ -1,21 +1,20 @@
 package network
 
 import (
-	"context"
-	"fmt"
-
-	"github.com/rs/zerolog/log"
-
 	"github.com/drakos74/lachesis/store"
 	"github.com/google/uuid"
 )
 
+var Void = Message{}
+
 type Message struct {
-	routingId uint32
-	content   interface{}
+	ID        uint32
+	Source    uint32
+	RoutingId uint32
+	Content   interface{}
 }
 
-type MsgProcessor func(in Message) Message
+type MsgProcessor func(members int, node Storage, in Message) Message
 
 type Internal struct {
 	ID      uint32
@@ -24,8 +23,15 @@ type Internal struct {
 	Process MsgProcessor
 }
 
-func Protocol(process MsgProcessor) Internal {
+func (i Internal) Send(msg Message) {
+	i.out <- msg
+	// wait for the responses
+
+}
+
+func Protocol(id uint32, process MsgProcessor) Internal {
 	return Internal{
+		ID:      id,
 		in:      make(chan Message),
 		out:     make(chan Message),
 		Process: process,
@@ -44,16 +50,21 @@ type Member struct {
 	Internal
 }
 
+type Storage interface {
+	store.Storage
+	Cluster() Member
+}
+
 type StorageNode struct {
 	Member
 	store store.Storage
 }
 
-type Node func() *StorageNode
+type Node func() Storage
 
-type NodeFactory func(newStorage store.StorageFactory, newCluster ProtocolFactory) *StorageNode
+type NodeFactory func(newStorage store.StorageFactory, newCluster ProtocolFactory) Storage
 
-func SingleNode(newStorage store.StorageFactory, newCluster ProtocolFactory) *StorageNode {
+func SingleNode(newStorage store.StorageFactory, newCluster ProtocolFactory) Storage {
 	id := uuid.New().ID()
 	return &StorageNode{
 		Member: Member{
@@ -73,45 +84,20 @@ func SingleNode(newStorage store.StorageFactory, newCluster ProtocolFactory) *St
 
 // StorageNode internals
 
-func (n *StorageNode) start(ctx context.Context) error {
-
-	// listen to internal cluster events
-	go func() {
-		for {
-			select {
-			case msg := <-n.Internal.in:
-				n.Internal.out <- n.Internal.Process(msg)
-			case <-ctx.Done():
-				log.Debug().Msg("Closing member channel")
-				return
-			}
-		}
-	}()
-
-	// listen to client events
-	go func() {
-		for {
-			select {
-			case cmd := <-n.Operation.in:
-				response := n.Execute(cmd)
-				n.Operation.out <- response
-			case <-n.Meta.in:
-				n.Meta.out <- n.Metadata()
-			case <-ctx.Done():
-				log.Debug().Msg("Closing storage channel")
-				return
-			}
-		}
-	}()
-
-	return nil
+func (n *StorageNode) Cluster() Member {
+	return n.Member
 }
 
 // Execute will execute the command and produce the corresponding response
-func (n *StorageNode) Execute(cmd Command) Response {
+func Execute(node Storage, cmd Command) Response {
 	element := store.Nil
 	var err error
-	element, err = cmd.Exec()(n)
+	switch cmd.Type() {
+	case Put:
+		err = node.Put(cmd.Element())
+	case Get:
+		element, err = node.Get(cmd.Element().Key)
+	}
 	return Response{
 		Element: element,
 		Err:     err,
@@ -121,7 +107,6 @@ func (n *StorageNode) Execute(cmd Command) Response {
 // Storage interface
 
 func (n *StorageNode) Put(element store.Element) error {
-	println(fmt.Sprintf("storage put n = %v", n))
 	return n.store.Put(element)
 }
 

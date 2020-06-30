@@ -3,9 +3,9 @@ package lb
 import (
 	"testing"
 
+	"github.com/drakos74/lachesis/network"
 	"github.com/drakos74/lachesis/store"
 	"github.com/drakos74/lachesis/store/mem"
-	"github.com/drakos74/lachesis/store/network"
 	"github.com/drakos74/lachesis/store/test"
 )
 
@@ -49,5 +49,5 @@ func TestShardedNetwork_Failure(t *testing.T) {
 // this is because of the randomisation of sharding and node down event
 // but this should be enough to signify that a sharded network fails in cases of node outages
 func TestShardedNetwork_NodeDownEventFailureRate(t *testing.T) {
-	new(test.FailureRate).Run(t, newShardedNetwork(network.NewNodeDownEvent(5, 30)), test.Limit{Write: 0.3, Read: 0.3})
+	new(test.FailureRate).Run(t, newShardedNetwork(network.NewNodeDownEvent(5, 30)), test.Limit{Write: 2, Read: 1})
 }
