@@ -4,12 +4,14 @@ import (
 	"fmt"
 )
 
-type EventRotation struct {
+// Events is a collection of Events
+type Events struct {
 	warmUp int
 	index  int
 	events []Event
 }
 
+// Event represents a generic network event that gets applied at the SWitch level
 type Event interface {
 	Switch
 	Wrap(router Switch) Switch
@@ -17,6 +19,7 @@ type Event interface {
 	Index() int
 }
 
+// NodeDown emulates the case where a node is not responsive
 type NodeDown struct {
 	index      int
 	iterations int
@@ -24,6 +27,7 @@ type NodeDown struct {
 	Switch
 }
 
+// NewNodeDownEvent creates a new NodeDown Event
 func NewNodeDownEvent(index, duration int) *NodeDown {
 	return &NodeDown{
 		index:    index,
@@ -31,23 +35,28 @@ func NewNodeDownEvent(index, duration int) *NodeDown {
 	}
 }
 
+// Wrap will decorate the current Switch implementation with the events one
 func (u *NodeDown) Wrap(router Switch) Switch {
 	u.Switch = router
 	return u
 }
 
+// Reset returns the previous network state
 func (u *NodeDown) Reset() Switch {
 	return u.Switch
 }
 
+// Register registers a new member to the network
 func (u *NodeDown) Register(id int) {
 	u.Switch.Register(id)
 }
 
+// Index returns the Index of the node that is supposed to be unresponsive
 func (u *NodeDown) Index() int {
 	return u.index
 }
 
+// Route returns the node responsible for serving the current request
 func (u *NodeDown) Route(key Key) ([]int, error) {
 	ids, err := u.Switch.Route(key)
 	liveIds := make([]int, 0)

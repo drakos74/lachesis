@@ -15,20 +15,26 @@ const (
 	eventInterval = 100
 )
 
+// Operation is the communication channel for outside clients with the network
 type Operation struct {
 	in  chan Command
 	out chan Response
 }
 
+// Meta is the communication channel for metadata about the network
 type Meta struct {
 	out chan store.Metadata
 	in  chan struct{}
 }
 
+// Operations is a collection of Operation
 type Operations []Operation
 
+// Metadata is a collection of Meta
 type Metadata []Meta
 
+// Network emulates a cluster of nodes and the corresponding operational components of it
+// the network has a Storage functionality as a whole and can be viewed as a distributed Storage
 type Network struct {
 	Switch
 	WorldClock
@@ -36,6 +42,7 @@ type Network struct {
 	cnl   func()
 }
 
+// NetworkFactory is the builder factory for a network
 type NetworkFactory struct {
 	router      PartitionStrategy
 	storage     store.StorageFactory
@@ -45,34 +52,41 @@ type NetworkFactory struct {
 	events      []Event
 }
 
+// Factory creates a new NodeFactory
 func Factory(events ...Event) *NetworkFactory {
 	return &NetworkFactory{
 		events:      events,
 		protocol:    NoProtocol,
-		nodeFactory: SingleNode,
+		nodeFactory: Node,
 	}
 }
 
+// Storage specifies the underlying Storage implementation for the network
 func (f *NetworkFactory) Storage(storage store.StorageFactory) *NetworkFactory {
 	f.storage = storage
 	return f
 }
 
+// Nodes specifies the amount of nodes for the distributed network
 func (f *NetworkFactory) Nodes(parallelism int) *NetworkFactory {
 	f.parallelism = parallelism
 	return f
 }
 
+// Router specifies the routing / switch implementation to route external client requests to individual nodes
 func (f *NetworkFactory) Router(router PartitionStrategy) *NetworkFactory {
 	f.router = router
 	return f
 }
 
+// Protocol specifies the internal communication protocol for the network
+// i.e. how it's members communicate with each other
 func (f *NetworkFactory) Protocol(protocol ProtocolFactory) *NetworkFactory {
 	f.protocol = protocol
 	return f
 }
 
+// Node specifies the factory for creating new network members
 func (f *NetworkFactory) Node(nodeFactory NodeFactory) *NetworkFactory {
 	f.nodeFactory = nodeFactory
 	return f
@@ -84,7 +98,7 @@ func (f *NetworkFactory) validate() {
 	}
 
 	if f.storage == nil {
-		panic("cannot create network without a storage implementation")
+		panic("cannot create network without a Storage implementation")
 	}
 
 	if f.router == nil {
@@ -100,6 +114,7 @@ func (f *NetworkFactory) validate() {
 	}
 }
 
+// Create returns a functioning network implementation that can be used as a distributed Storage
 func (f *NetworkFactory) Create() store.StorageFactory {
 	f.validate()
 
@@ -147,16 +162,16 @@ func (f *NetworkFactory) Create() store.StorageFactory {
 					case <-node.Cluster().Meta.in:
 						node.Cluster().Meta.out <- node.Metadata()
 					case <-ctx.Done():
-						log.Debug().Msg("Closing storage channel")
+						log.Debug().Msg("Closing Storage channel")
 						return
 					}
 				}
 			}()
 
-			// TODO : register with nodeId
 			// register node to the network interface
 			route.Register(len(nodes))
 			nodes = append(nodes, node)
+
 			// emulate the node internal protocol communication layer
 			go func() {
 				for msg := range node.Cluster().Internal.out {
@@ -177,7 +192,7 @@ func (f *NetworkFactory) Create() store.StorageFactory {
 			WorldClock: WorldClock{
 				tick: make(chan struct{}),
 				tock: make(chan Event),
-				eventPool: &EventRotation{
+				eventPool: &Events{
 					warmUp: eventInterval,
 					events: f.events,
 				},
@@ -202,6 +217,7 @@ func (f *NetworkFactory) Create() store.StorageFactory {
 
 }
 
+// trigger initiates an event for the network
 func (n *Network) trigger(event Event) {
 	if ev, ok := n.Switch.(Event); ok {
 		// get back the initial router implementation
@@ -212,6 +228,7 @@ func (n *Network) trigger(event Event) {
 	n.DeRegister(event.Index())
 }
 
+// Put allows clients to initPut a write command to the distributed Storage
 func (n *Network) Put(element store.Element) error {
 
 	cmd := PutCommand{element: element}
@@ -242,6 +259,7 @@ func (n *Network) Put(element store.Element) error {
 
 }
 
+// Get initiates a read requests to the distributed Storage
 func (n *Network) Get(key store.Key) (store.Element, error) {
 	cmd := GetCommand{key: key}
 	// emulate a network retry mechanism
@@ -267,6 +285,7 @@ func (n *Network) Get(key store.Key) (store.Element, error) {
 	return response.Element, response.Err
 }
 
+// retry emulates a retry mechanism, in case a node is down
 func retry(iterations int, apply func(key Key) ([]int, error), key []byte) ([]int, error) {
 	ids := make([]int, 0)
 	err := errors.New("")
@@ -279,6 +298,7 @@ func retry(iterations int, apply func(key Key) ([]int, error), key []byte) ([]in
 	return ids, err
 }
 
+// Metadata returns the network metadata
 func (n *Network) Metadata() store.Metadata {
 
 	metadata := store.Metadata{}
@@ -301,6 +321,7 @@ func (n *Network) Metadata() store.Metadata {
 	return metadata
 }
 
+// std computes the standard deviation of a population of floats
 func std(num []float64) {
 	size := float64(len(num))
 	var sum, mean, sd, md, dv float64
@@ -326,6 +347,7 @@ func std(num []float64) {
 		Msg(fmt.Sprintf("distribution-metric = %.2f", md/(sd+0.0001)))
 }
 
+// Close runs any cleanup / shutdown actions on the Storage
 func (n *Network) Close() error {
 	n.cnl()
 	return nil

@@ -14,7 +14,7 @@ func newLeaderNetwork(event ...network.Event) store.StorageFactory {
 		Router(LeaderFollowerPartition).
 		Storage(mem.CacheFactory).
 		Nodes(10).
-		Node(network.SingleNode).
+		Node(network.Node).
 		Create()
 }
 

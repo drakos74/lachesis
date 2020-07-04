@@ -8,13 +8,13 @@ import (
 
 type State struct {
 	term      int
-	index     int
+	index     int64
 	cmd       network.Command
 	committed bool
 }
 
 type stateMachine struct {
-	commitIndex int
+	commitIndex int64
 	states      []*State
 }
 

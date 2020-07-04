@@ -25,9 +25,9 @@ type Epoch struct {
 }
 
 type Log struct {
-	prevLogIndex int
-	prevLogTerm  int
-	logIndex     int
+	prevLogIndex int64
+	prevLogTerm  int64
+	logIndex     int64
 }
 
 type HeartBeat struct {

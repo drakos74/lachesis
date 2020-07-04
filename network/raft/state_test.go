@@ -19,9 +19,9 @@ func TestStateVerifyAppend(t *testing.T) {
 					term: term,
 				},
 				Log: Log{
-					prevLogIndex: i - 1,
-					prevLogTerm:  9,
-					logIndex:     i,
+					prevLogIndex: int64(i) - 1,
+					prevLogTerm:  int64(9),
+					logIndex:     int64(i),
 				},
 			},
 		}
@@ -70,7 +70,7 @@ func TestStateMachine_VerifyOverflow(t *testing.T) {
 
 }
 
-func prevState(prevIndex int) HeartBeat {
+func prevState(prevIndex int64) HeartBeat {
 	return HeartBeat{
 		Epoch: Epoch{
 			term: 10,
@@ -82,7 +82,7 @@ func prevState(prevIndex int) HeartBeat {
 	}
 }
 
-func newState(prevIndex, newIndex int) HeartBeat {
+func newState(prevIndex, newIndex int64) HeartBeat {
 	return HeartBeat{
 		Epoch: Epoch{
 			term: 10,
@@ -95,7 +95,7 @@ func newState(prevIndex, newIndex int) HeartBeat {
 	}
 }
 
-func preFillStates(machine *stateMachine, indexes ...int) {
+func preFillStates(machine *stateMachine, indexes ...int64) {
 
 	for _, index := range indexes {
 		cmd := AppendRPC{

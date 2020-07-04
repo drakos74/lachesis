@@ -12,13 +12,12 @@ import (
 )
 
 func newPaxosNetwork(event ...network.Event) store.StorageFactory {
-	signal := make(chan Signal)
 	return network.Factory(event...).
 		Router(lb.RandomPartition).
 		Storage(mem.CacheFactory).
 		Nodes(10).
-		Protocol(PaxosProtocol(signal)).
-		Node(PaxosNode(PaxosProtocol)).
+		Protocol(PaxosProtocol()).
+		Node(network.Node).
 		Create()
 }
 

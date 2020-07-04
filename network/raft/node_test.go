@@ -13,7 +13,7 @@ import (
 )
 
 func singleNode(signal chan Signal) network.Storage {
-	return network.SingleNode(mem.CacheFactory, network.NoProtocol)
+	return network.Node(mem.CacheFactory, network.NoProtocol)
 }
 
 func TestRaftLeaderFollower_Append(t *testing.T) {

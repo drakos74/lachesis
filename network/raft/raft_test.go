@@ -14,13 +14,12 @@ import (
 )
 
 func newRaftNetwork(event ...network.Event) store.StorageFactory {
-	signal := make(chan Signal)
 	return network.Factory(event...).
 		Router(lb.LeaderFollowerPartition).
-		Storage(mem.CacheFactory).
+		Storage(mem.SyncCacheFactory).
 		Nodes(10).
-		Protocol(RaftProtocol(signal)).
-		Node(RaftNode(RaftProtocol)).
+		Protocol(RaftProtocol()).
+		Node(network.Node).
 		Create()
 }
 

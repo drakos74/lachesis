@@ -2,106 +2,252 @@ package raft
 
 import (
 	"fmt"
+	"reflect"
 
-	"github.com/rs/zerolog/log"
+	"github.com/drakos74/lachesis/store"
 
 	"github.com/drakos74/lachesis/network"
 )
 
-const consensusThreshold = 1
-
-type confirmation struct {
-	count   map[uint32]int
-	trigger map[uint32]bool
-}
-
-func (c confirmation) reached(id uint32) bool {
-	return c.count[id] < 0 && !c.trigger[id]
-}
-
 // RaftProtocol implements the internal cluster communication requirements,
-// e.g. the leader keeping all the state machines up to date,
-// so that anyone can take over if needed
-func RaftProtocol(group chan Signal) network.ProtocolFactory {
-	return func(id uint32) network.Internal {
-		// keep some local cache for the leader to count the responses
-		consensus := confirmation{
-			count:   make(map[uint32]int),
-			trigger: make(map[uint32]bool),
+// e.g. the leader and followers interaction logic
+func RaftProtocol() network.ProtocolFactory {
+
+	processor := network.ProcessorFactory(func(state *network.State, node *network.StorageNode, element store.Element) (rpc interface{}, wait bool) {
+		stMachine, err := retrieveStatMachine(state)
+		if err != nil {
+			return nil, false
+		}
+		return AppendRPC{
+			HeartBeat: HeartBeat{
+				Epoch: Epoch{
+					leaderID: node.Cluster().ID,
+				},
+				Log: Log{
+					prevLogIndex: stMachine.commitIndex - 1,
+					logIndex:     stMachine.commitIndex,
+				},
+			},
+			command: network.NewPut(element),
+		}, true
+	})
+
+	// follower phase 1 processing logic
+	processor.Propose(func(state *network.State, storage store.Storage, msg interface{}) (interface{}, error) {
+		stMachine, err := retrieveStatMachine(state)
+		if err != nil {
+			return nil, fmt.Errorf("could not retrieve state machine '%w'", err)
+		}
+		// we expect a proposal message
+		if cmd, ok := msg.(AppendRPC); ok {
+
+			err := appendRPC(stMachine, cmd)
+
+			if err != nil {
+				return nil, err
+			}
+
+			updateStateMachine(state, stMachine)
+
+			return ResponseRPC{
+				Signal:    Append,
+				HeartBeat: cmd.HeartBeat,
+				response:  network.Response{},
+			}, nil
+		} else {
+			return nil, fmt.Errorf("unexpected message received for proposal confirmation '%v'", reflect.TypeOf(msg))
+		}
+	})
+
+	// leader phase1 processing logic
+	processor.Promise(func(state *network.State, storage store.Storage, msg interface{}) (interface{}, error) {
+		// we are doing the same work as the follower in the previous step
+		// e.g. appending to our log the same as the follower did, so that we are fully aligned!
+		// create our stateMachine if not already created
+		if _, ok := state.Log[""]; !ok {
+			state.Log[""] = newStateMachine()
 		}
 
-		return network.Protocol(id, func(members int, node network.Storage, msg network.Message) network.Message {
+		// we expect a proposal message
+		if cmd, ok := msg.(AppendRPC); ok {
+			wal := state.Log[""]
+			if stateMachine, ok := wal.(*stateMachine); ok {
 
-			member, _ := node.(*Node)
+				err := appendRPC(stateMachine, cmd)
 
-			// case it s an AppendRPC message
-			// this means we are a follower
-			// and need to send the message back to 'where it came from'
-			if cmd, ok := msg.Content.(AppendRPC); ok {
-				log.Debug().
-					Str("type", "follower").
-					Str("rpc", "append").
-					Int("index", cmd.HeartBeat.logIndex).
-					Uint32("id", msg.ID).
-					Uint32("node", member.Cluster().ID).
-					Uint32("from", msg.Source).
-					Msg("received rpc")
-				return network.Message{
-					ID:        msg.ID,
-					Source:    member.Cluster().ID,
-					RoutingId: msg.Source,
-					Content:   member.append(cmd),
+				if err != nil {
+					return nil, err
 				}
+
+				state.Log[""] = stateMachine
+
+				return ResponseRPC{
+					Signal:    Append,
+					HeartBeat: cmd.HeartBeat,
+					response:  network.Response{},
+				}, nil
+			} else {
+				return nil, fmt.Errorf("could not retrieve state machine '%v'", reflect.TypeOf(wal))
 			}
+		} else {
+			return nil, fmt.Errorf("unexpected message received for proposal confirmation '%v'", reflect.TypeOf(msg))
+		}
+	})
 
-			if heartbeat, ok := msg.Content.(HeartBeat); ok {
-				log.Debug().
-					Str("type", "follower").
-					Str("rpc", "commit").
-					Int("index", heartbeat.logIndex).
-					Uint32("id", msg.ID).
-					Uint32("node", member.Cluster().ID).
-					Uint32("from", msg.Source).
-					Msg("received rpc")
-				return network.Message{
-					ID:        msg.ID,
-					Source:    member.Cluster().ID,
-					RoutingId: msg.Source,
-					Content:   member.commit(heartbeat),
-				}
-			}
+	// follower phase 2 processing logic
+	processor.Commit(func(state *network.State, storage store.Storage, msg interface{}) (interface{}, error) {
+		// for ease of use, we skip another verify at this stage
+		// we assume the leader is 'sane' in the sense that it will adhere to the protocol
+		if heartbeat, ok := msg.(ResponseRPC); ok {
+			wal := state.Log[""]
 
-			// case it s an ResponseRPC message
-			// this means we are the leader now
-			if rsp, ok := msg.Content.(ResponseRPC); ok {
-				log.Debug().
-					Str("type", "leader").
-					Str("error", fmt.Sprintf("%v ", rsp.response.Err)).
-					Uint32("id", msg.ID).
-					Uint32("node", member.Cluster().ID).
-					Uint32("from", msg.Source).
-					Msg("received response")
-				if _, ok := consensus.count[msg.ID]; !ok {
-					consensus.count[msg.ID] = int(float64(members-2) * consensusThreshold)
-					consensus.trigger[msg.ID] = false
-				}
-
-				if rsp.response.Err == nil {
-					consensus.count[msg.ID]--
-					if consensus.reached(msg.ID) {
-						log.Debug().
-							Str("type", "leader").
-							Uint32("id", msg.ID).
-							Str("signal", rsp.Signal.String()).
-							Uint32("node", member.Cluster().ID).
-							Msg("received signal")
-						group <- rsp.Signal
-						consensus.trigger[msg.ID] = true
+			if stateMachine, ok := wal.(*stateMachine); ok {
+				// get all the pending entries from the state machine and commit them to the store
+				for i := state.Index; i <= heartbeat.logIndex; i++ {
+					resp := network.Execute(storage, stateMachine.states[i].cmd)
+					if resp.Err == nil {
+						stateMachine.states[i].committed = true
 					}
 				}
+
+				stateMachine.commitIndex = heartbeat.logIndex + 1
+
+				state.Log[""] = stateMachine
+
+				return ResponseRPC{
+					Signal: Commit,
+					response: network.Response{
+						Element: store.Nil,
+					},
+				}, nil
+			} else {
+				return nil, fmt.Errorf("could not retrieve state machine '%v'", reflect.TypeOf(wal))
 			}
-			// dont trigger any other events
-			return network.Void
-		})
+		} else {
+			return nil, fmt.Errorf("unexpected message received for commit action '%v'", reflect.TypeOf(msg))
+		}
+	})
+
+	processor.Confirm(func(state *network.State, storage store.Storage, msg interface{}) (interface{}, error) {
+		if heartbeat, ok := msg.(ResponseRPC); ok {
+			wal := state.Log[""]
+
+			if stateMachine, ok := wal.(*stateMachine); ok {
+				// get all the pending entries from the state machine and commit them to the store
+				for i := state.Index; i <= heartbeat.logIndex; i++ {
+					resp := network.Execute(storage, stateMachine.states[i].cmd)
+					if resp.Err == nil {
+						stateMachine.states[i].committed = true
+					}
+				}
+
+				stateMachine.commitIndex = heartbeat.logIndex + 1
+
+				state.Log[""] = stateMachine
+
+				return ResponseRPC{
+					Signal: Commit,
+					response: network.Response{
+						Element: store.Nil,
+					},
+				}, nil
+			} else {
+				return nil, fmt.Errorf("could not retrieve state machine '%v'", reflect.TypeOf(wal))
+			}
+		} else {
+			return nil, fmt.Errorf("unexpected message received for commit confirmation '%v'", reflect.TypeOf(msg))
+		}
+	})
+
+	return network.ConsensusProtocol(*processor)
+}
+
+func appendToLog(state *network.State, storage store.Storage, msg interface{}) (interface{}, error) {
+	stMachine, err := retrieveStatMachine(state)
+	if err != nil {
+		return nil, fmt.Errorf("could not retrieve state machine '%w'", err)
 	}
+	// we expect a proposal message
+	if cmd, ok := msg.(AppendRPC); ok {
+
+		err := appendRPC(stMachine, cmd)
+
+		if err != nil {
+			return nil, err
+		}
+
+		updateStateMachine(state, stMachine)
+
+		return ResponseRPC{
+			Signal:    Append,
+			HeartBeat: cmd.HeartBeat,
+			response:  network.Response{},
+		}, nil
+	} else {
+		return nil, fmt.Errorf("unexpected message received for proposal confirmation '%v'", reflect.TypeOf(msg))
+	}
+}
+
+func commitLog(state *network.State, storage store.Storage, msg interface{}) (interface{}, error) {
+	// for ease of use, we skip another verify at this stage
+	// we assume the leader is 'sane' in the sense that it will adhere to the protocol
+
+	stMachine, err := retrieveStatMachine(state)
+	if err != nil {
+		return nil, fmt.Errorf("could not retrieve state machine '%w'", err)
+	}
+
+	if heartbeat, ok := msg.(ResponseRPC); ok {
+
+		// get all the pending entries from the state machine and commit them to the store
+		for i := state.Index; i <= heartbeat.logIndex; i++ {
+			resp := network.Execute(storage, stMachine.states[i].cmd)
+			if resp.Err == nil {
+				stMachine.states[i].committed = true
+			}
+		}
+
+		stMachine.commitIndex = heartbeat.logIndex + 1
+
+		updateStateMachine(state, stMachine)
+
+		return ResponseRPC{
+			Signal: Commit,
+			response: network.Response{
+				Element: store.Nil,
+			},
+		}, nil
+	} else {
+		return nil, fmt.Errorf("unexpected message received for commit action '%v'", reflect.TypeOf(msg))
+	}
+}
+
+func appendRPC(stateMachine *stateMachine, cmd AppendRPC) error {
+	err := stateMachine.verify(cmd.HeartBeat)
+
+	if err != nil {
+		return fmt.Errorf("inconsistent node state: %w", err)
+	}
+
+	// add the new state
+	stateMachine.append(cmd)
+
+	return nil
+}
+
+func retrieveStatMachine(state *network.State) (*stateMachine, error) {
+	if _, ok := state.Log[""]; !ok {
+		state.Log[""] = newStateMachine()
+	}
+
+	wal := state.Log[""]
+	if stMachine, ok := wal.(*stateMachine); ok {
+		return stMachine, nil
+	} else {
+		return nil, fmt.Errorf("could not verify state machine: %v", reflect.TypeOf(wal))
+	}
+}
+
+func updateStateMachine(state *network.State, stMachine *stateMachine) {
+	state.Log[""] = stMachine
 }

@@ -23,7 +23,7 @@ func RaftNode(newCluster func(signal chan Signal) network.ProtocolFactory) netwo
 	signal := make(chan Signal)
 	return func(newStorage store.StorageFactory, clusterFactory network.ProtocolFactory) network.Storage {
 		return node(signal, func(signal chan Signal) network.Storage {
-			return network.SingleNode(newStorage, newCluster(signal))
+			return network.Node(newStorage, newCluster(signal))
 		})
 	}
 }
@@ -130,7 +130,7 @@ func (n *Node) processSignal(signal Signal, process func() error) error {
 		if s == signal {
 			return process()
 		} else {
-			return fmt.Errorf("unexpected signal received: %v instead of %v", s, signal)
+			return fmt.Errorf("unexpected signal received: '%v' instead of '%v'", s, signal)
 		}
 	case <-time.Tick(5 * time.Second):
 		return fmt.Errorf("could not get consensus from cluster")

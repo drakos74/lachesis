@@ -3,6 +3,8 @@ package test
 import (
 	"testing"
 
+	"github.com/rs/zerolog"
+
 	"github.com/drakos74/lachesis/store"
 	"github.com/stretchr/testify/suite"
 )
@@ -120,6 +122,8 @@ func (s *FailureRate) TestMultiConcurrentFailureRateOperations() {
 }
 
 func (s *FailureRate) Run(t *testing.T, factory func() store.Storage, limit Limit) {
+	// reduce logging
+	zerolog.SetGlobalLevel(zerolog.InfoLevel)
 	s.t = t
 	s.newStorage = factory
 	s.limit = limit
