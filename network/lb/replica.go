@@ -6,15 +6,18 @@ import (
 	"github.com/drakos74/lachesis/network"
 )
 
+// ReplicaPartition creates a switch with partition strategy that implements replicas
 func ReplicaPartition() network.Switch {
 	return &ReplicaSwitch{replicas: 3}
 }
 
+// ReplicaSwitch emulates a network switch which replicates the request to several nodes
 type ReplicaSwitch struct {
 	network.Cluster
 	replicas int
 }
 
+// Route returns the appropriate node to which the request should be routed based on the given key
 func (r ReplicaSwitch) Route(key network.Key) ([]int, error) {
 	var i big.Int
 	// convert to int

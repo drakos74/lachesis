@@ -23,15 +23,15 @@ func newFaultyNetwork(event ...network.Event) store.StorageFactory {
 		Create()
 }
 
-func testFaultyNetwork_SimpleImplementation(t *testing.T) {
+func testFaultyNetworkSimpleImplementation(t *testing.T) {
 	new(test.Consistency).Run(t, newFaultyNetwork())
 }
 
-func testFaultyNetwork_KeyValueImplementation(t *testing.T) {
+func testFaultyNetworkKeyValueImplementation(t *testing.T) {
 	new(test.ConsistencyWithMeta).Run(t, newFaultyNetwork())
 }
 
-func testFaultyNetwork_SyncImplementation(t *testing.T) {
+func testFaultyNetworkSyncImplementation(t *testing.T) {
 	new(test.Concurrency).Run(t, newFaultyNetwork())
 }
 

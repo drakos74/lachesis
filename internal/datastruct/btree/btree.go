@@ -7,12 +7,14 @@ import (
 	"github.com/drakos74/lachesis/store"
 )
 
+// BTree is a b-tree implementation of the storage interface
 type BTree struct {
 	degree int
 	length int
 	root   *node
 }
 
+// New creates a new btree storage implementation
 func New(degree int) *BTree {
 	return &BTree{
 		degree: degree,
@@ -41,14 +43,13 @@ func (t *BTree) ReplaceOrInsert(item store.Element) store.Element {
 		t.root.elements = append(t.root.elements, item)
 		t.length++
 		return store.Nil
-	} else {
-		if len(t.root.elements) >= t.maxElements() {
-			item2, second := t.root.split(t.maxElements() / 2)
-			oldroot := t.root
-			t.root = new(node)
-			t.root.elements = append(t.root.elements, item2)
-			t.root.children = append(t.root.children, oldroot, second)
-		}
+	}
+	if len(t.root.elements) >= t.maxElements() {
+		item2, second := t.root.split(t.maxElements() / 2)
+		oldroot := t.root
+		t.root = new(node)
+		t.root.elements = append(t.root.elements, item2)
+		t.root.children = append(t.root.children, oldroot, second)
 	}
 	out := t.root.insert(item, t.maxElements())
 	if store.IsNil(out) {
@@ -57,7 +58,7 @@ func (t *BTree) ReplaceOrInsert(item store.Element) store.Element {
 	return out
 }
 
-// get looks for the key item in the tree, returning it.  It returns nil if
+// Get looks for the key item in the tree, returning it.  It returns nil if
 // unable to find that item.
 func (t *BTree) Get(key store.Element) store.Element {
 	if t.root == nil {
@@ -66,6 +67,7 @@ func (t *BTree) Get(key store.Element) store.Element {
 	return t.root.get(key)
 }
 
+// Stats returns the stats of the Btree
 func (t *BTree) Stats() (count, keySize, valueSize uint64) {
 	var nodeCount uint64
 	var depth uint64

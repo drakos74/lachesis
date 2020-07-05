@@ -50,7 +50,6 @@ func Protocol() network.ProtocolFactory {
 			updateStateMachine(state, stMachine)
 
 			return ResponseRPC{
-				Signal:    Append,
 				HeartBeat: cmd.HeartBeat,
 				response:  network.Response{},
 			}, nil
@@ -81,7 +80,6 @@ func Protocol() network.ProtocolFactory {
 				state.Log[""] = stateMachine
 
 				return ResponseRPC{
-					Signal:    Append,
 					HeartBeat: cmd.HeartBeat,
 					response:  network.Response{},
 				}, nil
@@ -112,7 +110,6 @@ func Protocol() network.ProtocolFactory {
 				state.Log[""] = stateMachine
 
 				return ResponseRPC{
-					Signal: Commit,
 					response: network.Response{
 						Element: store.Nil,
 					},
@@ -141,7 +138,6 @@ func Protocol() network.ProtocolFactory {
 				state.Log[""] = stateMachine
 
 				return ResponseRPC{
-					Signal: Commit,
 					response: network.Response{
 						Element: store.Nil,
 					},

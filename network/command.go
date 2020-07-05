@@ -8,7 +8,7 @@ import (
 type CmdType int
 
 const (
-	// get represents a 'get' request
+	// Get represents a 'get' request
 	Get CmdType = iota + 1
 	// Put represents a 'put' request
 	Put

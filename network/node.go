@@ -15,7 +15,7 @@ var Void = Message{}
 type Message struct {
 	ID        uint32
 	Source    uint32
-	RoutingId uint32
+	RoutingID uint32
 	Type      MsgType
 	Signal    Signal
 	Content   interface{}
@@ -42,6 +42,7 @@ const (
 	Phase2
 )
 
+// String returns a hunaly readable string representation of the phase enum
 func (s Signal) String() string {
 	switch s {
 	case Phase1:
@@ -52,6 +53,7 @@ func (s Signal) String() string {
 	return ""
 }
 
+// MsgType represents the type of a message
 type MsgType int
 
 const (
@@ -59,12 +61,13 @@ const (
 	Propose MsgType = iota + 1
 	// Promise is the action triggered after the first phase for 1st tier nodes
 	Promise
-	// Confirm is the second phase action for 2nd tier nodes
+	// Commit is the second phase action for 2nd tier nodes
 	Commit
 	// Confirm is the final triggered after the second phase for 1st tier nodes
 	Confirm
 )
 
+// String prints a humanly readable string representation of the given message type
 func (t MsgType) String() string {
 	switch t {
 	case Propose:
@@ -79,6 +82,7 @@ func (t MsgType) String() string {
 	return ""
 }
 
+// Next returns the next message type for the response
 func (t MsgType) Next() MsgType {
 	switch t {
 	case Propose:
@@ -91,6 +95,7 @@ func (t MsgType) Next() MsgType {
 	return 0
 }
 
+// Phase returns the phase during which the current message appears in the protocol
 func (t MsgType) Phase() Signal {
 	switch t {
 	case Propose:
@@ -105,24 +110,25 @@ func (t MsgType) Phase() Signal {
 	return 0
 }
 
-type Handler struct {
-	msgType MsgType
-}
-
+// MsgProcessor bears the logic of processing a message
 type MsgProcessor func(state *State, storage store.Storage, msg interface{}) (interface{}, error)
 
+// State represents the wal of the storage node
 type State struct {
 	Index int64
 	// TODO : make this also a storage interface to be able to inject different implementations for the WAL
+	// only caveat is that the raw implementation is not enough, as we want to store an 'interface' and not raw bytes
 	Log map[string]interface{}
 }
 
+// NewStateLog creates a new state log for a node
 func NewStateLog() State {
 	return State{
 		Log: make(map[string]interface{}),
 	}
 }
 
+// Processor encapsulates all logic related to the internal cluster communication protocol
 type Processor struct {
 	Store    store.Storage
 	State    State
@@ -130,7 +136,7 @@ type Processor struct {
 	handle   map[MsgType]MsgProcessor
 }
 
-// TODO : create the processor factory
+// ProcessorFactory creates a new processor
 func ProcessorFactory(initPut func(state *State, node *StorageNode, element store.Element) (rpc interface{}, wait bool)) *Processor {
 	return &Processor{
 		initiate: initPut,
@@ -138,31 +144,37 @@ func ProcessorFactory(initPut func(state *State, node *StorageNode, element stor
 	}
 }
 
+// Propose adds a propose implementation to the processor
 func (p *Processor) Propose(handler MsgProcessor) *Processor {
 	p.handle[Propose] = handler
 	return p
 }
 
+// Promise adds a promise handler to the processor
 func (p *Processor) Promise(handler MsgProcessor) *Processor {
 	p.handle[Promise] = handler
 	return p
 }
 
+// Commit adds a commit handler to the processor
 func (p *Processor) Commit(handler MsgProcessor) *Processor {
 	p.handle[Commit] = handler
 	return p
 }
 
+// Confirm adds a confirmation handler to the processor
 func (p *Processor) Confirm(handler MsgProcessor) *Processor {
 	p.handle[Confirm] = handler
 	return p
 }
 
+// Storage adds a storage implementation to the processor
 func (p *Processor) Storage(storage store.Storage) *Processor {
 	p.Store = storage
 	return p
 }
 
+// Create creates a processor
 func (p *Processor) Create() *Processor {
 	// TODO : make checks
 	return p
@@ -289,7 +301,7 @@ func (n *StorageNode) Put(element store.Element) error {
 	return n.processor.Store.Put(element)
 }
 
-// get retrieves an element from the Storage
+// Get retrieves an element from the Storage
 func (n *StorageNode) Get(key store.Key) (store.Element, error) {
 	return n.processor.Store.Get(key)
 }

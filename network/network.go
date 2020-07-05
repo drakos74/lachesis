@@ -42,8 +42,8 @@ type Network struct {
 	cnl   func()
 }
 
-// NetworkFactory is the builder factory for a network
-type NetworkFactory struct {
+// FactoryBuilder is the builder factory for a network
+type FactoryBuilder struct {
 	router      PartitionStrategy
 	storage     store.StorageFactory
 	nodeFactory NodeFactory
@@ -53,8 +53,8 @@ type NetworkFactory struct {
 }
 
 // Factory creates a new NodeFactory
-func Factory(events ...Event) *NetworkFactory {
-	return &NetworkFactory{
+func Factory(events ...Event) *FactoryBuilder {
+	return &FactoryBuilder{
 		events:      events,
 		protocol:    NoProtocol,
 		nodeFactory: Node,
@@ -62,37 +62,37 @@ func Factory(events ...Event) *NetworkFactory {
 }
 
 // Storage specifies the underlying Storage implementation for the network
-func (f *NetworkFactory) Storage(storage store.StorageFactory) *NetworkFactory {
+func (f *FactoryBuilder) Storage(storage store.StorageFactory) *FactoryBuilder {
 	f.storage = storage
 	return f
 }
 
 // Nodes specifies the amount of nodes for the distributed network
-func (f *NetworkFactory) Nodes(parallelism int) *NetworkFactory {
+func (f *FactoryBuilder) Nodes(parallelism int) *FactoryBuilder {
 	f.parallelism = parallelism
 	return f
 }
 
 // Router specifies the routing / switch implementation to route external client requests to individual nodes
-func (f *NetworkFactory) Router(router PartitionStrategy) *NetworkFactory {
+func (f *FactoryBuilder) Router(router PartitionStrategy) *FactoryBuilder {
 	f.router = router
 	return f
 }
 
 // Protocol specifies the internal communication protocol for the network
 // i.e. how it's members communicate with each other
-func (f *NetworkFactory) Protocol(protocol ProtocolFactory) *NetworkFactory {
+func (f *FactoryBuilder) Protocol(protocol ProtocolFactory) *FactoryBuilder {
 	f.protocol = protocol
 	return f
 }
 
 // Node specifies the factory for creating new network members
-func (f *NetworkFactory) Node(nodeFactory NodeFactory) *NetworkFactory {
+func (f *FactoryBuilder) Node(nodeFactory NodeFactory) *FactoryBuilder {
 	f.nodeFactory = nodeFactory
 	return f
 }
 
-func (f *NetworkFactory) validate() {
+func (f *FactoryBuilder) validate() {
 	if f.parallelism == 0 {
 		panic("cannot create network without amount of parallelism")
 	}
@@ -114,8 +114,8 @@ func (f *NetworkFactory) validate() {
 	}
 }
 
-// create returns a functioning network implementation that can be used as a distributed Storage
-func (f *NetworkFactory) Create() store.StorageFactory {
+// Create returns a functioning network implementation that can be used as a distributed Storage
+func (f *FactoryBuilder) Create() store.StorageFactory {
 	f.validate()
 
 	return func() store.Storage {
@@ -178,7 +178,7 @@ func (f *NetworkFactory) Create() store.StorageFactory {
 					// ignore empty messages
 					if msg != Void {
 						for _, n := range nodes {
-							if msg.Source != n.Cluster().Internal.ID && (msg.RoutingId == 0 || n.Cluster().Internal.ID == msg.RoutingId) {
+							if msg.Source != n.Cluster().Internal.ID && (msg.RoutingID == 0 || n.Cluster().Internal.ID == msg.RoutingID) {
 								n.Cluster().Internal.in <- msg
 							}
 						}
@@ -259,7 +259,7 @@ func (n *Network) Put(element store.Element) error {
 
 }
 
-// get initiates a read requests to the distributed Storage
+// Get initiates a read requests to the distributed Storage
 func (n *Network) Get(key store.Key) (store.Element, error) {
 	cmd := GetCommand{key: key}
 	// emulate a network retry mechanism

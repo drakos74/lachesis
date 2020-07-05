@@ -16,7 +16,7 @@ func newPaxosNetwork(event ...network.Event) store.StorageFactory {
 		Router(lb.RandomPartition).
 		Storage(mem.CacheFactory).
 		Nodes(10).
-		Protocol(PaxosProtocol()).
+		Protocol(Protocol()).
 		Node(network.Node).
 		Create()
 }
@@ -38,18 +38,18 @@ func TestNetwork_SimpleNodeDownImplementation(t *testing.T) {
 	new(test.Consistency).Run(t, newPaxosNetwork(network.NewNodeDownEvent(0, 30)))
 }
 
-func testNetwork_SyncImplementation(t *testing.T) {
+func testNetworkSyncImplementation(t *testing.T) {
 	new(test.Concurrency).Run(t, newPaxosNetwork())
 }
 
-func testNetwork_SyncNodeDownImplementation(t *testing.T) {
+func testNetworkSyncNodeDownImplementation(t *testing.T) {
 	new(test.Concurrency).Run(t, newPaxosNetwork(network.NewNodeDownEvent(0, 30)))
 }
 
-func testNetwork_SimpleNodeDownEvent(t *testing.T) {
+func testNetworkSimpleNodeDownEvent(t *testing.T) {
 	new(test.FailureRate).Run(t, newPaxosNetwork(network.NewNodeDownEvent(3, 30)), test.Limit{})
 }
 
-func testNetwork_LeaderNodeDownEvent(t *testing.T) {
+func testNetworkLeaderNodeDownEvent(t *testing.T) {
 	new(test.FailureRate).Run(t, newPaxosNetwork(network.NewNodeDownEvent(0, 30)), test.Limit{})
 }

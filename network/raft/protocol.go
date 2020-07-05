@@ -2,25 +2,6 @@ package raft
 
 import "github.com/drakos74/lachesis/network"
 
-type Signal int
-
-const (
-	// Append represents a signal
-	Append Signal = iota + 1
-
-	Commit
-)
-
-func (s Signal) String() string {
-	switch s {
-	case Append:
-		return "append"
-	case Commit:
-		return "commit"
-	}
-	return ""
-}
-
 // Epoch represents the leader and its term according to the raft protocol definition
 type Epoch struct {
 	term     int
@@ -48,7 +29,6 @@ type AppendRPC struct {
 
 // ResponseRPC is the response object for the raft protocol
 type ResponseRPC struct {
-	Signal
 	HeartBeat
 	response network.Response
 }

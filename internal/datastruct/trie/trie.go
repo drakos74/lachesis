@@ -6,8 +6,8 @@ import (
 	"github.com/drakos74/lachesis/store"
 )
 
-// TODO : review based on theory
 // Trie is a trie structure with keys and values made of byte arrays
+// TODO : review, check implementation and flavours of Trie(s) based on the theory
 type Trie struct {
 	key   byte
 	value []byte
@@ -36,11 +36,9 @@ func (t *Trie) Commit(key []byte, value []byte) error {
 	if ok {
 		// we already have this node ...
 		return trie.Commit(key[1:], value)
-	} else {
-		// we dont have the rest of these nodes in the trie
-		return t.add(key, value)
 	}
-
+	// we dont have the rest of these nodes in the trie
+	return t.add(key, value)
 }
 
 // Read reads the value for the corresponding key
@@ -78,6 +76,7 @@ func (t *Trie) add(key []byte, value []byte) error {
 	return nil
 }
 
+// Metadata returns the internal stats for the Trie storage implementation
 func Metadata(trie *Trie) store.Metadata {
 	metadata := store.NewMetadata()
 	for _, t := range trie.tries {

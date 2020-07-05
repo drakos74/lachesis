@@ -30,7 +30,7 @@ func TestNetwork_SyncImplementation(t *testing.T) {
 	new(test.Concurrency).Run(t, newLeaderNetwork())
 }
 
-func testNetwork_SyncFailingImplementation(t *testing.T) {
+func testNetworkSyncFailingImplementation(t *testing.T) {
 	new(test.Concurrency).Run(t, newLeaderNetwork(network.NewNodeDownEvent(0, 30)))
 }
 
@@ -38,7 +38,7 @@ func TestNetwork_SimpleNodeDownEvent(t *testing.T) {
 	new(test.FailureRate).Run(t, newLeaderNetwork(network.NewNodeDownEvent(3, 30)), test.Limit{})
 }
 
-func testNetwork_LeaderNodeDownEvent(t *testing.T) {
+func testNetworkLeaderNodeDownEvent(t *testing.T) {
 	// Note : we know from the routing strategy, that the leader is always the '0th' element
 	new(test.FailureRate).Run(t, newLeaderNetwork(network.NewNodeDownEvent(0, 30)), test.Limit{})
 }

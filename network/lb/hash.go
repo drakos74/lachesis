@@ -8,18 +8,21 @@ import (
 	"github.com/drakos74/lachesis/network"
 )
 
+// ConsistentPartition creates a network switch emulator that uses consistent hashing
 func ConsistentPartition() network.Switch {
 	return &ConsistentSwitch{replicas: 3, members: make([]int, 0), hashMap: make(map[int]int)}
 }
 
 const unit = 360
 
+// ConsistentSwitch emulates a network switch based on consistent hashing logic
 type ConsistentSwitch struct {
 	replicas int
 	hashMap  map[int]int
 	members  []int
 }
 
+// Register registers a node in the cluster
 func (c *ConsistentSwitch) Register(id int) {
 	for i := 0; i < c.replicas; i++ {
 		hash := mod(byteHash([]byte(strconv.Itoa(i)+" "+string(id))), unit)
@@ -31,10 +34,12 @@ func (c *ConsistentSwitch) Register(id int) {
 	})
 }
 
+// DeRegister removes a node from the cluster
 func (c *ConsistentSwitch) DeRegister(id int) {
 	// nothing to do for now ...
 }
 
+// Route returns the nodes in the cluster that correspond to the given key
 func (c ConsistentSwitch) Route(key network.Key) ([]int, error) {
 	// convert to int
 	hash := mod(byteHash(key), unit)
@@ -63,6 +68,7 @@ func (c ConsistentSwitch) Route(key network.Key) ([]int, error) {
 	return nodes, nil
 }
 
+// Members returns all the cluster members
 func (c ConsistentSwitch) Members() []int {
 	return c.members
 }

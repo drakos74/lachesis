@@ -10,9 +10,9 @@ import (
 	"github.com/drakos74/lachesis/network"
 )
 
-// PaxosProtocol implements the internal cluster communication requirements,
+// Protocol implements the internal cluster communication requirements,
 // e.g. the proposers and acceptors interaction logic
-func PaxosProtocol() network.ProtocolFactory {
+func Protocol() network.ProtocolFactory {
 
 	processor := network.ProcessorFactory(func(state *network.State, node *network.StorageNode, element store.Element) (rpc interface{}, wait bool) {
 		index := time.Now().UnixNano()
@@ -36,9 +36,8 @@ func PaxosProtocol() network.ProtocolFactory {
 			state.Log[string(proposal.command.Element().Key)] = proposal
 			response := Promise{}
 			return response, nil
-		} else {
-			return nil, fmt.Errorf("unexpected message received for proposal confirmation '%v'", reflect.TypeOf(msg))
 		}
+		return nil, fmt.Errorf("unexpected message received for proposal confirmation '%v'", reflect.TypeOf(msg))
 	})
 
 	// leader phase1 processing logic
@@ -56,9 +55,8 @@ func PaxosProtocol() network.ProtocolFactory {
 			state.Log[string(proposal.command.Element().Key)] = proposal
 			response := Commit{key: proposal.command.Element().Key}
 			return response, nil
-		} else {
-			return nil, fmt.Errorf("unexpected message to create commit '%v'", reflect.TypeOf(msg))
 		}
+		return nil, fmt.Errorf("unexpected message to create commit '%v'", reflect.TypeOf(msg))
 	})
 
 	// follower phase 2 processing logic
@@ -68,9 +66,8 @@ func PaxosProtocol() network.ProtocolFactory {
 			entry := currentState.(Proposal)
 			network.Execute(storage, entry.command)
 			return nil, nil
-		} else {
-			return nil, fmt.Errorf("unexpected message received for commit confirmation '%v'", reflect.TypeOf(msg))
 		}
+		return nil, fmt.Errorf("unexpected message received for commit confirmation '%v'", reflect.TypeOf(msg))
 	})
 
 	processor.Confirm(func(state *network.State, storage store.Storage, msg interface{}) (interface{}, error) {
@@ -79,9 +76,8 @@ func PaxosProtocol() network.ProtocolFactory {
 			entry := currentState.(Proposal)
 			network.Execute(storage, entry.command)
 			return nil, nil
-		} else {
-			return nil, fmt.Errorf("unexpected message received for commit confirmation '%v'", reflect.TypeOf(msg))
 		}
+		return nil, fmt.Errorf("unexpected message received for commit confirmation '%v'", reflect.TypeOf(msg))
 	})
 
 	return network.ConsensusProtocol(*processor)

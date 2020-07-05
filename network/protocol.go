@@ -29,9 +29,8 @@ func (i *Internal) processSignal(signal Signal, process func() error) error {
 	case s := <-i.signal:
 		if s == signal {
 			return process()
-		} else {
-			return fmt.Errorf("unexpected signal received: '%v' instead of '%v'", s, signal)
 		}
+		return fmt.Errorf("unexpected signal received: '%v' instead of '%v'", s, signal)
 	case <-time.Tick(5 * time.Second):
 		return fmt.Errorf("could not get consensus from cluster")
 	}
@@ -114,7 +113,7 @@ func ConsensusProtocol(processor Processor) ProtocolFactory {
 				return Message{
 					ID:        msg.ID,
 					Source:    member.Cluster().ID,
-					RoutingId: msg.Source,
+					RoutingID: msg.Source,
 					Content:   response,
 					Type:      msg.Type.Next(),
 					Err:       err,
