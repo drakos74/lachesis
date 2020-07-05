@@ -11,7 +11,7 @@ import (
 )
 
 func TestBash_Put(t *testing.T) {
-	bash := BashDB{}
+	bash := DB{}
 
 	element := store.NewElement([]byte(fmt.Sprintf("key-%d", time.Now().Unix())), []byte(fmt.Sprintf("value-%d", time.Now().Unix())))
 

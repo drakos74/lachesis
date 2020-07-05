@@ -6,8 +6,11 @@ import (
 )
 
 const (
-	NoValue       = "could not find element for key %v"
-	NoIndex       = "could not find index for key %v"
+	// NoValue represents an error message string in the case where there is no value for a given key
+	NoValue = "could not find element for key %v"
+	// NoIndex represents the error message string in the case where no index was found for a given key
+	NoIndex = "could not find index for key %v"
+	// InternalError represents the error message in the case where there was an error internal to the storage implementation
 	InternalError = "could not complete operation %v for %v: %w"
 )
 
@@ -22,7 +25,10 @@ type Storage interface {
 // StorageFactory generates a storage object
 type StorageFactory func() Storage
 
+// Key identifies the byte arrays used as keys of the storage
 type Key []byte
+
+// Value identifies the byte arrays used for the values of the storage
 type Value []byte
 
 // Element is a concrete implementation of the Element interface
@@ -57,6 +63,7 @@ type Metadata struct {
 	Errors      errors
 }
 
+// NewMetadata create a new metadata struct
 func NewMetadata() Metadata {
 	return Metadata{
 		Errors: make([]error, 0),
@@ -93,26 +100,32 @@ func (err *errors) append(currentErr error) {
 
 // handle nil
 
+// NilBytes represents an empty byte array
 var NilBytes = make([]byte, 0)
 
+// Nil represents an element that has not been initialised with ay values
 var Nil = Element{}
 
+// IsNil checks if an element has not been initialised with any properties
 func IsNil(e Element) bool {
 	return len(e.Key) == 0 && len(e.Value) == 0
 }
 
 // equal
 
+// BytesEqual compares to byte arrays
 func BytesEqual(a, b []byte) bool {
 	return bytes.Compare(a, b) == 0
 }
 
+// IsEqual tests the equality of 2 elements based on their keys and values
 func IsEqual(a, b Element) bool {
 	return BytesEqual(a.Key, b.Key) && BytesEqual(a.Value, b.Value)
 }
 
 // ordering
 
+// IsLess compares to elements based on the natural ordering of their key bytes
 func IsLess(a, b Element) bool {
 	return bytes.Compare(a.Key, b.Key) < 0
 }

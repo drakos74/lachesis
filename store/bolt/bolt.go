@@ -15,10 +15,12 @@ import (
 
 const bucket = "bucket"
 
+// Store is the storage implementation backed by a bolt files store
 type Store struct {
 	db *bolt.DB
 }
 
+// Put writes an element to the bolt file storage
 func (s Store) Put(element store.Element) error {
 	return s.db.Update(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(bucket))
@@ -27,6 +29,7 @@ func (s Store) Put(element store.Element) error {
 	})
 }
 
+// Get retrieves a value from the bolt file storage based on the given key
 func (s Store) Get(key store.Key) (store.Element, error) {
 	var value []byte
 	err := s.db.View(func(tx *bolt.Tx) error {
@@ -47,6 +50,7 @@ func (s Store) Get(key store.Key) (store.Element, error) {
 	return store.NewElement(key, value), nil
 }
 
+// Metadata returns internal stats regarding the bolt file storage implementation
 func (s Store) Metadata() store.Metadata {
 	var count uint64
 	var keyBytes uint64
@@ -81,6 +85,7 @@ func (s Store) Metadata() store.Metadata {
 	}
 }
 
+// Close closes the bolt file store
 func (s Store) Close() error {
 	return s.db.Close()
 }
@@ -100,6 +105,7 @@ func newBolt(db *bolt.DB, err error) (*Store, error) {
 	return &Store{db: db}, err
 }
 
+// NewFileStore creates a new storage implementation backed by the bolt file store
 func NewFileStore(f string) (*Store, error) {
 	dir, err := os.Getwd()
 	if err != nil {
@@ -109,8 +115,8 @@ func NewFileStore(f string) (*Store, error) {
 	return newBolt(bolt.Open(fmt.Sprintf("%s.db", f), 0600, &bolt.Options{Timeout: 1 * time.Second}))
 }
 
-// BoltFileFactory generates a bolt storage implementation
-func BoltFileFactory(path string) store.StorageFactory {
+// FileFactory generates a bolt storage implementation
+func FileFactory(path string) store.StorageFactory {
 	return func() store.Storage {
 		// use nano, in order to create a new store each time (we want the tests to remain independent at this stage)
 		s, err := NewFileStore(fmt.Sprintf("%s/%v", path, time.Now().UnixNano()))

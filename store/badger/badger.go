@@ -13,10 +13,12 @@ import (
 	"github.com/dgraph-io/badger/v2"
 )
 
+// Store is the storage implementation backed by a badger store
 type Store struct {
 	db *badger.DB
 }
 
+// Put writes a key into the badger store
 func (s *Store) Put(element store.Element) error {
 	return s.db.Update(func(txn *badger.Txn) error {
 		err := txn.Set(element.Key, element.Value)
@@ -24,6 +26,7 @@ func (s *Store) Put(element store.Element) error {
 	})
 }
 
+// Get retrieves a value for the given key from the badger storage implementation
 func (s *Store) Get(key store.Key) (store.Element, error) {
 	var value []byte
 
@@ -76,6 +79,7 @@ func (s *Store) Metadata() store.Metadata {
 	}
 }
 
+// Close closes the badger storage implementation
 func (s *Store) Close() error {
 	return s.db.Close()
 }
@@ -88,8 +92,8 @@ func newBadger(db *badger.DB, err error) (*Store, error) {
 	return &Store{db: db}, nil
 }
 
-// BadgerFileFactory generates a badger file storage implementation
-func BadgerFileFactory(path string) store.StorageFactory {
+// FileFactory generates a badger file storage implementation
+func FileFactory(path string) store.StorageFactory {
 	// use nano, in order to create a new store each time (we want the tests to remain independent at this stage)
 	dir, err := os.Getwd()
 	if err != nil {
@@ -106,12 +110,13 @@ func BadgerFileFactory(path string) store.StorageFactory {
 
 }
 
+// NewMemoryStore creates a new badger memory store
 func NewMemoryStore() (*Store, error) {
 	return newBadger(badger.Open(badger.DefaultOptions("").WithInMemory(true)))
 }
 
-// BadgerMemoryFactory generates a badger in-memory storage implementation
-func BadgerMemoryFactory() store.Storage {
+// MemoryFactory generates a badger in-memory storage implementation
+func MemoryFactory() store.Storage {
 	s, err := NewMemoryStore()
 	if err != nil {
 		panic(fmt.Sprintf("error during store creation: %v", err))

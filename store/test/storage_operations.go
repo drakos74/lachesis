@@ -35,7 +35,7 @@ func VoidReadOperation(t *testing.T, storage store.Storage, checkMeta bool) {
 	assert.NoError(t, err)
 }
 
-// ReadOperation performs a read on a given key
+// IntermediateReadOperation performs a read on a given key
 // expecting the results to be the expected value
 func IntermediateReadOperation(t *testing.T, storage store.Storage, key store.Key, expectedValue store.Value) store.Element {
 
@@ -79,6 +79,8 @@ func ReadWriteOperation(t *testing.T, storage store.Storage, generator RandomFac
 	assert.NoError(t, err)
 }
 
+// ReadOverwriteOperation performs a write, read and write operation again on the same key
+// to check the overwrite feature of the given storage
 func ReadOverwriteOperation(t *testing.T, storage store.Storage, generator RandomFactory, checkMeta bool) {
 
 	element1 := generator.ElementFactory()
@@ -117,6 +119,7 @@ func ReadOverwriteOperation(t *testing.T, storage store.Storage, generator Rando
 
 const num = 1000
 
+// MultiReadWriteOperations executes multiple read and write operations
 func MultiReadWriteOperations(t *testing.T, storage store.Storage, generator RandomFactory, checkMeta bool) {
 
 	metadata := store.NewMetadata()
@@ -156,6 +159,7 @@ func MultiReadWriteOperations(t *testing.T, storage store.Storage, generator Ran
 	assert.NoError(t, err)
 }
 
+// MultiConcurrentReadWriteOperations executes multiple concurrent read and write operations
 func MultiConcurrentReadWriteOperations(t *testing.T, storage store.Storage, generator RandomFactory) {
 
 	wg := sync.WaitGroup{}
@@ -185,7 +189,7 @@ func MultiConcurrentReadWriteOperations(t *testing.T, storage store.Storage, gen
 				key := element.Key
 				result, err := storage.Get(key)
 				if err != nil {
-					panic(fmt.Sprintf("error on read: %w", err))
+					panic(fmt.Errorf("error on read: %w", err))
 				}
 				atomic.AddInt32(&r, 1)
 				wg.Done()
@@ -208,11 +212,13 @@ func MultiConcurrentReadWriteOperations(t *testing.T, storage store.Storage, gen
 
 }
 
+// Errors counts the number of errors during read and write operations
 type Errors struct {
 	write int32
 	read  int32
 }
 
+// MultiConcurrentFailureRateOperations executes multiple concurrent operations and track the amount of errors encountered
 func MultiConcurrentFailureRateOperations(t *testing.T, storage store.Storage, generator RandomFactory) (readError, writeError float64) {
 
 	wg := sync.WaitGroup{}

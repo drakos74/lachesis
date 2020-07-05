@@ -9,9 +9,9 @@ import (
 	"github.com/drakos74/lachesis/network"
 )
 
-// RaftProtocol implements the internal cluster communication requirements,
+// Protocol implements the internal cluster communication requirements,
 // e.g. the leader and followers interaction logic
-func RaftProtocol() network.ProtocolFactory {
+func Protocol() network.ProtocolFactory {
 
 	processor := network.ProcessorFactory(func(state *network.State, node *network.StorageNode, element store.Element) (rpc interface{}, wait bool) {
 		stMachine, err := retrieveStatMachine(state)
@@ -54,9 +54,8 @@ func RaftProtocol() network.ProtocolFactory {
 				HeartBeat: cmd.HeartBeat,
 				response:  network.Response{},
 			}, nil
-		} else {
-			return nil, fmt.Errorf("unexpected message received for proposal confirmation '%v'", reflect.TypeOf(msg))
 		}
+		return nil, fmt.Errorf("unexpected message received for proposal confirmation '%v'", reflect.TypeOf(msg))
 	})
 
 	// leader phase1 processing logic
@@ -86,12 +85,10 @@ func RaftProtocol() network.ProtocolFactory {
 					HeartBeat: cmd.HeartBeat,
 					response:  network.Response{},
 				}, nil
-			} else {
-				return nil, fmt.Errorf("could not retrieve state machine '%v'", reflect.TypeOf(wal))
 			}
-		} else {
-			return nil, fmt.Errorf("unexpected message received for proposal confirmation '%v'", reflect.TypeOf(msg))
+			return nil, fmt.Errorf("could not retrieve state machine '%v'", reflect.TypeOf(wal))
 		}
+		return nil, fmt.Errorf("unexpected message received for proposal confirmation '%v'", reflect.TypeOf(msg))
 	})
 
 	// follower phase 2 processing logic
@@ -120,12 +117,10 @@ func RaftProtocol() network.ProtocolFactory {
 						Element: store.Nil,
 					},
 				}, nil
-			} else {
-				return nil, fmt.Errorf("could not retrieve state machine '%v'", reflect.TypeOf(wal))
 			}
-		} else {
-			return nil, fmt.Errorf("unexpected message received for commit action '%v'", reflect.TypeOf(msg))
+			return nil, fmt.Errorf("could not retrieve state machine '%v'", reflect.TypeOf(wal))
 		}
+		return nil, fmt.Errorf("unexpected message received for commit action '%v'", reflect.TypeOf(msg))
 	})
 
 	processor.Confirm(func(state *network.State, storage store.Storage, msg interface{}) (interface{}, error) {
@@ -151,75 +146,13 @@ func RaftProtocol() network.ProtocolFactory {
 						Element: store.Nil,
 					},
 				}, nil
-			} else {
-				return nil, fmt.Errorf("could not retrieve state machine '%v'", reflect.TypeOf(wal))
 			}
-		} else {
-			return nil, fmt.Errorf("unexpected message received for commit confirmation '%v'", reflect.TypeOf(msg))
+			return nil, fmt.Errorf("could not retrieve state machine '%v'", reflect.TypeOf(wal))
 		}
+		return nil, fmt.Errorf("unexpected message received for commit confirmation '%v'", reflect.TypeOf(msg))
 	})
 
 	return network.ConsensusProtocol(*processor)
-}
-
-func appendToLog(state *network.State, storage store.Storage, msg interface{}) (interface{}, error) {
-	stMachine, err := retrieveStatMachine(state)
-	if err != nil {
-		return nil, fmt.Errorf("could not retrieve state machine '%w'", err)
-	}
-	// we expect a proposal message
-	if cmd, ok := msg.(AppendRPC); ok {
-
-		err := appendRPC(stMachine, cmd)
-
-		if err != nil {
-			return nil, err
-		}
-
-		updateStateMachine(state, stMachine)
-
-		return ResponseRPC{
-			Signal:    Append,
-			HeartBeat: cmd.HeartBeat,
-			response:  network.Response{},
-		}, nil
-	} else {
-		return nil, fmt.Errorf("unexpected message received for proposal confirmation '%v'", reflect.TypeOf(msg))
-	}
-}
-
-func commitLog(state *network.State, storage store.Storage, msg interface{}) (interface{}, error) {
-	// for ease of use, we skip another verify at this stage
-	// we assume the leader is 'sane' in the sense that it will adhere to the protocol
-
-	stMachine, err := retrieveStatMachine(state)
-	if err != nil {
-		return nil, fmt.Errorf("could not retrieve state machine '%w'", err)
-	}
-
-	if heartbeat, ok := msg.(ResponseRPC); ok {
-
-		// get all the pending entries from the state machine and commit them to the store
-		for i := state.Index; i <= heartbeat.logIndex; i++ {
-			resp := network.Execute(storage, stMachine.states[i].cmd)
-			if resp.Err == nil {
-				stMachine.states[i].committed = true
-			}
-		}
-
-		stMachine.commitIndex = heartbeat.logIndex + 1
-
-		updateStateMachine(state, stMachine)
-
-		return ResponseRPC{
-			Signal: Commit,
-			response: network.Response{
-				Element: store.Nil,
-			},
-		}, nil
-	} else {
-		return nil, fmt.Errorf("unexpected message received for commit action '%v'", reflect.TypeOf(msg))
-	}
 }
 
 func appendRPC(stateMachine *stateMachine, cmd AppendRPC) error {
@@ -243,9 +176,8 @@ func retrieveStatMachine(state *network.State) (*stateMachine, error) {
 	wal := state.Log[""]
 	if stMachine, ok := wal.(*stateMachine); ok {
 		return stMachine, nil
-	} else {
-		return nil, fmt.Errorf("could not verify state machine: %v", reflect.TypeOf(wal))
 	}
+	return nil, fmt.Errorf("could not verify state machine: %v", reflect.TypeOf(wal))
 }
 
 func updateStateMachine(state *network.State, stMachine *stateMachine) {

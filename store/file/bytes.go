@@ -56,6 +56,7 @@ func newRawConcat() concat {
 	}
 }
 
+// Concat merges 2 arrays of bytes into one
 // TODO : optimise by using append
 func Concat(size int, arrays ...[]byte) ([]byte, error) {
 	arr := make([]byte, size)

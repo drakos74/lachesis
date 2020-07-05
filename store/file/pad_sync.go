@@ -50,7 +50,7 @@ func NewSyncTreePad(path string) (*SyncScratchPad, error) {
 	}, nil
 }
 
-// SyncScratchPadFactory generates a synced file storage implementation
+// SyncTreePadFactory generates a synced file storage implementation
 func SyncTreePadFactory(path string) store.StorageFactory {
 	return func() store.Storage {
 		pad, err := NewSyncTreePad(path)

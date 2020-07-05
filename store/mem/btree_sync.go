@@ -8,6 +8,7 @@ import (
 	"github.com/google/btree"
 )
 
+// SyncBTree implements a storage based on a Btree data struct
 type SyncBTree struct {
 	*btree.BTree
 }
@@ -21,15 +22,18 @@ type item struct {
 	store.Element
 }
 
+// Less compares 2 items in terms of natural order
 func (i item) Less(than btree.Item) bool {
 	return store.IsLess(i.Element, than.(item).Element)
 }
 
+// Put stores an element in the storage for the given key
 func (s *SyncBTree) Put(element store.Element) error {
 	s.BTree.ReplaceOrInsert(item{element})
 	return nil
 }
 
+// Get returns an element based on the given key
 func (s *SyncBTree) Get(key store.Key) (store.Element, error) {
 	e := s.BTree.Get(item{store.NewElement(key, []byte{})})
 	if e == nil {
@@ -38,6 +42,7 @@ func (s *SyncBTree) Get(key store.Key) (store.Element, error) {
 	return e.(item).Element, nil
 }
 
+// Metadata returns the metadata of the given storage
 func (s *SyncBTree) Metadata() store.Metadata {
 	var count uint64
 	var keySize uint64
@@ -61,6 +66,7 @@ func (s *SyncBTree) Metadata() store.Metadata {
 	}
 }
 
+// Close shuts down the storage and performs any needed cleanup
 func (s *SyncBTree) Close() error {
 	// no need to close anything
 	return nil

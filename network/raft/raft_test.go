@@ -18,7 +18,7 @@ func newRaftNetwork(event ...network.Event) store.StorageFactory {
 		Router(lb.LeaderFollowerPartition).
 		Storage(mem.SyncCacheFactory).
 		Nodes(10).
-		Protocol(RaftProtocol()).
+		Protocol(Protocol()).
 		Node(network.Node).
 		Create()
 }

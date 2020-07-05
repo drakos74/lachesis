@@ -7,9 +7,9 @@ import (
 )
 
 func TestBadgerFile_KeyValueImplementation(t *testing.T) {
-	new(test.ConsistencyWithMeta).Run(t, BadgerFileFactory("data"))
+	new(test.ConsistencyWithMeta).Run(t, FileFactory("data"))
 }
 
 func TestBadgerFile_SyncImplementation(t *testing.T) {
-	new(test.Concurrency).Run(t, BadgerFileFactory("data"))
+	new(test.Concurrency).Run(t, FileFactory("data"))
 }

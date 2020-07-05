@@ -11,6 +11,7 @@ import (
 // ElementFactory generates a store.Element
 type ElementFactory func() store.Element
 
+// RandomFactory is an element factory that generates random byte arrays as entries for the elements of the storage
 type RandomFactory struct {
 	ElementFactory
 	KeySize   int
@@ -64,6 +65,7 @@ func Elements(n int, generator RandomFactory) []store.Element {
 	return elements
 }
 
+// Equals is used to check equality of byte arrays
 func Equals(expected, actual []byte) error {
 	res := bytes.Compare(expected, actual)
 	if res == 0 {

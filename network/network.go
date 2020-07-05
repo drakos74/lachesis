@@ -114,7 +114,7 @@ func (f *NetworkFactory) validate() {
 	}
 }
 
-// Create returns a functioning network implementation that can be used as a distributed Storage
+// create returns a functioning network implementation that can be used as a distributed Storage
 func (f *NetworkFactory) Create() store.StorageFactory {
 	f.validate()
 
@@ -259,7 +259,7 @@ func (n *Network) Put(element store.Element) error {
 
 }
 
-// Get initiates a read requests to the distributed Storage
+// get initiates a read requests to the distributed Storage
 func (n *Network) Get(key store.Key) (store.Element, error) {
 	cmd := GetCommand{key: key}
 	// emulate a network retry mechanism

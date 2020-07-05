@@ -6,6 +6,7 @@ import (
 	"github.com/drakos74/lachesis/network"
 )
 
+// State represents the internal state of a raft node
 type State struct {
 	term      int
 	index     int64

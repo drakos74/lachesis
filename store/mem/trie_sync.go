@@ -15,7 +15,7 @@ type SyncTrie struct {
 	sync.RWMutex
 }
 
-// NewTrie creates a new Cache instance
+// NewSyncTrie creates a new Cache instance
 func NewSyncTrie() *SyncTrie {
 	return &SyncTrie{storage: trie.NewTrie(byte(' '))}
 }

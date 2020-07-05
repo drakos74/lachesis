@@ -57,7 +57,7 @@ func (t *BTree) ReplaceOrInsert(item store.Element) store.Element {
 	return out
 }
 
-// Get looks for the key item in the tree, returning it.  It returns nil if
+// get looks for the key item in the tree, returning it.  It returns nil if
 // unable to find that item.
 func (t *BTree) Get(key store.Element) store.Element {
 	if t.root == nil {

@@ -48,7 +48,7 @@ func BenchmarkSyncBTree(b *testing.B) {
 
 // BenchmarkFileStorage executes the benchmarks for the file storage
 func BenchmarkFileStorage(b *testing.B) {
-	executeBenchmarks(b, file.FileStorageFactory("testdata/file"))
+	executeBenchmarks(b, file.StorageFactory("testdata/file"))
 }
 
 // BenchmarkScratchPad executes the benchmarks for the file storage
@@ -73,17 +73,17 @@ func BenchmarkSyncTreePad(b *testing.B) {
 
 //BenchmarkMemBadger executes the benchmarks for badger in-memory store
 func BenchmarkMemBadger(b *testing.B) {
-	executeBenchmarks(b, badger.BadgerMemoryFactory)
+	executeBenchmarks(b, badger.MemoryFactory)
 }
 
 // BenchmarkFileBadger executes the benchmarks for badger file store
 func BenchmarkFileBadger(b *testing.B) {
-	executeBenchmarks(b, badger.BadgerFileFactory("testdata/badger"))
+	executeBenchmarks(b, badger.FileFactory("testdata/badger"))
 }
 
 // BenchmarkFileBolt executes the benchmarks for badger file store
 func BenchmarkFileBolt(b *testing.B) {
-	executeBenchmarks(b, bolt.BoltFileFactory("testdata/bolt"))
+	executeBenchmarks(b, bolt.FileFactory("testdata/bolt"))
 }
 
 func executeBenchmarks(b *testing.B, storageFactory func() store.Storage) {
@@ -91,11 +91,11 @@ func executeBenchmarks(b *testing.B, storageFactory func() store.Storage) {
 	// reduce logging
 	zerolog.SetGlobalLevel(zerolog.InfoLevel)
 
-	scenarios := []BenchmarkScenario{
+	scenarios := []Scenario{
 		Benchmark(Evolution().
-			Add(Limit(5)).
-			Add(Num(Pow(10))).
-			Create(),
+			add(limit(5)).
+			add(num(pow(10))).
+			create(),
 			10, 10, 20),
 	}
 
@@ -106,11 +106,11 @@ func executeBenchmarks(b *testing.B, storageFactory func() store.Storage) {
 
 }
 
-func executeBenchmark(b *testing.B, storage store.Storage, scenario BenchmarkScenario, execution ...benchmarkExecution) {
+func executeBenchmark(b *testing.B, storage store.Storage, scenario Scenario, execution ...benchmarkExecution) {
 
-	for scenario.Next() {
+	for scenario.next() {
 
-		currentScenario := scenario.Get()
+		currentScenario := scenario.get()
 		elements := test.Elements(currentScenario.Num, test.Random(currentScenario.KeySize, currentScenario.ValueSize))
 
 		for _, exec := range execution {

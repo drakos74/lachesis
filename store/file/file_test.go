@@ -7,5 +7,5 @@ import (
 )
 
 func TestFile_SimpleImplementation(t *testing.T) {
-	new(test.Consistency).Run(t, FileStorageFactory("data"))
+	new(test.Consistency).Run(t, StorageFactory("data"))
 }

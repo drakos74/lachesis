@@ -10,6 +10,6 @@ func TestBTree_KeyValueImplementation(t *testing.T) {
 	new(test.ConsistencyWithMeta).Run(t, BTreeFactory)
 }
 
-func testBTree_SyncImplementation(t *testing.T) {
+func testBTreeSyncImplementation(t *testing.T) {
 	new(test.Concurrency).Run(t, BTreeFactory)
 }

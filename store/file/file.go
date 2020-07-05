@@ -14,7 +14,8 @@ import (
 	"github.com/drakos74/lachesis/store"
 )
 
-type FileStorage struct {
+// Storage is the file storage implementation for the Storage interface
+type Storage struct {
 	wrFile *os.File
 	rdFile *os.File
 	// we use this to encapsulate our concatenation logic
@@ -22,7 +23,8 @@ type FileStorage struct {
 	filename string
 }
 
-func (f FileStorage) Put(element store.Element) error {
+// Put adds an element to the file storage
+func (f Storage) Put(element store.Element) error {
 	bytes, err := f.concat.join(element)
 	if err != nil {
 		return fmt.Errorf("could not serialize element '%v' %w", element, err)
@@ -37,7 +39,8 @@ func (f FileStorage) Put(element store.Element) error {
 	return nil
 }
 
-func (f FileStorage) Get(key store.Key) (store.Element, error) {
+// Get retrieves a value from the file storage based on the given key
+func (f Storage) Get(key store.Key) (store.Element, error) {
 	scanner := bufio.NewScanner(f.rdFile)
 	for scanner.Scan() {
 		result, err := f.concat.split(key, scanner.Bytes())
@@ -52,7 +55,8 @@ func (f FileStorage) Get(key store.Key) (store.Element, error) {
 	return store.Nil, fmt.Errorf(store.NoValue, key)
 }
 
-func (f FileStorage) Metadata() store.Metadata {
+// Metadata returns the internal stats of the file storage implementation
+func (f Storage) Metadata() store.Metadata {
 
 	var size uint64
 
@@ -66,7 +70,8 @@ func (f FileStorage) Metadata() store.Metadata {
 	}
 }
 
-func (f FileStorage) Close() error {
+// Close closes the files related to the storage implementation
+func (f Storage) Close() error {
 	wrErr := f.wrFile.Close()
 	rdErr := f.rdFile.Close()
 
@@ -77,8 +82,8 @@ func (f FileStorage) Close() error {
 	return nil
 }
 
-// NewFile creates a new FileStorage storage instance
-func NewFileStorage(path string) (*FileStorage, error) {
+// NewFileStorage creates a new Storage storage instance
+func NewFileStorage(path string) (*Storage, error) {
 	// generate a file name
 	fileName := fmt.Sprintf("%s/%s.%s", path, strconv.FormatInt(time.Now().UnixNano(), 10), "lac")
 	wrFile, err := os.OpenFile(fileName, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
@@ -92,11 +97,11 @@ func NewFileStorage(path string) (*FileStorage, error) {
 	log.Debug().
 		Str("filename", wrFile.Name()).
 		Msg("Open ScratchPad Storage")
-	return &FileStorage{wrFile: wrFile, rdFile: rdFile, concat: newRawConcat(), filename: fileName}, nil
+	return &Storage{wrFile: wrFile, rdFile: rdFile, concat: newRawConcat(), filename: fileName}, nil
 }
 
-// FileStorageFactory generates a file storage implementation
-func FileStorageFactory(path string) store.StorageFactory {
+// StorageFactory generates a file storage implementation
+func StorageFactory(path string) store.StorageFactory {
 	return func() store.Storage {
 		pad, err := NewFileStorage(path)
 		if err != nil {

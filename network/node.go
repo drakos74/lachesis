@@ -289,7 +289,7 @@ func (n *StorageNode) Put(element store.Element) error {
 	return n.processor.Store.Put(element)
 }
 
-// Get retrieves an element from the Storage
+// get retrieves an element from the Storage
 func (n *StorageNode) Get(key store.Key) (store.Element, error) {
 	return n.processor.Store.Get(key)
 }

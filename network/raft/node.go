@@ -8,6 +8,7 @@ import (
 	"github.com/drakos74/lachesis/store"
 )
 
+// Node represents a raft node implementation
 type Node struct {
 	msgID uint32
 	*stateMachine
@@ -15,11 +16,13 @@ type Node struct {
 	signal  chan Signal
 }
 
+// Cluster exposes the member properties of a nide
 func (n *Node) Cluster() network.Member {
 	return n.storage.Cluster()
 }
 
-func RaftNode(newCluster func(signal chan Signal) network.ProtocolFactory) network.NodeFactory {
+// NeNode creates a new raft node
+func NewNode(newCluster func(signal chan Signal) network.ProtocolFactory) network.NodeFactory {
 	signal := make(chan Signal)
 	return func(newStorage store.StorageFactory, clusterFactory network.ProtocolFactory) network.Storage {
 		return node(signal, func(signal chan Signal) network.Storage {
