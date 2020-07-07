@@ -119,13 +119,12 @@ func (f *FactoryBuilder) Create() store.StorageFactory {
 	f.validate()
 
 	return func() store.Storage {
-
 		ctx, cnl := context.WithCancel(context.Background())
-
+		// create the network router
 		route := f.router()
 
 		nodes := make([]Storage, 0)
-
+		// apply properties to the members of the network
 		for i := 0; i < f.parallelism; i++ {
 			node := f.nodeFactory(f.storage, f.protocol)
 
@@ -172,21 +171,8 @@ func (f *FactoryBuilder) Create() store.StorageFactory {
 			route.Register(len(nodes))
 			nodes = append(nodes, node)
 
-			// emulate the node internal protocol communication layer
-			go func() {
-				for msg := range node.Cluster().Internal.out {
-					// ignore empty messages
-					if msg != Void {
-						for _, n := range nodes {
-							if msg.Source != n.Cluster().Internal.ID && (msg.RoutingID == 0 || n.Cluster().Internal.ID == msg.RoutingID) {
-								n.Cluster().Internal.in <- msg
-							}
-						}
-					}
-				}
-			}()
 		}
-
+		// create the network struct
 		net := &Network{
 			Switch: route,
 			WorldClock: WorldClock{
@@ -200,21 +186,16 @@ func (f *FactoryBuilder) Create() store.StorageFactory {
 			nodes: nodes,
 			cnl:   cnl,
 		}
-
 		// listen to the world clock for external events
 		go func() {
 			for ev := range net.tock {
 				net.trigger(ev)
 			}
 		}()
-
 		// start the world clock
 		go net.WorldClock.startTicking()
-
 		return net
-
 	}
-
 }
 
 // trigger initiates an event for the network
