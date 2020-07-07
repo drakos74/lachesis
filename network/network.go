@@ -245,10 +245,8 @@ func (n *Network) Put(element store.Element) error {
 		nodeResponse := <-n.nodes[id].Cluster().Operation.out
 		if nodeResponse.Err == nil {
 			// pick the non-failing response to send to the client
-			// TODO : investigate also the fail-fast approach by DeRegistering parallelism
 			response = nodeResponse
 		} else {
-			// TODO : track these events differently
 			log.Info().Str("Type", "ERROR").Msg(fmt.Sprintf("node %d returned an error = %v", id, nodeResponse.Err))
 		}
 	}
@@ -310,7 +308,6 @@ func (n *Network) Metadata() store.Metadata {
 	for i, node := range n.nodes {
 		node.Cluster().Meta.in <- struct{}{}
 		meta := <-node.Cluster().Meta.out
-		// TODO : expose differently
 		log.Info().Str("Type", "META").Msg(fmt.Sprintf("%v meta = %v", i, meta))
 		metadata.Merge(meta)
 		counts[i] = float64(meta.Size)

@@ -148,7 +148,6 @@ func ConsensusProtocol(processor Processor) ProtocolFactory {
 					}
 				} else {
 					log.Err(msg.Err).Msg("cannot read consensus response")
-					// TODO : return the error
 				}
 			}
 

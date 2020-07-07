@@ -21,7 +21,6 @@ func newConsistentNetwork(event ...network.Event) store.StorageFactory {
 }
 
 // fixed failure condition with consistent hashing network
-// TODO : improve distribution metric
 func TestConsistentNetwork_Failure_Resilience(t *testing.T) {
 	new(test.Consistency).Run(t, newConsistentNetwork(network.NewNodeDownEvent(5, 30)))
 }
