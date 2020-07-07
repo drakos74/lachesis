@@ -93,7 +93,6 @@ func (m *Metadata) Error(err error) {
 
 type errors []error
 
-// TODO : test
 func (err *errors) append(currentErr error) {
 	*err = append(*err, currentErr)
 }

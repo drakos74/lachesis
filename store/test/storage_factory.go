@@ -53,8 +53,6 @@ func RandomValue(keySize, valueSize int) RandomFactory {
 	}
 }
 
-// TODO : sequential key factory , to assert ordered key structs
-
 // Elements will create the given number of elements with the provided factory
 // it will return the elements in a slice
 func Elements(n int, generator RandomFactory) []store.Element {

@@ -169,8 +169,6 @@ func MultiConcurrentReadWriteOperations(t *testing.T, storage store.Storage, gen
 
 		wg.Add(1)
 
-		// TODO : try to make this linear
-		// each element cycle is done in a different routine to generator more contention
 		go func(storage store.Storage) {
 			element := generator.ElementFactory()
 
@@ -231,8 +229,6 @@ func MultiConcurrentFailureRateOperations(t *testing.T, storage store.Storage, g
 
 		wg.Add(1)
 
-		// TODO : try to make this linear
-		// each element cycle is done in a different routine to generate more contention
 		go func(storage store.Storage) {
 			element := generator.ElementFactory()
 
@@ -288,10 +284,10 @@ func MultiConcurrentFailureRateOperations(t *testing.T, storage store.Storage, g
 
 }
 
-func assertMeta(t *testing.T, size, keysSize, vaLuesSize uint64, meta store.Metadata) {
+func assertMeta(t *testing.T, size, keysSize, valuesSize uint64, meta store.Metadata) {
 	assert.Equal(t, size, meta.Size)
 	// TODO : assert on the volume of the store
 	//assert.Equal(t, keysSize, meta.KeysBytes)
-	//assert.Equal(t, vaLuesSize, meta.ValuesBytes)
+	//assert.Equal(t, valuesSize, meta.ValuesBytes)
 	assert.Equal(t, 0, len(meta.Errors))
 }

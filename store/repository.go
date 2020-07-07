@@ -52,7 +52,6 @@ func (repo *Repository) Get(k interface{}) (KV, error) {
 	if err != nil {
 		return KV{}, fmt.Errorf("could not encode key %v: %w", k, err)
 	}
-	// TODO : fix this
 	element, err := repo.storage.Get(key.Key)
 	if err != nil {
 		return KV{}, fmt.Errorf("could not retrieve element for key %v: %w", k, err)
