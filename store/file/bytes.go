@@ -7,7 +7,6 @@ import (
 	"github.com/drakos74/lachesis/store"
 )
 
-// TODO :  make it simpler , if there is no other use fot it
 // Serializer converts an element into a consistent byte representation by merging the key and value
 type join func(element store.Element) ([]byte, error)
 

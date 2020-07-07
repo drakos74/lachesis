@@ -71,7 +71,6 @@ func (s *Store) Metadata() store.Metadata {
 		println(fmt.Sprintf("err = %v", err))
 	}
 
-	// TODO : add also sizes ...
 	return store.Metadata{
 		Size:        count,
 		KeysBytes:   keySize,
