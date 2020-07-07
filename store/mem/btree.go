@@ -3,7 +3,7 @@ package mem
 import (
 	"fmt"
 
-	"github.com/drakos74/lachesis/internal/datastruct/btree"
+	"github.com/drakos74/lachesis/datastruct/btree"
 	"github.com/drakos74/lachesis/store"
 )
 

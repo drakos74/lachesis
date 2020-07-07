@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/drakos74/lachesis/internal/datastruct/trie"
+	"github.com/drakos74/lachesis/datastruct/trie"
 	"github.com/drakos74/lachesis/store"
 )
 
