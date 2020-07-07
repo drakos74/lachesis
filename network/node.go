@@ -1,8 +1,6 @@
 package network
 
 import (
-	"fmt"
-
 	"github.com/drakos74/lachesis/store"
 	"github.com/google/uuid"
 )
@@ -17,7 +15,6 @@ type Message struct {
 	Source    uint32
 	RoutingID uint32
 	Type      MsgType
-	Signal    Signal
 	Content   interface{}
 	Err       error
 }
@@ -32,83 +29,8 @@ type Member struct {
 	*Internal
 }
 
-// Signal helps the nodes gather and synchronise amongst each other
-type Signal int
-
-const (
-	// Phase1 represents a signal that confirms the first phase completion of the communication protocol
-	Phase1 Signal = iota + 1
-	// Phase2 represents a signal that confirms the second phase completion of the communication protocol
-	Phase2
-)
-
-// String returns a hunaly readable string representation of the phase enum
-func (s Signal) String() string {
-	switch s {
-	case Phase1:
-		return "prepare"
-	case Phase2:
-		return "Confirm"
-	}
-	return ""
-}
-
 // MsgType represents the type of a message
 type MsgType int
-
-const (
-	// Propose is the first phase action for 2nd tier nodes
-	Propose MsgType = iota + 1
-	// Promise is the action triggered after the first phase for 1st tier nodes
-	Promise
-	// Commit is the second phase action for 2nd tier nodes
-	Commit
-	// Confirm is the final triggered after the second phase for 1st tier nodes
-	Confirm
-)
-
-// String prints a humanly readable string representation of the given message type
-func (t MsgType) String() string {
-	switch t {
-	case Propose:
-		return "propose"
-	case Promise:
-		return "promise"
-	case Commit:
-		return "Confirm"
-	case Confirm:
-		return "confirm"
-	}
-	return ""
-}
-
-// Next returns the next message type for the response
-func (t MsgType) Next() MsgType {
-	switch t {
-	case Propose:
-		return Promise
-	case Promise:
-		return Commit
-	case Commit:
-		return Confirm
-	}
-	return 0
-}
-
-// Phase returns the phase during which the current message appears in the protocol
-func (t MsgType) Phase() Signal {
-	switch t {
-	case Propose:
-		fallthrough
-	case Promise:
-		return Phase1
-	case Commit:
-		fallthrough
-	case Confirm:
-		return Phase2
-	}
-	return 0
-}
 
 // MsgProcessor bears the logic of processing a message
 type MsgProcessor func(state *State, storage store.Storage, msg interface{}) (interface{}, error)
@@ -142,30 +64,6 @@ func ProcessorFactory(initPut func(state *State, node *StorageNode, element stor
 		initiate: initPut,
 		handle:   make(map[MsgType]MsgProcessor),
 	}
-}
-
-// Propose adds a propose implementation to the processor
-func (p *Processor) Propose(handler MsgProcessor) *Processor {
-	p.handle[Propose] = handler
-	return p
-}
-
-// Promise adds a promise handler to the processor
-func (p *Processor) Promise(handler MsgProcessor) *Processor {
-	p.handle[Promise] = handler
-	return p
-}
-
-// Commit adds a commit handler to the processor
-func (p *Processor) Commit(handler MsgProcessor) *Processor {
-	p.handle[Commit] = handler
-	return p
-}
-
-// Confirm adds a confirmation handler to the processor
-func (p *Processor) Confirm(handler MsgProcessor) *Processor {
-	p.handle[Confirm] = handler
-	return p
 }
 
 // Storage adds a storage implementation to the processor
@@ -267,37 +165,6 @@ func Execute(storage store.Storage, cmd Command) Response {
 
 // Put writes an element to the Storage
 func (n *StorageNode) Put(element store.Element) error {
-
-	cmd, wait := n.Peer.initPut(n, element)
-
-	if wait {
-		n.msgID++
-		msg := Message{ID: n.msgID, Type: Propose, Source: n.Cluster().ID, Content: cmd}
-		n.Cluster().Internal.Send(msg)
-
-		var cmt interface{}
-		err := n.processSignal(Phase1, func() error {
-			var err error
-			cmt, err = n.Peer.getProcessor(Promise)(&n.Peer.processor.State, n.Peer.processor.Store, msg.Content)
-			if err != nil {
-				return fmt.Errorf("could not apply phase1 action: %w", err)
-			}
-			n.msgID++
-			n.Cluster().Internal.Send(Message{ID: n.msgID, Type: Commit, Source: n.Cluster().ID, Content: cmt})
-			return nil
-		})
-
-		if err != nil {
-			return fmt.Errorf("could not complete prepare phase Log: %w", err)
-		}
-
-		return n.processSignal(Phase2, func() error {
-			_, err := n.getProcessor(Confirm)(&n.Peer.processor.State, n.Peer.processor.Store, cmt)
-			return err
-		})
-	}
-	// for a decoupled cluster, we dont need the above logic,
-	// as segmentation is done at network level, we just apply the put command as per the usual
 	return n.processor.Store.Put(element)
 }
 
