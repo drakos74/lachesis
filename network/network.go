@@ -178,7 +178,8 @@ func (f *FactoryBuilder) Create() store.StorageFactory {
 					// ignore empty messages
 					if msg != Void {
 						for _, n := range nodes {
-							if msg.Source != n.Cluster().Internal.ID && (msg.RoutingID == 0 || n.Cluster().Internal.ID == msg.RoutingID) {
+							if msg.Source != n.Cluster().Internal.ID && (msg.RoutingID == 0 ||
+								n.Cluster().Internal.ID == msg.RoutingID) {
 								n.Cluster().Internal.in <- msg
 							}
 						}
