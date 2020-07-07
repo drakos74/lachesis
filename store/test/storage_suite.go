@@ -14,7 +14,7 @@ type Suite struct {
 	suite.Suite
 	t          *testing.T
 	limit      Limit
-	newStorage func() store.Storage
+	newStorage store.StorageFactory
 }
 
 // Limit is used for asserting counts on read and write operations

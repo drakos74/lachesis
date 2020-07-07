@@ -67,10 +67,8 @@ func ReadWriteOperation(t *testing.T, storage store.Storage, generator RandomFac
 	assert.Equal(t, element, savedElement)
 
 	if checkMeta {
-		// check the metadata
 		assertMeta(t, 1, uint64(generator.KeySize), uint64(generator.ValueSize), storage.Metadata())
 	} else {
-		// print just the metadata
 		log.Info().Msg(fmt.Sprintf("metadata = %v", storage.Metadata()))
 	}
 

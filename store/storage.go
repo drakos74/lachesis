@@ -22,9 +22,6 @@ type Storage interface {
 	Close() error
 }
 
-// StorageFactory generates a storage object
-type StorageFactory func() Storage
-
 // Key identifies the byte arrays used as keys of the storage
 type Key []byte
 
@@ -36,6 +33,9 @@ type Element struct {
 	Key
 	Value
 }
+
+// StorageFactory generates a storage object
+type StorageFactory func() Storage
 
 // String returns a readable representation of an Element
 func String(e Element) string {
