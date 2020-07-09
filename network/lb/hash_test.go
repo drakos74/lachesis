@@ -27,5 +27,5 @@ func TestConsistentNetwork_Failure_Resilience(t *testing.T) {
 }
 
 func TestConsistentNetwork_NodeDownEventFailureRate(t *testing.T) {
-	new(test.FailureRate).Run(t, newConsistentNetwork(network.NewNodeDownEvent(5, 30)), test.Limit{})
+	new(test.FailureRate).Run(t, newConsistentNetwork(network.NewNodeDownEvent(0, 30)), test.Limit{})
 }

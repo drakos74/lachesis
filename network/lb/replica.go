@@ -8,13 +8,17 @@ import (
 
 // ReplicaPartition creates a switch with partition strategy that implements replicas
 func ReplicaPartition() network.Switch {
-	return &ReplicaSwitch{replicas: 3}
+	return &ReplicaSwitch{}
 }
 
 // ReplicaSwitch emulates a network switch which replicates the request to several nodes
 type ReplicaSwitch struct {
 	network.Cluster
-	replicas int
+}
+
+// DeRegister removes a node from the cluster
+func (c *ReplicaSwitch) DeRegister(id int) {
+	// do nothing
 }
 
 // Route returns the appropriate node to which the request should be routed based on the given key

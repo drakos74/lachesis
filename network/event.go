@@ -61,7 +61,7 @@ func (u *NodeDown) Route(key Key) ([]int, error) {
 	ids, err := u.Switch.Route(key)
 	liveIds := make([]int, 0)
 	for _, id := range ids {
-		if u.index >= 0 && u.index == id && u.iterations < u.duration {
+		if u.index >= 0 && u.index == id && (u.duration == 0 || u.iterations < u.duration) {
 			// we need to ignore this one e.g. node is down
 			u.iterations++
 		} else {

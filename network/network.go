@@ -273,7 +273,6 @@ func (n *Network) Get(key store.Key) (store.Element, error) {
 		// we emulate for now blocking communication
 		n.nodes[id].Cluster().Operation.in <- cmd
 		response = <-n.nodes[id].Cluster().Operation.out
-
 		// stop at the first successful response
 		if response.Err == nil {
 			break
