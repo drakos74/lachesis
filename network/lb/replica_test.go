@@ -28,3 +28,7 @@ func TestReplicaNetwork_Failure_Resilience(t *testing.T) {
 func TestReplicaNetwork_NodeDownEventFailureRate(t *testing.T) {
 	new(test.FailureRate).Run(t, newReplicatedNetwork(network.NewNodeDownEvent(5, 30)), test.Limit{})
 }
+
+func TestReplicaNetwork_NodeLossEventFailureRate(t *testing.T) {
+	new(test.FailureRate).Run(t, newReplicatedNetwork(network.NewNodeDownEvent(5, 0)), test.Limit{})
+}
