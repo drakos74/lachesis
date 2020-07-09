@@ -1,0 +1,106 @@
+GOROOT=/usr/local/go #gosetup
+GOPATH=/Users/drakos74/go #gosetup
+/usr/local/go/bin/go test -c -o /private/var/folders/9f/x47mxqs91ng21njz8nrt5d2m0000gq/T/___gobench_github_com_drakos74_lachesis_store_benchmark github.com/drakos74/lachesis/store/benchmark #gosetup
+/private/var/folders/9f/x47mxqs91ng21njz8nrt5d2m0000gq/T/___gobench_github_com_drakos74_lachesis_store_benchmark -test.v -test.bench . -test.run ^$ -test.cpuprofile /Users/drakos74/Library/Caches/GoLand2019.2/profiler/lachesis.f9ede8e7/benchmark' #gosetup
+goos: darwin
+goarch: amd64
+pkg: github.com/drakos74/lachesis/store/benchmark
+BenchmarkCache/*mem.Cache|put|num-objects:10|size-key:10|size-value:20|-16         	 2243074	       521 ns/op
+BenchmarkCache/*mem.Cache|get|num-objects:10|size-key:10|size-value:20|-16         	 3927606	       321 ns/op
+BenchmarkCache/*mem.Cache|put|num-objects:100|size-key:10|size-value:20|-16        	  211306	      5583 ns/op
+BenchmarkCache/*mem.Cache|get|num-objects:100|size-key:10|size-value:20|-16        	  364219	      3457 ns/op
+BenchmarkCache/*mem.Cache|put|num-objects:1000|size-key:10|size-value:20|-16       	   18496	     61996 ns/op
+BenchmarkCache/*mem.Cache|get|num-objects:1000|size-key:10|size-value:20|-16       	   28497	     43893 ns/op
+BenchmarkCache/*mem.Cache|put|num-objects:10000|size-key:10|size-value:20|-16      	    1666	    719664 ns/op
+BenchmarkCache/*mem.Cache|get|num-objects:10000|size-key:10|size-value:20|-16      	    2274	    532466 ns/op
+BenchmarkCache/*mem.Cache|put|num-objects:100000|size-key:10|size-value:20|-16     	     112	  10072647 ns/op
+BenchmarkCache/*mem.Cache|get|num-objects:100000|size-key:10|size-value:20|-16     	     145	   8365492 ns/op
+BenchmarkCache/*mem.Cache|put|num-objects:1000000|size-key:10|size-value:20|-16    	       7	 179654873 ns/op
+BenchmarkCache/*mem.Cache|get|num-objects:1000000|size-key:10|size-value:20|-16    	       7	 157763269 ns/op
+BenchmarkCache/*mem.Cache|put|num-objects:1000|size-key:4|size-value:100|-16       	   16677	     72265 ns/op
+BenchmarkCache/*mem.Cache|get|num-objects:1000|size-key:4|size-value:100|-16       	   19922	     61705 ns/op
+BenchmarkCache/*mem.Cache|put|num-objects:1000|size-key:8|size-value:100|-16       	   17151	     70746 ns/op
+BenchmarkCache/*mem.Cache|get|num-objects:1000|size-key:8|size-value:100|-16       	   20427	     61021 ns/op
+BenchmarkCache/*mem.Cache|put|num-objects:1000|size-key:12|size-value:100|-16      	   15543	     78156 ns/op
+BenchmarkCache/*mem.Cache|get|num-objects:1000|size-key:12|size-value:100|-16      	   19380	     62948 ns/op
+BenchmarkCache/*mem.Cache|put|num-objects:1000|size-key:16|size-value:100|-16      	   15468	     79368 ns/op
+BenchmarkCache/*mem.Cache|get|num-objects:1000|size-key:16|size-value:100|-16      	   20485	     58603 ns/op
+BenchmarkCache/*mem.Cache|put|num-objects:1000|size-key:20|size-value:100|-16      	   14445	     85147 ns/op
+BenchmarkCache/*mem.Cache|get|num-objects:1000|size-key:20|size-value:100|-16      	   19084	     63111 ns/op
+BenchmarkCache/*mem.Cache|put|num-objects:1000|size-key:24|size-value:100|-16      	   14468	     81735 ns/op
+BenchmarkCache/*mem.Cache|get|num-objects:1000|size-key:24|size-value:100|-16      	   19201	     63044 ns/op
+BenchmarkCache/*mem.Cache|put|num-objects:1000|size-key:28|size-value:100|-16      	   14430	     82413 ns/op
+BenchmarkCache/*mem.Cache|get|num-objects:1000|size-key:28|size-value:100|-16      	   18694	     63460 ns/op
+BenchmarkCache/*mem.Cache|put|num-objects:1000|size-key:32|size-value:100|-16      	   14601	     81110 ns/op
+BenchmarkCache/*mem.Cache|get|num-objects:1000|size-key:32|size-value:100|-16      	   18877	     62435 ns/op
+BenchmarkCache/*mem.Cache|put|num-objects:1000|size-key:36|size-value:100|-16      	   14054	     88227 ns/op
+BenchmarkCache/*mem.Cache|get|num-objects:1000|size-key:36|size-value:100|-16      	   18784	     64387 ns/op
+BenchmarkCache/*mem.Cache|put|num-objects:1000|size-key:40|size-value:100|-16      	   13294	     89135 ns/op
+BenchmarkCache/*mem.Cache|get|num-objects:1000|size-key:40|size-value:100|-16      	   18336	     64743 ns/op
+BenchmarkCache/*mem.Cache|put|num-objects:1000|size-key:16|size-value:2|-16        	   14760	     77299 ns/op
+BenchmarkCache/*mem.Cache|get|num-objects:1000|size-key:16|size-value:2|-16        	   19786	     58894 ns/op
+BenchmarkCache/*mem.Cache|put|num-objects:1000|size-key:16|size-value:4|-16        	   15668	     76343 ns/op
+BenchmarkCache/*mem.Cache|get|num-objects:1000|size-key:16|size-value:4|-16        	   20340	     60362 ns/op
+BenchmarkCache/*mem.Cache|put|num-objects:1000|size-key:16|size-value:8|-16        	   15112	     78444 ns/op
+BenchmarkCache/*mem.Cache|get|num-objects:1000|size-key:16|size-value:8|-16        	   19716	     61098 ns/op
+BenchmarkCache/*mem.Cache|put|num-objects:1000|size-key:16|size-value:16|-16       	   14804	     80985 ns/op
+BenchmarkCache/*mem.Cache|get|num-objects:1000|size-key:16|size-value:16|-16       	   19442	     63513 ns/op
+BenchmarkCache/*mem.Cache|put|num-objects:1000|size-key:16|size-value:32|-16       	   15208	     86248 ns/op
+BenchmarkCache/*mem.Cache|get|num-objects:1000|size-key:16|size-value:32|-16       	   18357	     63498 ns/op
+BenchmarkCache/*mem.Cache|put|num-objects:1000|size-key:16|size-value:64|-16       	   15151	     77285 ns/op
+BenchmarkCache/*mem.Cache|get|num-objects:1000|size-key:16|size-value:64|-16       	   19416	     64103 ns/op
+BenchmarkCache/*mem.Cache|put|num-objects:1000|size-key:16|size-value:128|-16      	   15918	     76597 ns/op
+BenchmarkCache/*mem.Cache|get|num-objects:1000|size-key:16|size-value:128|-16      	   20253	     60436 ns/op
+BenchmarkCache/*mem.Cache|put|num-objects:1000|size-key:16|size-value:256|-16      	   15799	     76724 ns/op
+BenchmarkCache/*mem.Cache|get|num-objects:1000|size-key:16|size-value:256|-16      	   20055	     60864 ns/op
+BenchmarkSyncCache/*mem.SyncCache|put|num-objects:10|size-key:10|size-value:20|-16 	  593100	      1888 ns/op
+BenchmarkSyncCache/*mem.SyncCache|get|num-objects:10|size-key:10|size-value:20|-16 	 2085289	       568 ns/op
+BenchmarkSyncCache/*mem.SyncCache|put|num-objects:100|size-key:10|size-value:20|-16         	   54432	     21622 ns/op
+BenchmarkSyncCache/*mem.SyncCache|get|num-objects:100|size-key:10|size-value:20|-16         	  179053	      6517 ns/op
+BenchmarkSyncCache/*mem.SyncCache|put|num-objects:1000|size-key:10|size-value:20|-16        	    5280	    234586 ns/op
+BenchmarkSyncCache/*mem.SyncCache|get|num-objects:1000|size-key:10|size-value:20|-16        	   17212	     69525 ns/op
+BenchmarkSyncCache/*mem.SyncCache|put|num-objects:10000|size-key:10|size-value:20|-16       	     489	   2474073 ns/op
+BenchmarkSyncCache/*mem.SyncCache|get|num-objects:10000|size-key:10|size-value:20|-16       	    1509	    784442 ns/op
+BenchmarkSyncCache/*mem.SyncCache|put|num-objects:100000|size-key:10|size-value:20|-16      	      36	  33257292 ns/op
+BenchmarkSyncCache/*mem.SyncCache|get|num-objects:100000|size-key:10|size-value:20|-16      	      90	  13077779 ns/op
+BenchmarkSyncCache/*mem.SyncCache|put|num-objects:1000000|size-key:10|size-value:20|-16     	       3	 456217913 ns/op
+BenchmarkSyncCache/*mem.SyncCache|get|num-objects:1000000|size-key:10|size-value:20|-16     	       6	 191964047 ns/op
+BenchmarkSyncCache/*mem.SyncCache|put|num-objects:1000|size-key:4|size-value:100|-16        	    4335	    282020 ns/op
+BenchmarkSyncCache/*mem.SyncCache|get|num-objects:1000|size-key:4|size-value:100|-16        	   12039	     84447 ns/op
+BenchmarkSyncCache/*mem.SyncCache|put|num-objects:1000|size-key:8|size-value:100|-16        	    4164	    286214 ns/op
+BenchmarkSyncCache/*mem.SyncCache|get|num-objects:1000|size-key:8|size-value:100|-16        	   12202	     87476 ns/op
+BenchmarkSyncCache/*mem.SyncCache|put|num-objects:1000|size-key:12|size-value:100|-16       	    4113	    282471 ns/op
+BenchmarkSyncCache/*mem.SyncCache|get|num-objects:1000|size-key:12|size-value:100|-16       	   11974	     87667 ns/op
+BenchmarkSyncCache/*mem.SyncCache|put|num-objects:1000|size-key:16|size-value:100|-16       	    4086	    284694 ns/op
+BenchmarkSyncCache/*mem.SyncCache|get|num-objects:1000|size-key:16|size-value:100|-16       	   11665	     88255 ns/op
+BenchmarkSyncCache/*mem.SyncCache|put|num-objects:1000|size-key:20|size-value:100|-16       	    4111	    295196 ns/op
+BenchmarkSyncCache/*mem.SyncCache|get|num-objects:1000|size-key:20|size-value:100|-16       	   11811	     86693 ns/op
+BenchmarkSyncCache/*mem.SyncCache|put|num-objects:1000|size-key:24|size-value:100|-16       	    4065	    286595 ns/op
+BenchmarkSyncCache/*mem.SyncCache|get|num-objects:1000|size-key:24|size-value:100|-16       	   11889	     85977 ns/op
+BenchmarkSyncCache/*mem.SyncCache|put|num-objects:1000|size-key:28|size-value:100|-16       	    4123	    289971 ns/op
+BenchmarkSyncCache/*mem.SyncCache|get|num-objects:1000|size-key:28|size-value:100|-16       	   11316	     88978 ns/op
+BenchmarkSyncCache/*mem.SyncCache|put|num-objects:1000|size-key:32|size-value:100|-16       	    4070	    287615 ns/op
+BenchmarkSyncCache/*mem.SyncCache|get|num-objects:1000|size-key:32|size-value:100|-16       	   11917	     88931 ns/op
+BenchmarkSyncCache/*mem.SyncCache|put|num-objects:1000|size-key:36|size-value:100|-16       	    3920	    294540 ns/op
+BenchmarkSyncCache/*mem.SyncCache|get|num-objects:1000|size-key:36|size-value:100|-16       	    8367	    124488 ns/op
+BenchmarkSyncCache/*mem.SyncCache|put|num-objects:1000|size-key:40|size-value:100|-16       	    4032	    290297 ns/op
+BenchmarkSyncCache/*mem.SyncCache|get|num-objects:1000|size-key:40|size-value:100|-16       	    8998	    124560 ns/op
+BenchmarkSyncCache/*mem.SyncCache|put|num-objects:1000|size-key:16|size-value:2|-16         	    4189	    281725 ns/op
+BenchmarkSyncCache/*mem.SyncCache|get|num-objects:1000|size-key:16|size-value:2|-16         	   11762	     90637 ns/op
+BenchmarkSyncCache/*mem.SyncCache|put|num-objects:1000|size-key:16|size-value:4|-16         	    4161	    289845 ns/op
+BenchmarkSyncCache/*mem.SyncCache|get|num-objects:1000|size-key:16|size-value:4|-16         	   11468	     87896 ns/op
+BenchmarkSyncCache/*mem.SyncCache|put|num-objects:1000|size-key:16|size-value:8|-16         	    4218	    276690 ns/op
+BenchmarkSyncCache/*mem.SyncCache|get|num-objects:1000|size-key:16|size-value:8|-16         	   11964	     87550 ns/op
+BenchmarkSyncCache/*mem.SyncCache|put|num-objects:1000|size-key:16|size-value:16|-16        	    4150	    285920 ns/op
+BenchmarkSyncCache/*mem.SyncCache|get|num-objects:1000|size-key:16|size-value:16|-16        	   13969	     85471 ns/op
+BenchmarkSyncCache/*mem.SyncCache|put|num-objects:1000|size-key:16|size-value:32|-16        	    4212	    279696 ns/op
+BenchmarkSyncCache/*mem.SyncCache|get|num-objects:1000|size-key:16|size-value:32|-16        	   11826	     86497 ns/op
+BenchmarkSyncCache/*mem.SyncCache|put|num-objects:1000|size-key:16|size-value:64|-16        	    4172	    281918 ns/op
+BenchmarkSyncCache/*mem.SyncCache|get|num-objects:1000|size-key:16|size-value:64|-16        	   14132	     85457 ns/op
+BenchmarkSyncCache/*mem.SyncCache|put|num-objects:1000|size-key:16|size-value:128|-16       	    4282	    282925 ns/op
+BenchmarkSyncCache/*mem.SyncCache|get|num-objects:1000|size-key:16|size-value:128|-16       	   12237	     84576 ns/op
+BenchmarkSyncCache/*mem.SyncCache|put|num-objects:1000|size-key:16|size-value:256|-16       	    4088	    284441 ns/op
+BenchmarkSyncCache/*mem.SyncCache|get|num-objects:1000|size-key:16|size-value:256|-16       	   11344	     88548 ns/op
+PASS
+
+Process finished with exit code 0
