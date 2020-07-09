@@ -10,16 +10,21 @@ import (
 
 // DB is the storage implementation backed by a simple bash script
 type DB struct {
+	path string
 }
 
 // DBFactory create a DB storage implementation
-func DBFactory() store.Storage {
-	return DB{}
+func DBFactory(path string) store.StorageFactory {
+	return func() store.Storage {
+		println(fmt.Sprintf("path = %v", path))
+		return DB{path: path}
+	}
 }
 
 // Put adds an element to the Bash store
 func (b DB) Put(element store.Element) error {
-	cmd := exec.Command("bash", fmt.Sprintf("%s%s.sh", "", "db_set"), string(element.Key), string(element.Value))
+	println(fmt.Sprintf("element = %v", element))
+	cmd := exec.Command("bash", fmt.Sprintf("%s%s.sh", b.path, "db_set"), string(element.Key), string(element.Value))
 	var out bytes.Buffer
 	cmd.Stdout = &out
 	var errOut bytes.Buffer
@@ -29,7 +34,7 @@ func (b DB) Put(element store.Element) error {
 
 // Get performs a value retrieval from th Bash store based on the given key
 func (b DB) Get(key store.Key) (store.Element, error) {
-	cmd := exec.Command("bash", fmt.Sprintf("%s%s.sh", "", "db_get"), string(key))
+	cmd := exec.Command("bash", fmt.Sprintf("%s%s.sh", b.path, "db_get"), string(key))
 	var out bytes.Buffer
 	cmd.Stdout = &out
 	var errOut bytes.Buffer
@@ -44,10 +49,11 @@ func (b DB) Get(key store.Key) (store.Element, error) {
 
 // Metadata returns the internal metadata of the given storage implementation
 func (b DB) Metadata() store.Metadata {
-	panic("implement me")
+	return store.Metadata{}
 }
 
 // Close closes the DB storage and performs any needed cleanup
 func (b DB) Close() error {
-	panic("implement me")
+	// nothing to do
+	return nil
 }
