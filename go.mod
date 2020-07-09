@@ -3,12 +3,12 @@ module github.com/drakos74/lachesis
 go 1.13
 
 require (
-	github.com/boltdb/bolt v1.3.1
-	github.com/dgraph-io/badger/v2 v2.0.3
+	gioui.org v0.0.0-20200403084947-efce78d414f3
+	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/drakos74/oremi v0.0.1
 	github.com/google/btree v1.0.0
-	github.com/google/uuid v1.1.1
+	github.com/kr/pretty v0.1.0 // indirect
 	github.com/rs/zerolog v1.17.2
-	github.com/stretchr/testify v1.4.0
-	golang.org/x/net v0.0.0-20200226121028-0de0cce0169b // indirect
-	golang.org/x/sys v0.0.0-20200124204421-9fbb57f87de9 // indirect
+	github.com/stretchr/testify v1.5.1
+	gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15 // indirect
 )
