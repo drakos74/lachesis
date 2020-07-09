@@ -13,7 +13,7 @@ import (
 
 func main() {
 
-	file := flag.String("file", "store/benchmark/results/benchmark_hashtable.txt", "bench output file")
+	file := flag.String("file", "store/benchmark/results/benchmark_indexes.txt", "bench output file")
 
 	flag.Parse()
 
