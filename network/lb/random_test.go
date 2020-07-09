@@ -36,7 +36,6 @@ func testFaultyNetworkSyncImplementation(t *testing.T) {
 }
 
 func TestFaultyNetwork_SimpleFailureRate(t *testing.T) {
-	// {"level":"info","write":"0.00","read":"90.60","time":"2020-06-28T11:45:07+02:00","message":"Error Rate"}
 	new(test.FailureRate).Run(t, newFaultyNetwork(), test.Limit{
 		Read:  0.0,
 		Write: 95.0,
