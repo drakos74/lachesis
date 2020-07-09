@@ -25,6 +25,22 @@ func BenchmarkSyncCache(b *testing.B) {
 	executeBenchmarks(b, mem.SyncCacheFactory)
 }
 
+func BenchmarkTrie(b *testing.B) {
+	executeBenchmarks(b, mem.TrieFactory)
+}
+
+func BenchmarkSyncTrie(b *testing.B) {
+	executeBenchmarks(b, mem.SyncTrieFactory)
+}
+
+func BenchmarkBTree(b *testing.B) {
+	executeBenchmarks(b, mem.BTreeFactory)
+}
+
+func BenchmarkSyncBTree(b *testing.B) {
+	executeBenchmarks(b, mem.SyncBTreeFactory)
+}
+
 func executeBenchmarks(b *testing.B, storageFactory func() store.Storage) {
 
 	// reduce logging
