@@ -16,7 +16,6 @@ func TestBash_Put(t *testing.T) {
 	element := store.NewElement([]byte(fmt.Sprintf("key-%d", time.Now().Unix())), []byte(fmt.Sprintf("value-%d", time.Now().Unix())))
 
 	err := bash.Put(element)
-	println(fmt.Sprintf("err = %v", err))
 	assert.NoError(t, err)
 
 	e, err := bash.Get(element.Key)
