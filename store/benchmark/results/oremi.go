@@ -6,6 +6,8 @@ import (
 	"log"
 	"strings"
 
+	lachesisbench "github.com/drakos74/lachesis/store/benchmark"
+
 	"gioui.org/layout"
 	"github.com/drakos74/oremi"
 	"github.com/drakos74/oremi/bench"
@@ -13,7 +15,7 @@ import (
 
 func main() {
 
-	file := flag.String("file", "store/benchmark/results/benchmark_indexes.txt", "bench output file")
+	file := flag.String("file", "store/benchmark/results/benchmark_file.txt", "bench output file")
 
 	flag.Parse()
 
@@ -48,11 +50,10 @@ func gatherBenchmarks(benchmarks bench.Benchmarks) map[string]map[string]oremi.C
 	collections["latency"] = make(map[string]oremi.Collection)
 	for label, benchmark := range graphs {
 		collections["latency"][label] = benchmark.Extract(
-			bench.Key,
+			bench.Value,
 			bench.Latency,
-			bench.Include(map[string]float64{bench.Num: 1000}),
-			bench.Exclude(map[string]float64{bench.Key: 16})).
-			Color(colors.Get(label))
+			bench.Label(lachesisbench.ValueSizeScenario),
+		).Color(colors.Get(label))
 	}
 	return collections
 }
