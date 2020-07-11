@@ -13,7 +13,7 @@ import (
 
 func main() {
 
-	file := flag.String("file", "store/benchmark/results/benchmark_indexes.txt", "bench output file")
+	file := flag.String("file", "store/benchmark/results/benchmark_file.txt", "bench output file")
 
 	flag.Parse()
 
@@ -48,7 +48,7 @@ func gatherBenchmarks(benchmarks bench.Benchmarks) map[string]map[string]oremi.C
 	collections["latency"] = make(map[string]oremi.Collection)
 	//collections["memory"] = make(map[string]oremi.Collection)
 	for label, graph := range graphs {
-		collections["latency"][label] = graph.Extract(bench.Key, bench.Latency, bench.Include(map[string]float64{bench.Num: 1000}), bench.Exclude(map[string]float64{bench.Key: 16})).
+		collections["latency"][label] = graph.Extract(bench.Key, bench.Latency, bench.Include(map[string]float64{bench.Num: 10}), bench.Exclude(map[string]float64{bench.Key: 16})).
 			Color(colors.Get(label))
 		//collections["latency"][label] = graph.Extract(bench.Value, bench.Latency, bench.Include(map[string]float64{bench.Num: 1000}), bench.Exclude(map[string]float64{bench.Value: 100})).
 		//	Color(colors.Get(label))

@@ -1,1 +1,0 @@
-file storage directory for sync-tree-pad benchmarks

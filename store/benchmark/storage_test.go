@@ -46,26 +46,30 @@ import (
 // file
 
 // BenchmarkFileStorage executes the benchmarks for the file storage
-func BenchmarkFileStorage(b *testing.B) {
-	executeBenchmarks(b, file.StorageFactory("testdata/file"))
-}
+//func BenchmarkFileStorage(b *testing.B) {
+//	executeBenchmarks(b, file.StorageFactory("testdata/file"))
+//}
 
-// BenchmarkScratchPad executes the benchmarks for the file storage
-func BenchmarkScratchPad(b *testing.B) {
+// BenchmarkTriePad executes the benchmarks for the file storage
+// with a trie for key indexing
+func BenchmarkTriePad(b *testing.B) {
 	executeBenchmarks(b, file.ScratchPadFactory("testdata/trie-pad"))
 }
 
-// BenchmarkSyncScratchPad executes the benchmarks for the thread-safe file storage
-func BenchmarkSyncScratchPad(b *testing.B) {
+// BenchmarkSyncTriePad executes the benchmarks for the thread-safe file storage
+// with a trie for key indexing
+func BenchmarkSyncTriePad(b *testing.B) {
 	executeBenchmarks(b, file.SyncScratchPadFactory("testdata/sync-trie-pad"))
 }
 
 // BenchmarkTreePad executes the benchmarks for the file storage
+// with a b-tree for key indexing
 func BenchmarkTreePad(b *testing.B) {
 	executeBenchmarks(b, file.TreePadFactory("testdata/btree-pad"))
 }
 
 // BenchmarkSyncTreePad executes the benchmarks for the thread-safe file storage
+// with a b-tree for key indexing
 func BenchmarkSyncTreePad(b *testing.B) {
 	executeBenchmarks(b, file.SyncTreePadFactory("testdata/sync-btree-pad"))
 }
@@ -92,24 +96,24 @@ func executeBenchmarks(b *testing.B, storageFactory func() store.Storage) {
 
 	scenarios := []Scenario{
 		Benchmark(Evolution().
-			add(limit(7)).
+			add(limit(5)).
 			add(num(pow(10))).
 			create(),
 			10, 4, 10),
 		Benchmark(Evolution().
-			add(limit(7)).
+			add(limit(5)).
 			add(key(pow(2))).
 			create(),
 			10, 4, 10),
 		Benchmark(Evolution().
-			add(limit(7)).
+			add(limit(5)).
 			add(key(pow(2))).
 			create(),
 			10, 4, 10),
 	}
 
-	storage := storageFactory()
 	for _, scenario := range scenarios {
+		storage := storageFactory()
 		executeBenchmark(b, storage, scenario, put, get)
 	}
 

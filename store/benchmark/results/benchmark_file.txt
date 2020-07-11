@@ -1,0 +1,271 @@
+GOROOT=/usr/local/go #gosetup
+GOPATH=/Users/drakos74/go #gosetup
+/usr/local/go/bin/go test -c -o /private/var/folders/9f/x47mxqs91ng21njz8nrt5d2m0000gq/T/___gobench_github_com_drakos74_lachesis_store_benchmark github.com/drakos74/lachesis/store/benchmark #gosetup
+/private/var/folders/9f/x47mxqs91ng21njz8nrt5d2m0000gq/T/___gobench_github_com_drakos74_lachesis_store_benchmark -test.v -test.bench . -test.run ^$ #gosetup
+goos: darwin
+goarch: amd64
+pkg: github.com/drakos74/lachesis/store/benchmark
+BenchmarkScratchPad/*file.ScratchPad|put|num-objects:10|size-key:4|size-value:10|-16         	   27175	     43875 ns/op
+BenchmarkScratchPad/*file.ScratchPad|get|num-objects:10|size-key:4|size-value:10|-16         	   70456	     16933 ns/op
+BenchmarkScratchPad/*file.ScratchPad|put|num-objects:100|size-key:4|size-value:10|-16        	    2876	    438194 ns/op
+BenchmarkScratchPad/*file.ScratchPad|get|num-objects:100|size-key:4|size-value:10|-16        	    7065	    171314 ns/op
+BenchmarkScratchPad/*file.ScratchPad|put|num-objects:1000|size-key:4|size-value:10|-16       	     285	   4331005 ns/op
+BenchmarkScratchPad/*file.ScratchPad|get|num-objects:1000|size-key:4|size-value:10|-16       	     680	   1748426 ns/op
+BenchmarkScratchPad/*file.ScratchPad|put|num-objects:10000|size-key:4|size-value:10|-16      	      22	  50424104 ns/op
+BenchmarkScratchPad/*file.ScratchPad|get|num-objects:10000|size-key:4|size-value:10|-16      	      55	  18432480 ns/op
+BenchmarkScratchPad/*file.ScratchPad|put|num-objects:100000|size-key:4|size-value:10|-16     	       3	 495996363 ns/op
+BenchmarkScratchPad/*file.ScratchPad|get|num-objects:100000|size-key:4|size-value:10|-16     	       5	 206675836 ns/op
+BenchmarkScratchPad/*file.ScratchPad|put|num-objects:10|size-key:4|size-value:10|#01-16      	   27166	     48315 ns/op
+BenchmarkScratchPad/*file.ScratchPad|get|num-objects:10|size-key:4|size-value:10|#01-16      	   69460	     16849 ns/op
+BenchmarkScratchPad/*file.ScratchPad|put|num-objects:10|size-key:8|size-value:10|-16         	   25768	     45346 ns/op
+BenchmarkScratchPad/*file.ScratchPad|get|num-objects:10|size-key:8|size-value:10|-16         	   63828	     18639 ns/op
+BenchmarkScratchPad/*file.ScratchPad|put|num-objects:10|size-key:16|size-value:10|-16        	   24927	     52670 ns/op
+BenchmarkScratchPad/*file.ScratchPad|get|num-objects:10|size-key:16|size-value:10|-16        	   53643	     21423 ns/op
+BenchmarkScratchPad/*file.ScratchPad|put|num-objects:10|size-key:32|size-value:10|-16        	   21726	     53851 ns/op
+BenchmarkScratchPad/*file.ScratchPad|get|num-objects:10|size-key:32|size-value:10|-16        	   43149	     27515 ns/op
+BenchmarkScratchPad/*file.ScratchPad|put|num-objects:10|size-key:64|size-value:10|-16        	   18476	     65547 ns/op
+BenchmarkScratchPad/*file.ScratchPad|get|num-objects:10|size-key:64|size-value:10|-16        	   27073	     43093 ns/op
+BenchmarkScratchPad/*file.ScratchPad|put|num-objects:10|size-key:4|size-value:10|#02-16      	   28137	     43002 ns/op
+BenchmarkScratchPad/*file.ScratchPad|get|num-objects:10|size-key:4|size-value:10|#02-16      	   68378	     17445 ns/op
+BenchmarkScratchPad/*file.ScratchPad|put|num-objects:10|size-key:8|size-value:10|#01-16      	   22537	     45373 ns/op
+BenchmarkScratchPad/*file.ScratchPad|get|num-objects:10|size-key:8|size-value:10|#01-16      	   63271	     18522 ns/op
+BenchmarkScratchPad/*file.ScratchPad|put|num-objects:10|size-key:16|size-value:10|#01-16     	   25552	     47303 ns/op
+BenchmarkScratchPad/*file.ScratchPad|get|num-objects:10|size-key:16|size-value:10|#01-16     	   54692	     21686 ns/op
+BenchmarkScratchPad/*file.ScratchPad|put|num-objects:10|size-key:32|size-value:10|#01-16     	   20374	     57288 ns/op
+BenchmarkScratchPad/*file.ScratchPad|get|num-objects:10|size-key:32|size-value:10|#01-16     	   42717	     27899 ns/op
+BenchmarkScratchPad/*file.ScratchPad|put|num-objects:10|size-key:64|size-value:10|#01-16     	   18330	     63477 ns/op
+BenchmarkScratchPad/*file.ScratchPad|get|num-objects:10|size-key:64|size-value:10|#01-16     	   27612	     43891 ns/op
+BenchmarkSyncScratchPad/*file.SyncScratchPad|put|num-objects:10|size-key:4|size-value:10|-16 	   27624	     49134 ns/op
+BenchmarkSyncScratchPad/*file.SyncScratchPad|get|num-objects:10|size-key:4|size-value:10|-16 	   66451	     17908 ns/op
+BenchmarkSyncScratchPad/*file.SyncScratchPad|put|num-objects:100|size-key:4|size-value:10|-16         	    2854	    444832 ns/op
+BenchmarkSyncScratchPad/*file.SyncScratchPad|get|num-objects:100|size-key:4|size-value:10|-16         	    6385	    176678 ns/op
+BenchmarkSyncScratchPad/*file.SyncScratchPad|put|num-objects:1000|size-key:4|size-value:10|-16        	     278	   5259572 ns/op
+BenchmarkSyncScratchPad/*file.SyncScratchPad|get|num-objects:1000|size-key:4|size-value:10|-16        	     686	   1858862 ns/op
+BenchmarkSyncScratchPad/*file.SyncScratchPad|put|num-objects:10000|size-key:4|size-value:10|-16       	      24	  48081630 ns/op
+BenchmarkSyncScratchPad/*file.SyncScratchPad|get|num-objects:10000|size-key:4|size-value:10|-16       	      58	  20017769 ns/op
+BenchmarkSyncScratchPad/*file.SyncScratchPad|put|num-objects:100000|size-key:4|size-value:10|-16      	       2	 526686907 ns/op
+BenchmarkSyncScratchPad/*file.SyncScratchPad|get|num-objects:100000|size-key:4|size-value:10|-16      	       5	 215295603 ns/op
+BenchmarkSyncScratchPad/*file.SyncScratchPad|put|num-objects:10|size-key:4|size-value:10|#01-16       	   26474	     49733 ns/op
+BenchmarkSyncScratchPad/*file.SyncScratchPad|get|num-objects:10|size-key:4|size-value:10|#01-16       	   64116	     17641 ns/op
+BenchmarkSyncScratchPad/*file.SyncScratchPad|put|num-objects:10|size-key:8|size-value:10|-16          	   26680	     45691 ns/op
+BenchmarkSyncScratchPad/*file.SyncScratchPad|get|num-objects:10|size-key:8|size-value:10|-16          	   60186	     19914 ns/op
+BenchmarkSyncScratchPad/*file.SyncScratchPad|put|num-objects:10|size-key:16|size-value:10|-16         	   23990	     54219 ns/op
+BenchmarkSyncScratchPad/*file.SyncScratchPad|get|num-objects:10|size-key:16|size-value:10|-16         	   54194	     22386 ns/op
+BenchmarkSyncScratchPad/*file.SyncScratchPad|put|num-objects:10|size-key:32|size-value:10|-16         	   21382	     55072 ns/op
+BenchmarkSyncScratchPad/*file.SyncScratchPad|get|num-objects:10|size-key:32|size-value:10|-16         	   41284	     29538 ns/op
+BenchmarkSyncScratchPad/*file.SyncScratchPad|put|num-objects:10|size-key:64|size-value:10|-16         	   18376	     64063 ns/op
+BenchmarkSyncScratchPad/*file.SyncScratchPad|get|num-objects:10|size-key:64|size-value:10|-16         	   26864	     43718 ns/op
+BenchmarkSyncScratchPad/*file.SyncScratchPad|put|num-objects:10|size-key:4|size-value:10|#02-16       	   27595	     47901 ns/op
+BenchmarkSyncScratchPad/*file.SyncScratchPad|get|num-objects:10|size-key:4|size-value:10|#02-16       	   66412	     18047 ns/op
+BenchmarkSyncScratchPad/*file.SyncScratchPad|put|num-objects:10|size-key:8|size-value:10|#01-16       	   26360	     47108 ns/op
+BenchmarkSyncScratchPad/*file.SyncScratchPad|get|num-objects:10|size-key:8|size-value:10|#01-16       	   60084	     19634 ns/op
+BenchmarkSyncScratchPad/*file.SyncScratchPad|put|num-objects:10|size-key:16|size-value:10|#01-16      	   25341	     47873 ns/op
+BenchmarkSyncScratchPad/*file.SyncScratchPad|get|num-objects:10|size-key:16|size-value:10|#01-16      	   54782	     22205 ns/op
+BenchmarkSyncScratchPad/*file.SyncScratchPad|put|num-objects:10|size-key:32|size-value:10|#01-16      	   21524	     60834 ns/op
+BenchmarkSyncScratchPad/*file.SyncScratchPad|get|num-objects:10|size-key:32|size-value:10|#01-16      	   41805	     28685 ns/op
+BenchmarkSyncScratchPad/*file.SyncScratchPad|put|num-objects:10|size-key:64|size-value:10|#01-16      	   18452	     65849 ns/op
+BenchmarkSyncScratchPad/*file.SyncScratchPad|get|num-objects:10|size-key:64|size-value:10|#01-16      	   28100	     43163 ns/op
+BenchmarkTreePad/*file.ScratchPad|put|num-objects:10|size-key:4|size-value:10|-16                     	   27396	     47654 ns/op
+BenchmarkTreePad/*file.ScratchPad|get|num-objects:10|size-key:4|size-value:10|-16                     	   67612	     17027 ns/op
+BenchmarkTreePad/*file.ScratchPad|put|num-objects:100|size-key:4|size-value:10|-16                    	    3067	    433893 ns/op
+BenchmarkTreePad/*file.ScratchPad|get|num-objects:100|size-key:4|size-value:10|-16                    	    6724	    193589 ns/op
+BenchmarkTreePad/*file.ScratchPad|put|num-objects:1000|size-key:4|size-value:10|-16                   	     242	   4819670 ns/op
+BenchmarkTreePad/*file.ScratchPad|get|num-objects:1000|size-key:4|size-value:10|-16                   	     576	   2077854 ns/op
+BenchmarkTreePad/*file.ScratchPad|put|num-objects:10000|size-key:4|size-value:10|-16                  	      19	  55917090 ns/op
+BenchmarkTreePad/*file.ScratchPad|get|num-objects:10000|size-key:4|size-value:10|-16                  	      52	  23045202 ns/op
+BenchmarkTreePad/*file.ScratchPad|put|num-objects:100000|size-key:4|size-value:10|-16                 	       2	 561491210 ns/op
+BenchmarkTreePad/*file.ScratchPad|get|num-objects:100000|size-key:4|size-value:10|-16                 	       4	 279842909 ns/op
+BenchmarkTreePad/*file.ScratchPad|put|num-objects:10|size-key:4|size-value:10|#01-16                  	   26846	     44667 ns/op
+BenchmarkTreePad/*file.ScratchPad|get|num-objects:10|size-key:4|size-value:10|#01-16                  	   67802	     17816 ns/op
+BenchmarkTreePad/*file.ScratchPad|put|num-objects:10|size-key:8|size-value:10|-16                     	   27121	     43367 ns/op
+BenchmarkTreePad/*file.ScratchPad|get|num-objects:10|size-key:8|size-value:10|-16                     	   68041	     17846 ns/op
+BenchmarkTreePad/*file.ScratchPad|put|num-objects:10|size-key:16|size-value:10|-16                    	   27590	     48904 ns/op
+BenchmarkTreePad/*file.ScratchPad|get|num-objects:10|size-key:16|size-value:10|-16                    	   67213	     18099 ns/op
+BenchmarkTreePad/*file.ScratchPad|put|num-objects:10|size-key:32|size-value:10|-16                    	   27181	     44886 ns/op
+BenchmarkTreePad/*file.ScratchPad|get|num-objects:10|size-key:32|size-value:10|-16                    	   64363	     18619 ns/op
+BenchmarkTreePad/*file.ScratchPad|put|num-objects:10|size-key:64|size-value:10|-16                    	   27741	     46791 ns/op
+BenchmarkTreePad/*file.ScratchPad|get|num-objects:10|size-key:64|size-value:10|-16                    	   64249	     18537 ns/op
+BenchmarkTreePad/*file.ScratchPad|put|num-objects:10|size-key:4|size-value:10|#02-16                  	   28088	     46743 ns/op
+BenchmarkTreePad/*file.ScratchPad|get|num-objects:10|size-key:4|size-value:10|#02-16                  	   71094	     17268 ns/op
+BenchmarkTreePad/*file.ScratchPad|put|num-objects:10|size-key:8|size-value:10|#01-16                  	   28147	     43988 ns/op
+BenchmarkTreePad/*file.ScratchPad|get|num-objects:10|size-key:8|size-value:10|#01-16                  	   67147	     18068 ns/op
+BenchmarkTreePad/*file.ScratchPad|put|num-objects:10|size-key:16|size-value:10|#01-16                 	   26896	     47594 ns/op
+BenchmarkTreePad/*file.ScratchPad|get|num-objects:10|size-key:16|size-value:10|#01-16                 	   64888	     18099 ns/op
+BenchmarkTreePad/*file.ScratchPad|put|num-objects:10|size-key:32|size-value:10|#01-16                 	   25754	     46987 ns/op
+BenchmarkTreePad/*file.ScratchPad|get|num-objects:10|size-key:32|size-value:10|#01-16                 	   66019	     18071 ns/op
+BenchmarkTreePad/*file.ScratchPad|put|num-objects:10|size-key:64|size-value:10|#01-16                 	   27549	     49143 ns/op
+BenchmarkTreePad/*file.ScratchPad|get|num-objects:10|size-key:64|size-value:10|#01-16                 	   63428	     19581 ns/op
+BenchmarkSyncTreePad/*file.SyncScratchPad|put|num-objects:10|size-key:4|size-value:10|-16             	   24783	     49189 ns/op
+BenchmarkSyncTreePad/*file.SyncScratchPad|get|num-objects:10|size-key:4|size-value:10|-16             	   67531	     18253 ns/op
+BenchmarkSyncTreePad/*file.SyncScratchPad|put|num-objects:100|size-key:4|size-value:10|-16            	    2379	    465351 ns/op
+BenchmarkSyncTreePad/*file.SyncScratchPad|get|num-objects:100|size-key:4|size-value:10|-16            	    6061	    198609 ns/op
+BenchmarkSyncTreePad/*file.SyncScratchPad|put|num-objects:1000|size-key:4|size-value:10|-16           	     253	   5320070 ns/op
+BenchmarkSyncTreePad/*file.SyncScratchPad|get|num-objects:1000|size-key:4|size-value:10|-16           	     566	   2168019 ns/op
+BenchmarkSyncTreePad/*file.SyncScratchPad|put|num-objects:10000|size-key:4|size-value:10|-16          	      21	  50645221 ns/op
+BenchmarkSyncTreePad/*file.SyncScratchPad|get|num-objects:10000|size-key:4|size-value:10|-16          	      52	  23822385 ns/op
+BenchmarkSyncTreePad/*file.SyncScratchPad|put|num-objects:100000|size-key:4|size-value:10|-16         	       2	 558979135 ns/op
+BenchmarkSyncTreePad/*file.SyncScratchPad|get|num-objects:100000|size-key:4|size-value:10|-16         	       4	 290179254 ns/op
+BenchmarkSyncTreePad/*file.SyncScratchPad|put|num-objects:10|size-key:4|size-value:10|#01-16          	   27103	     48858 ns/op
+BenchmarkSyncTreePad/*file.SyncScratchPad|get|num-objects:10|size-key:4|size-value:10|#01-16          	   68450	     18092 ns/op
+BenchmarkSyncTreePad/*file.SyncScratchPad|put|num-objects:10|size-key:8|size-value:10|-16             	   25005	     44734 ns/op
+BenchmarkSyncTreePad/*file.SyncScratchPad|get|num-objects:10|size-key:8|size-value:10|-16             	   66634	     18465 ns/op
+BenchmarkSyncTreePad/*file.SyncScratchPad|put|num-objects:10|size-key:16|size-value:10|-16            	   26680	     49465 ns/op
+BenchmarkSyncTreePad/*file.SyncScratchPad|get|num-objects:10|size-key:16|size-value:10|-16            	   61044	     19152 ns/op
+BenchmarkSyncTreePad/*file.SyncScratchPad|put|num-objects:10|size-key:32|size-value:10|-16            	   26277	     46669 ns/op
+BenchmarkSyncTreePad/*file.SyncScratchPad|get|num-objects:10|size-key:32|size-value:10|-16            	   63396	     18971 ns/op
+BenchmarkSyncTreePad/*file.SyncScratchPad|put|num-objects:10|size-key:64|size-value:10|-16            	   26738	     49488 ns/op
+BenchmarkSyncTreePad/*file.SyncScratchPad|get|num-objects:10|size-key:64|size-value:10|-16            	   61291	     19428 ns/op
+BenchmarkSyncTreePad/*file.SyncScratchPad|put|num-objects:10|size-key:4|size-value:10|#02-16          	   26778	     49964 ns/op
+BenchmarkSyncTreePad/*file.SyncScratchPad|get|num-objects:10|size-key:4|size-value:10|#02-16          	   60968	     18534 ns/op
+BenchmarkSyncTreePad/*file.SyncScratchPad|put|num-objects:10|size-key:8|size-value:10|#01-16          	   25400	     46347 ns/op
+BenchmarkSyncTreePad/*file.SyncScratchPad|get|num-objects:10|size-key:8|size-value:10|#01-16          	   63242	     19038 ns/op
+BenchmarkSyncTreePad/*file.SyncScratchPad|put|num-objects:10|size-key:16|size-value:10|#01-16         	   25472	     51267 ns/op
+BenchmarkSyncTreePad/*file.SyncScratchPad|get|num-objects:10|size-key:16|size-value:10|#01-16         	   64892	     18644 ns/op
+BenchmarkSyncTreePad/*file.SyncScratchPad|put|num-objects:10|size-key:32|size-value:10|#01-16         	   26641	     45443 ns/op
+BenchmarkSyncTreePad/*file.SyncScratchPad|get|num-objects:10|size-key:32|size-value:10|#01-16         	   64700	     18730 ns/op
+BenchmarkSyncTreePad/*file.SyncScratchPad|put|num-objects:10|size-key:64|size-value:10|#01-16         	   25998	     48099 ns/op
+BenchmarkSyncTreePad/*file.SyncScratchPad|get|num-objects:10|size-key:64|size-value:10|#01-16         	   61066	     19322 ns/op
+BenchmarkMemBadger/*badger.Store|put|num-objects:10|size-key:4|size-value:10|-16                      	    6928	    185190 ns/op
+BenchmarkMemBadger/*badger.Store|get|num-objects:10|size-key:4|size-value:10|-16                      	   86065	     14248 ns/op
+BenchmarkMemBadger/*badger.Store|put|num-objects:100|size-key:4|size-value:10|-16                     	     579	   1833953 ns/op
+BenchmarkMemBadger/*badger.Store|get|num-objects:100|size-key:4|size-value:10|-16                     	    7596	    159179 ns/op
+BenchmarkMemBadger/*badger.Store|put|num-objects:1000|size-key:4|size-value:10|-16                    	      64	  18556708 ns/op
+BenchmarkMemBadger/*badger.Store|get|num-objects:1000|size-key:4|size-value:10|-16                    	     744	   1646044 ns/op
+BenchmarkMemBadger/*badger.Store|put|num-objects:10000|size-key:4|size-value:10|-16                   	       6	 187813077 ns/op
+BenchmarkMemBadger/*badger.Store|get|num-objects:10000|size-key:4|size-value:10|-16                   	      63	  17569401 ns/op
+BenchmarkMemBadger/*badger.Store|put|num-objects:100000|size-key:4|size-value:10|-16                  	       1	1911309804 ns/op
+BenchmarkMemBadger/*badger.Store|get|num-objects:100000|size-key:4|size-value:10|-16                  	       5	 201504391 ns/op
+badger 2020/07/11 11:44:57 DEBUG: Storing value log head: {Fid:0 Len:0 Offset:0}
+badger 2020/07/11 11:44:57 INFO: Got compaction priority: {level:0 score:1.73 dropPrefix:[]}
+badger 2020/07/11 11:44:57 INFO: Running for level: 0
+badger 2020/07/11 11:44:58 DEBUG: LOG Compact. Added 111109 keys. Skipped 262182 keys. Iteration took: 41.01414ms
+badger 2020/07/11 11:44:58 DEBUG: Discard stats: map[]
+badger 2020/07/11 11:44:58 INFO: LOG Compact 0->1, del 1 tables, add 1 tables, took 47.176305ms
+badger 2020/07/11 11:44:58 INFO: Compaction for level: 0 DONE
+badger 2020/07/11 11:44:58 INFO: Force compaction on level 0 done
+BenchmarkMemBadger/*badger.Store|put|num-objects:10|size-key:4|size-value:10|#01-16                   	    6770	    182340 ns/op
+BenchmarkMemBadger/*badger.Store|get|num-objects:10|size-key:4|size-value:10|#01-16                   	   80053	     14521 ns/op
+BenchmarkMemBadger/*badger.Store|put|num-objects:10|size-key:8|size-value:10|-16                      	    6351	    187378 ns/op
+BenchmarkMemBadger/*badger.Store|get|num-objects:10|size-key:8|size-value:10|-16                      	   83166	     14869 ns/op
+BenchmarkMemBadger/*badger.Store|put|num-objects:10|size-key:16|size-value:10|-16                     	    6300	    186299 ns/op
+BenchmarkMemBadger/*badger.Store|get|num-objects:10|size-key:16|size-value:10|-16                     	   86038	     14001 ns/op
+BenchmarkMemBadger/*badger.Store|put|num-objects:10|size-key:32|size-value:10|-16                     	    6565	    189855 ns/op
+BenchmarkMemBadger/*badger.Store|get|num-objects:10|size-key:32|size-value:10|-16                     	   80410	     14558 ns/op
+BenchmarkMemBadger/*badger.Store|put|num-objects:10|size-key:64|size-value:10|-16                     	    6420	    184962 ns/op
+BenchmarkMemBadger/*badger.Store|get|num-objects:10|size-key:64|size-value:10|-16                     	   83007	     14914 ns/op
+badger 2020/07/11 11:45:10 DEBUG: Storing value log head: {Fid:0 Len:0 Offset:0}
+badger 2020/07/11 11:45:11 INFO: Got compaction priority: {level:0 score:1.73 dropPrefix:[]}
+badger 2020/07/11 11:45:11 INFO: Running for level: 0
+badger 2020/07/11 11:45:11 DEBUG: LOG Compact. Added 51 keys. Skipped 329060 keys. Iteration took: 28.61309ms
+badger 2020/07/11 11:45:11 DEBUG: Discard stats: map[]
+badger 2020/07/11 11:45:11 INFO: LOG Compact 0->1, del 1 tables, add 1 tables, took 28.683803ms
+badger 2020/07/11 11:45:11 INFO: Compaction for level: 0 DONE
+badger 2020/07/11 11:45:11 INFO: Force compaction on level 0 done
+BenchmarkMemBadger/*badger.Store|put|num-objects:10|size-key:4|size-value:10|#02-16                   	    6322	    181730 ns/op
+BenchmarkMemBadger/*badger.Store|get|num-objects:10|size-key:4|size-value:10|#02-16                   	   91572	     13192 ns/op
+BenchmarkMemBadger/*badger.Store|put|num-objects:10|size-key:8|size-value:10|#01-16                   	    6337	    181727 ns/op
+BenchmarkMemBadger/*badger.Store|get|num-objects:10|size-key:8|size-value:10|#01-16                   	   93936	     12908 ns/op
+BenchmarkMemBadger/*badger.Store|put|num-objects:10|size-key:16|size-value:10|#01-16                  	    6240	    183197 ns/op
+BenchmarkMemBadger/*badger.Store|get|num-objects:10|size-key:16|size-value:10|#01-16                  	   86331	     13754 ns/op
+BenchmarkMemBadger/*badger.Store|put|num-objects:10|size-key:32|size-value:10|#01-16                  	    6204	    183734 ns/op
+BenchmarkMemBadger/*badger.Store|get|num-objects:10|size-key:32|size-value:10|#01-16                  	   85660	     13985 ns/op
+BenchmarkMemBadger/*badger.Store|put|num-objects:10|size-key:64|size-value:10|#01-16                  	    6249	    188153 ns/op
+BenchmarkMemBadger/*badger.Store|get|num-objects:10|size-key:64|size-value:10|#01-16                  	   83046	     14806 ns/op
+badger 2020/07/11 11:45:23 DEBUG: Storing value log head: {Fid:0 Len:0 Offset:0}
+badger 2020/07/11 11:45:23 INFO: Got compaction priority: {level:0 score:1.73 dropPrefix:[]}
+badger 2020/07/11 11:45:23 INFO: Running for level: 0
+badger 2020/07/11 11:45:23 DEBUG: LOG Compact. Added 51 keys. Skipped 318520 keys. Iteration took: 56.666341ms
+badger 2020/07/11 11:45:23 DEBUG: Discard stats: map[]
+badger 2020/07/11 11:45:23 INFO: LOG Compact 0->1, del 1 tables, add 1 tables, took 56.751182ms
+badger 2020/07/11 11:45:23 INFO: Compaction for level: 0 DONE
+badger 2020/07/11 11:45:23 INFO: Force compaction on level 0 done
+badger 2020/07/11 11:45:23 INFO: All 0 tables opened in 0s
+BenchmarkFileBadger/*badger.Store|put|num-objects:10|size-key:4|size-value:10|-16                     	    1087	   1099305 ns/op
+BenchmarkFileBadger/*badger.Store|get|num-objects:10|size-key:4|size-value:10|-16                     	   86836	     13479 ns/op
+BenchmarkFileBadger/*badger.Store|put|num-objects:100|size-key:4|size-value:10|-16                    	     108	  11511038 ns/op
+BenchmarkFileBadger/*badger.Store|get|num-objects:100|size-key:4|size-value:10|-16                    	    8671	    146348 ns/op
+BenchmarkFileBadger/*badger.Store|put|num-objects:1000|size-key:4|size-value:10|-16                   	       9	 111613405 ns/op
+BenchmarkFileBadger/*badger.Store|get|num-objects:1000|size-key:4|size-value:10|-16                   	     800	   1494971 ns/op
+BenchmarkFileBadger/*badger.Store|put|num-objects:10000|size-key:4|size-value:10|-16                  	       1	1155986154 ns/op
+BenchmarkFileBadger/*badger.Store|get|num-objects:10000|size-key:4|size-value:10|-16                  	      79	  15054267 ns/op
+BenchmarkFileBadger/*badger.Store|put|num-objects:100000|size-key:4|size-value:10|-16                 	       1	11455077666 ns/op
+BenchmarkFileBadger/*badger.Store|get|num-objects:100000|size-key:4|size-value:10|-16                 	       6	 167272042 ns/op
+badger 2020/07/11 11:45:47 DEBUG: Storing value log head: {Fid:0 Len:34 Offset:9715581}
+badger 2020/07/11 11:45:47 INFO: Got compaction priority: {level:0 score:1.73 dropPrefix:[]}
+badger 2020/07/11 11:45:47 INFO: Running for level: 0
+badger 2020/07/11 11:45:47 DEBUG: LOG Compact. Added 111111 keys. Skipped 40070 keys. Iteration took: 52.790139ms
+badger 2020/07/11 11:45:47 DEBUG: Discard stats: map[]
+badger 2020/07/11 11:45:47 INFO: LOG Compact 0->1, del 1 tables, add 1 tables, took 81.427384ms
+badger 2020/07/11 11:45:47 INFO: Compaction for level: 0 DONE
+badger 2020/07/11 11:45:47 INFO: Force compaction on level 0 done
+badger 2020/07/11 11:45:47 INFO: All 0 tables opened in 0s
+BenchmarkFileBadger/*badger.Store|put|num-objects:10|size-key:4|size-value:10|#01-16                  	    1047	   1176835 ns/op
+BenchmarkFileBadger/*badger.Store|get|num-objects:10|size-key:4|size-value:10|#01-16                  	   80930	     13612 ns/op
+BenchmarkFileBadger/*badger.Store|put|num-objects:10|size-key:8|size-value:10|-16                     	    1076	   1163735 ns/op
+BenchmarkFileBadger/*badger.Store|get|num-objects:10|size-key:8|size-value:10|-16                     	   88282	     12756 ns/op
+BenchmarkFileBadger/*badger.Store|put|num-objects:10|size-key:16|size-value:10|-16                    	    1040	   1124306 ns/op
+BenchmarkFileBadger/*badger.Store|get|num-objects:10|size-key:16|size-value:10|-16                    	   89977	     12994 ns/op
+BenchmarkFileBadger/*badger.Store|put|num-objects:10|size-key:32|size-value:10|-16                    	    1095	   1219342 ns/op
+BenchmarkFileBadger/*badger.Store|get|num-objects:10|size-key:32|size-value:10|-16                    	   90601	     13139 ns/op
+BenchmarkFileBadger/*badger.Store|put|num-objects:10|size-key:64|size-value:10|-16                    	    1048	   1210386 ns/op
+BenchmarkFileBadger/*badger.Store|get|num-objects:10|size-key:64|size-value:10|-16                    	   88324	     13694 ns/op
+badger 2020/07/11 11:46:01 DEBUG: Storing value log head: {Fid:0 Len:33 Offset:4916201}
+badger 2020/07/11 11:46:01 INFO: Got compaction priority: {level:0 score:1.73 dropPrefix:[]}
+badger 2020/07/11 11:46:01 INFO: Running for level: 0
+badger 2020/07/11 11:46:01 DEBUG: LOG Compact. Added 51 keys. Skipped 58060 keys. Iteration took: 16.562025ms
+badger 2020/07/11 11:46:01 DEBUG: Discard stats: map[]
+badger 2020/07/11 11:46:01 INFO: LOG Compact 0->1, del 1 tables, add 1 tables, took 31.66532ms
+badger 2020/07/11 11:46:01 INFO: Compaction for level: 0 DONE
+badger 2020/07/11 11:46:01 INFO: Force compaction on level 0 done
+badger 2020/07/11 11:46:01 INFO: All 0 tables opened in 0s
+BenchmarkFileBadger/*badger.Store|put|num-objects:10|size-key:4|size-value:10|#02-16                  	    1009	   1152515 ns/op
+BenchmarkFileBadger/*badger.Store|get|num-objects:10|size-key:4|size-value:10|#02-16                  	   74284	     14433 ns/op
+BenchmarkFileBadger/*badger.Store|put|num-objects:10|size-key:8|size-value:10|#01-16                  	    1036	   1125093 ns/op
+BenchmarkFileBadger/*badger.Store|get|num-objects:10|size-key:8|size-value:10|#01-16                  	   79332	     13443 ns/op
+BenchmarkFileBadger/*badger.Store|put|num-objects:10|size-key:16|size-value:10|#01-16                 	    1030	   1120521 ns/op
+BenchmarkFileBadger/*badger.Store|get|num-objects:10|size-key:16|size-value:10|#01-16                 	   82820	     14312 ns/op
+BenchmarkFileBadger/*badger.Store|put|num-objects:10|size-key:32|size-value:10|#01-16                 	    1077	   1136857 ns/op
+BenchmarkFileBadger/*badger.Store|get|num-objects:10|size-key:32|size-value:10|#01-16                 	   77650	     13875 ns/op
+BenchmarkFileBadger/*badger.Store|put|num-objects:10|size-key:64|size-value:10|#01-16                 	    1076	   1133332 ns/op
+BenchmarkFileBadger/*badger.Store|get|num-objects:10|size-key:64|size-value:10|#01-16                 	   80679	     14549 ns/op
+badger 2020/07/11 11:46:14 DEBUG: Storing value log head: {Fid:0 Len:33 Offset:4875241}
+badger 2020/07/11 11:46:14 INFO: Got compaction priority: {level:0 score:1.73 dropPrefix:[]}
+badger 2020/07/11 11:46:14 INFO: Running for level: 0
+badger 2020/07/11 11:46:14 DEBUG: LOG Compact. Added 51 keys. Skipped 57280 keys. Iteration took: 16.923487ms
+badger 2020/07/11 11:46:14 DEBUG: Discard stats: map[]
+badger 2020/07/11 11:46:14 INFO: LOG Compact 0->1, del 1 tables, add 1 tables, took 33.366619ms
+badger 2020/07/11 11:46:14 INFO: Compaction for level: 0 DONE
+badger 2020/07/11 11:46:14 INFO: Force compaction on level 0 done
+BenchmarkFileBolt/*bolt.Store|put|num-objects:10|size-key:4|size-value:10|-16                         	       8	 131851852 ns/op
+BenchmarkFileBolt/*bolt.Store|get|num-objects:10|size-key:4|size-value:10|-16                         	  170298	      6581 ns/op
+BenchmarkFileBolt/*bolt.Store|put|num-objects:100|size-key:4|size-value:10|-16                        	       1	1340573413 ns/op
+BenchmarkFileBolt/*bolt.Store|get|num-objects:100|size-key:4|size-value:10|-16                        	   17407	     69881 ns/op
+BenchmarkFileBolt/*bolt.Store|put|num-objects:1000|size-key:4|size-value:10|-16                       	       1	15052139972 ns/op
+BenchmarkFileBolt/*bolt.Store|get|num-objects:1000|size-key:4|size-value:10|-16                       	    1340	    850605 ns/op
+BenchmarkFileBolt/*bolt.Store|put|num-objects:10000|size-key:4|size-value:10|-16                      	       1	138672721104 ns/op
+BenchmarkFileBolt/*bolt.Store|get|num-objects:10000|size-key:4|size-value:10|-16                      	     123	   9795380 ns/op
+BenchmarkFileBolt/*bolt.Store|put|num-objects:100000|size-key:4|size-value:10|-16                     	       1	1415073058096 ns/op
+BenchmarkFileBolt/*bolt.Store|get|num-objects:100000|size-key:4|size-value:10|-16                     	       9	 120752112 ns/op
+BenchmarkFileBolt/*bolt.Store|put|num-objects:10|size-key:4|size-value:10|#01-16                      	       8	 129952296 ns/op
+BenchmarkFileBolt/*bolt.Store|get|num-objects:10|size-key:4|size-value:10|#01-16                      	  161335	      6723 ns/op
+BenchmarkFileBolt/*bolt.Store|put|num-objects:10|size-key:8|size-value:10|-16                         	       9	 130546796 ns/op
+BenchmarkFileBolt/*bolt.Store|get|num-objects:10|size-key:8|size-value:10|-16                         	  165471	      6745 ns/op
+BenchmarkFileBolt/*bolt.Store|put|num-objects:10|size-key:16|size-value:10|-16                        	       8	 129439640 ns/op
+BenchmarkFileBolt/*bolt.Store|get|num-objects:10|size-key:16|size-value:10|-16                        	  172434	      6614 ns/op
+BenchmarkFileBolt/*bolt.Store|put|num-objects:10|size-key:32|size-value:10|-16                        	       8	 131741759 ns/op
+BenchmarkFileBolt/*bolt.Store|get|num-objects:10|size-key:32|size-value:10|-16                        	  165746	      6730 ns/op
+BenchmarkFileBolt/*bolt.Store|put|num-objects:10|size-key:64|size-value:10|-16                        	       8	 134158684 ns/op
+BenchmarkFileBolt/*bolt.Store|get|num-objects:10|size-key:64|size-value:10|-16                        	  159042	      6945 ns/op
+BenchmarkFileBolt/*bolt.Store|put|num-objects:10|size-key:4|size-value:10|#02-16                      	       8	 132741999 ns/op
+BenchmarkFileBolt/*bolt.Store|get|num-objects:10|size-key:4|size-value:10|#02-16                      	  163868	      6670 ns/op
+BenchmarkFileBolt/*bolt.Store|put|num-objects:10|size-key:8|size-value:10|#01-16                      	       8	 128500785 ns/op
+BenchmarkFileBolt/*bolt.Store|get|num-objects:10|size-key:8|size-value:10|#01-16                      	  175616	      6704 ns/op
+BenchmarkFileBolt/*bolt.Store|put|num-objects:10|size-key:16|size-value:10|#01-16                     	       8	 132751404 ns/op
+BenchmarkFileBolt/*bolt.Store|get|num-objects:10|size-key:16|size-value:10|#01-16                     	  167499	      6877 ns/op
+BenchmarkFileBolt/*bolt.Store|put|num-objects:10|size-key:32|size-value:10|#01-16                     	       8	 130818422 ns/op
+BenchmarkFileBolt/*bolt.Store|get|num-objects:10|size-key:32|size-value:10|#01-16                     	  158056	      6883 ns/op
+BenchmarkFileBolt/*bolt.Store|put|num-objects:10|size-key:64|size-value:10|#01-16                     	       8	 133254173 ns/op
+BenchmarkFileBolt/*bolt.Store|get|num-objects:10|size-key:64|size-value:10|#01-16                     	  165034	      6971 ns/op
+PASS
+
+Process finished with exit code 0
