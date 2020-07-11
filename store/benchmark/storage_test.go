@@ -47,28 +47,32 @@ func BenchmarkSyncBTree(b *testing.B) {
 // file
 
 // BenchmarkFileStorage executes the benchmarks for the file storage
-func BenchmarkFileStorage(b *testing.B) {
-	executeBenchmarks(b, file.StorageFactory("testdata/file"))
+//func BenchmarkFileStorage(b *testing.B) {
+//	executeBenchmarks(b, file.StorageFactory("testdata/file"))
+//}
+
+// BenchmarkTriePad executes the benchmarks for the file storage
+// with a trie for key indexing
+func BenchmarkTriePad(b *testing.B) {
+	executeBenchmarks(b, file.ScratchPadFactory("testdata/trie-pad"))
 }
 
-// BenchmarkScratchPad executes the benchmarks for the file storage
-func BenchmarkScratchPad(b *testing.B) {
-	executeBenchmarks(b, file.ScratchPadFactory("testdata/scratchpad"))
-}
-
-// BenchmarkSyncScratchPad executes the benchmarks for the thread-safe file storage
-func BenchmarkSyncScratchPad(b *testing.B) {
-	executeBenchmarks(b, file.SyncScratchPadFactory("testdata/sync-scratchpad"))
+// BenchmarkSyncTriePad executes the benchmarks for the thread-safe file storage
+// with a trie for key indexing
+func BenchmarkSyncTriePad(b *testing.B) {
+	executeBenchmarks(b, file.SyncScratchPadFactory("testdata/sync-trie-pad"))
 }
 
 // BenchmarkTreePad executes the benchmarks for the file storage
+// with a b-tree for key indexing
 func BenchmarkTreePad(b *testing.B) {
-	executeBenchmarks(b, file.TreePadFactory("testdata/treepad"))
+	executeBenchmarks(b, file.TreePadFactory("testdata/btree-pad"))
 }
 
 // BenchmarkSyncTreePad executes the benchmarks for the thread-safe file storage
+// with a b-tree for key indexing
 func BenchmarkSyncTreePad(b *testing.B) {
-	executeBenchmarks(b, file.SyncTreePadFactory("testdata/sync-treepad"))
+	executeBenchmarks(b, file.SyncTreePadFactory("testdata/sync-btree-pad"))
 }
 
 //BenchmarkMemBadger executes the benchmarks for badger in-memory store
@@ -96,11 +100,24 @@ func executeBenchmarks(b *testing.B, storageFactory func() store.Storage) {
 			add(limit(5)).
 			add(num(pow(10))).
 			create(),
-			10, 10, 20),
+			10, 4, 10). // initial values
+			Name("num-objects"),
+		Benchmark(Evolution().
+			add(limit(5)).
+			add(key(pow(2))).
+			create(),
+			10, 4, 10). // initial values
+			Name("increasing-key-size"),
+		Benchmark(Evolution().
+			add(limit(5)).
+			add(key(pow(2))).
+			create(),
+			10, 4, 10). // initial values
+			Name("increasing-value-size"),
 	}
 
-	storage := storageFactory()
 	for _, scenario := range scenarios {
+		storage := storageFactory()
 		executeBenchmark(b, storage, scenario, put, get)
 	}
 
@@ -114,7 +131,7 @@ func executeBenchmark(b *testing.B, storage store.Storage, scenario Scenario, ex
 		elements := test.Elements(currentScenario.Num, test.Random(currentScenario.KeySize, currentScenario.ValueSize))
 
 		for _, exec := range execution {
-			b.Run(fmt.Sprintf("%s|%s|num-objects:%d|size-key:%d|size-value:%d|", reflect.TypeOf(storage).String(), getFuncName(exec), scenario.Num, scenario.KeySize, scenario.ValueSize), func(b *testing.B) {
+			b.Run(fmt.Sprintf("%s|%s-%s|num-objects:%d|size-key:%d|size-value:%d|", reflect.TypeOf(storage).String(), getFuncName(exec), scenario.name, scenario.Num, scenario.KeySize, scenario.ValueSize), func(b *testing.B) {
 				for i := 0; i < b.N; i++ {
 					exec(storage, elements)
 				}
