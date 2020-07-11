@@ -17,6 +17,7 @@ type Config struct {
 
 // Scenario represents a benchmark scenario
 type Scenario struct {
+	name string
 	evolution
 	Config
 }
@@ -33,6 +34,11 @@ func Benchmark(next Evolve, num, keySize, valueSize int) Scenario {
 			ValueSize: valueSize,
 		},
 	}
+}
+
+func (s *Scenario) Name(name string) Scenario {
+	s.name = name
+	return *s
 }
 
 // next evolves the given scenario for one iteration
