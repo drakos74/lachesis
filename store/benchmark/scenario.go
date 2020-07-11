@@ -1,5 +1,13 @@
 package benchmark
 
+const (
+	KeySizeScenario     = "increasing-key-size"
+	ValueSizeScenario   = "increasing-value-size"
+	ObjectCountScenario = "increasing-objects-count"
+	Put                 = "put"
+	Get                 = "get"
+)
+
 // Evolve represents an evolution logic for a given scenario parameters
 type Evolve func(scenario *Scenario) bool
 
@@ -23,8 +31,8 @@ type Scenario struct {
 }
 
 // Benchmark creates a new benchmark scenario
-func Benchmark(next Evolve, num, keySize, valueSize int) Scenario {
-	return Scenario{
+func Benchmark(next Evolve, num, keySize, valueSize int) *Scenario {
+	return &Scenario{
 		evolution: evolution{
 			next: next,
 		},
