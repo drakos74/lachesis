@@ -99,17 +99,20 @@ func executeBenchmarks(b *testing.B, storageFactory func() store.Storage) {
 			add(limit(5)).
 			add(num(pow(10))).
 			create(),
-			10, 4, 10),
+			10, 4, 10). // initial values
+			Name("num-objects"),
 		Benchmark(Evolution().
 			add(limit(5)).
 			add(key(pow(2))).
 			create(),
-			10, 4, 10),
+			10, 4, 10). // initial values
+			Name("increasing-key-size"),
 		Benchmark(Evolution().
 			add(limit(5)).
 			add(key(pow(2))).
 			create(),
-			10, 4, 10),
+			10, 4, 10). // initial values
+			Name("increasing-value-size"),
 	}
 
 	for _, scenario := range scenarios {
@@ -127,7 +130,7 @@ func executeBenchmark(b *testing.B, storage store.Storage, scenario Scenario, ex
 		elements := test.Elements(currentScenario.Num, test.Random(currentScenario.KeySize, currentScenario.ValueSize))
 
 		for _, exec := range execution {
-			b.Run(fmt.Sprintf("%s|%s|num-objects:%d|size-key:%d|size-value:%d|", reflect.TypeOf(storage).String(), getFuncName(exec), scenario.Num, scenario.KeySize, scenario.ValueSize), func(b *testing.B) {
+			b.Run(fmt.Sprintf("%s|%s-%s|num-objects:%d|size-key:%d|size-value:%d|", reflect.TypeOf(storage).String(), getFuncName(exec), scenario.name, scenario.Num, scenario.KeySize, scenario.ValueSize), func(b *testing.B) {
 				for i := 0; i < b.N; i++ {
 					exec(storage, elements)
 				}
