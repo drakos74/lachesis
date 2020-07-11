@@ -48,9 +48,9 @@ func NewScratchPad(path string, index store.StorageFactory) (*ScratchPad, error)
 	return &ScratchPad{wrFile: wrFile, rdFile: rdFile, concat: newIndexedConcat(), index: index(), filename: fileName}, nil
 }
 
-// ScratchPadFactory generates a file storage implementation
+// TriePadFactory generates a file storage implementation
 // with a trie as an index
-func ScratchPadFactory(path string) store.StorageFactory {
+func TriePadFactory(path string) store.StorageFactory {
 	return func() store.Storage {
 		pad, err := NewScratchPad(path, mem.SyncTrieFactory)
 		if err != nil {

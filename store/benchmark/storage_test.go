@@ -53,7 +53,13 @@ import (
 // BenchmarkTriePad executes the benchmarks for the file storage
 // with a trie for key indexing
 func BenchmarkTriePad(b *testing.B) {
-	executeBenchmarks(b, file.ScratchPadFactory("testdata/trie-pad"))
+	executeBenchmarks(b, file.TriePadFactory("testdata/trie-pad"))
+}
+
+// BenchmarkClosingTriePad executes the benchmarks for the file storage
+// with a trie for key indexing
+func BenchmarkClosingTriePad(b *testing.B) {
+	executeBenchmarks(b, file.TrieClosingPadFactory("testdata/trie-pad"))
 }
 
 // BenchmarkSyncTriePad executes the benchmarks for the thread-safe file storage
@@ -66,6 +72,12 @@ func BenchmarkSyncTriePad(b *testing.B) {
 // with a b-tree for key indexing
 func BenchmarkTreePad(b *testing.B) {
 	executeBenchmarks(b, file.TreePadFactory("testdata/btree-pad"))
+}
+
+// BenchmarkClosingTreePad executes the benchmarks for the file storage
+// with a b-tree for key indexing
+func BenchmarkClosingTreePad(b *testing.B) {
+	executeBenchmarks(b, file.TreeClosingPadFactory("testdata/btree-pad"))
 }
 
 // BenchmarkSyncTreePad executes the benchmarks for the thread-safe file storage
