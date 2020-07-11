@@ -13,10 +13,10 @@
 
 # project specific test files
 store/benchmark/testdata/file/*
-store/benchmark/testdata/scratchpad/*
-store/benchmark/testdata/sync-scratchpad/*
-store/benchmark/testdata/treepad/*
-store/benchmark/testdata/sync-treepad/*
+store/benchmark/testdata/trie-pad/*
+store/benchmark/testdata/sync-trie-pad/*
+store/benchmark/testdata/btree-pad/*
+store/benchmark/testdata/sync-btree-pad/*
 store/benchmark/testdata/badger/*
 store/benchmark/testdata/bolt/*
 

@@ -15,7 +15,7 @@ import (
 )
 
 // ScratchPad is a single file wrapper for storing key value pairs
-// it uses a Trie for storing the keys as an fileIndex for the file
+// it uses another storage implementation for storing the keys as a fileIndex for the file
 type ScratchPad struct {
 	wrFile *os.File
 	rdFile *os.File
