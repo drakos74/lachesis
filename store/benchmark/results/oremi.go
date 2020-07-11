@@ -50,9 +50,9 @@ func gatherBenchmarks(benchmarks bench.Benchmarks) map[string]map[string]oremi.C
 	collections["latency"] = make(map[string]oremi.Collection)
 	for label, benchmark := range graphs {
 		collections["latency"][label] = benchmark.Extract(
-			bench.Value,
+			bench.Key,
 			bench.Latency,
-			bench.Label(lachesisbench.ValueSizeScenario),
+			bench.Label(lachesisbench.KeySizeScenario),
 		).Color(colors.Get(label))
 	}
 	return collections

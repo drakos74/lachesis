@@ -7,11 +7,11 @@ import (
 )
 
 func TestFile_KeyValueImplementation(t *testing.T) {
-	new(test.ConsistencyWithMeta).Run(t, ScratchPadFactory("data"))
+	new(test.ConsistencyWithMeta).Run(t, TriePadFactory("data"))
 }
 
 func testFileSyncImplementation(t *testing.T) {
-	new(test.Concurrency).Run(t, ScratchPadFactory("data"))
+	new(test.Concurrency).Run(t, TriePadFactory("data"))
 }
 
 func TestBTreeFile_KeyValueImplementation(t *testing.T) {
