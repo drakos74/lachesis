@@ -23,8 +23,8 @@ type Scenario struct {
 }
 
 // Benchmark creates a new benchmark scenario
-func Benchmark(next Evolve, num, keySize, valueSize int) Scenario {
-	return Scenario{
+func Benchmark(next Evolve, num, keySize, valueSize int) *Scenario {
+	return &Scenario{
 		evolution: evolution{
 			next: next,
 		},
