@@ -9,6 +9,7 @@ github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/drakos74/oremi v0.0.2 h1:te2tp38qU1PD9ISCG8m4Vhm37pl4izNecbHiN33oLgU=
 github.com/drakos74/oremi v0.0.2/go.mod h1:M8fBSVM/0Z7VPyme+E9c5BZflEwSDGfCF1S6ck5QSak=
+github.com/drakos74/oremi v0.0.3/go.mod h1:M8fBSVM/0Z7VPyme+E9c5BZflEwSDGfCF1S6ck5QSak=
 github.com/go-gl/glfw v0.0.0-20190409004039-e6da0acd62b1/go.mod h1:vR7hzQXu2zJy9AVAgeJqvqgH9Q5CA+iKCZ2gyEVpxRU=
 github.com/gocarina/gocsv v0.0.0-20200330101823-46266ca37bd3/go.mod h1:5YoVOkjYAQumqlV356Hj3xeYh4BdZuLE0/nRkf2NKkI=
 github.com/google/uuid v1.1.1 h1:Gkbcsh/GbpXz7lPftLA3P6TYMwjCLYm83jiFQZF/3gY=
