@@ -92,7 +92,25 @@ func newBadger(db *badger.DB, err error) (*Store, error) {
 	return &Store{db: db}, nil
 }
 
-// FileFactory generates a badger file storage implementation
+// FileFactory generates a badger file storage implementation with the predefined path.
+func FileStore(path string) store.StorageFactory {
+	// use nano, in order to create a new store each time (we want the tests to remain independent at this stage)
+	dir, err := os.Getwd()
+	if err != nil {
+		panic(fmt.Sprintf("error during badger store creation: %v", err))
+	}
+	log.Info().Str("badger-dir", dir)
+	return func() store.Storage {
+		s, err := newBadger(badger.Open(badger.DefaultOptions(fmt.Sprintf("%s", path))))
+		if err != nil {
+			panic(fmt.Sprintf("error during badger store creation: %v", err))
+		}
+		return s
+	}
+}
+
+// FileFactory generates a badger file storage implementation with a unique path.
+// This method should be used for local testing.
 func FileFactory(path string) store.StorageFactory {
 	// use nano, in order to create a new store each time (we want the tests to remain independent at this stage)
 	dir, err := os.Getwd()
@@ -107,7 +125,6 @@ func FileFactory(path string) store.StorageFactory {
 		}
 		return s
 	}
-
 }
 
 // NewMemoryStore creates a new badger memory store
