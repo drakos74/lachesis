@@ -5,7 +5,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/drakos74/lachesis/store/test"
+	"github.com/drakos74/lachesis/benchmarks/store/test"
 )
 
 func TestNode_New(t *testing.T) {

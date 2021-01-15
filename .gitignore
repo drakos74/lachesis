@@ -12,20 +12,20 @@
 *.out
 
 # project specific test files
-store/benchmark/testdata/file/*
-store/benchmark/testdata/scratchpad/*
-store/benchmark/testdata/sync-scratchpad/*
-store/benchmark/testdata/treepad/*
-store/benchmark/testdata/sync-treepad/*
-store/benchmark/testdata/badger/*
-store/benchmark/testdata/bolt/*
+benchmarks/test/testdata/file/*
+benchmarks/test/testdata/scratchpad/*
+benchmarks/test/testdata/sync-scratchpad/*
+benchmarks/test/testdata/treepad/*
+benchmarks/test/testdata/sync-treepad/*
+benchmarks/test/testdata/badger/*
+benchmarks/test/testdata/bolt/*
 
 # storage specific test files
-store/file/data/*
-store/file/sync-data/*
-store/file/bash/database
-store/bolt/data/*
-store/badger/data/*
+benchmarks/store/file/data/*
+benchmarks/store/file/sync-data/*
+benchmarks/store/file/bash/database
+benchmarks/store/bolt/data/*
+benchmarks/store/badger/data/*
 
 
 # idea
