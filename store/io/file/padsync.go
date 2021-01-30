@@ -2,10 +2,10 @@ package file
 
 import (
 	"fmt"
-	"github.com/drakos74/lachesis/store"
+	"github.com/drakos74/lachesis"
 	"sync"
 
-	"github.com/drakos74/lachesis/store/io/mem"
+	"github.com/drakos74/lachesis/io/mem"
 )
 
 // SyncScratchPad is a thread-safe implementation of  file store

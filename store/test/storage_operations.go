@@ -2,7 +2,7 @@ package test
 
 import (
 	"fmt"
-	"github.com/drakos74/lachesis/store"
+	"github.com/drakos74/lachesis"
 	"sync"
 	"sync/atomic"
 	"testing"

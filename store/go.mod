@@ -1,9 +1,9 @@
-module github.com/drakos74/lachesis/store
+module github.com/drakos74/lachesis
 
-go 1.16
+go 1.15
 
 require (
 	github.com/google/btree v1.0.0
-	github.com/rs/zerolog v1.17.2
-	github.com/stretchr/testify v1.6.1
+	github.com/rs/zerolog v1.20.0
+	github.com/stretchr/testify v1.7.0
 )

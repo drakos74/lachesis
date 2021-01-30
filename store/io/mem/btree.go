@@ -2,9 +2,9 @@ package mem
 
 import (
 	"fmt"
-	"github.com/drakos74/lachesis/store"
+	"github.com/drakos74/lachesis"
 
-	"github.com/drakos74/lachesis/store/datastruct/btree"
+	"github.com/drakos74/lachesis/datastruct/btree"
 )
 
 // Btree is a btree storage implementation

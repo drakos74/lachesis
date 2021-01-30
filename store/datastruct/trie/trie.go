@@ -2,7 +2,7 @@ package trie
 
 import (
 	"fmt"
-	"github.com/drakos74/lachesis/store"
+	"github.com/drakos74/lachesis"
 )
 
 // Trie is a trie structure with keys and values made of byte arrays

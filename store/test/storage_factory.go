@@ -3,7 +3,7 @@ package test
 import (
 	"bytes"
 	"fmt"
-	"github.com/drakos74/lachesis/store"
+	"github.com/drakos74/lachesis"
 	"math/rand"
 )
 

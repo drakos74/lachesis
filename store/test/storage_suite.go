@@ -1,7 +1,7 @@
 package test
 
 import (
-	"github.com/drakos74/lachesis/store"
+	"github.com/drakos74/lachesis"
 	"testing"
 
 	"github.com/rs/zerolog"

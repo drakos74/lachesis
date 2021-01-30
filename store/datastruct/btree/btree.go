@@ -1,9 +1,10 @@
 package btree
 
 import (
-	"github.com/drakos74/lachesis/store"
 	"sort"
 	"sync/atomic"
+
+	"github.com/drakos74/lachesis"
 )
 
 // BTree is a b-tree implementation of the storage interface

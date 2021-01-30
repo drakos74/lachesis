@@ -2,9 +2,9 @@ package mem
 
 import (
 	"fmt"
-	"github.com/drakos74/lachesis/store"
+	"github.com/drakos74/lachesis"
 
-	"github.com/drakos74/lachesis/store/datastruct/trie"
+	"github.com/drakos74/lachesis/datastruct/trie"
 )
 
 // Trie is an in memory struct implementing the storage interface

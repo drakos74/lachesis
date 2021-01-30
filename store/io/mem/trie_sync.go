@@ -2,10 +2,10 @@ package mem
 
 import (
 	"fmt"
-	"github.com/drakos74/lachesis/store"
+	"github.com/drakos74/lachesis"
 	"sync"
 
-	"github.com/drakos74/lachesis/store/datastruct/trie"
+	"github.com/drakos74/lachesis/datastruct/trie"
 )
 
 // SyncTrie is an in memory struct implementing the storage interface

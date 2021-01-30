@@ -3,14 +3,14 @@ package file
 import (
 	"bufio"
 	"fmt"
-	"github.com/drakos74/lachesis/store"
-	"github.com/drakos74/lachesis/store/app"
+	"github.com/drakos74/lachesis"
+	"github.com/drakos74/lachesis/app"
 	"os"
 	"strconv"
 	"time"
 
-	"github.com/drakos74/lachesis/store/io/bytes"
-	"github.com/drakos74/lachesis/store/io/mem"
+	"github.com/drakos74/lachesis/io/bytes"
+	"github.com/drakos74/lachesis/io/mem"
 	"github.com/rs/zerolog/log"
 )
 

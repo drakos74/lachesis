@@ -2,8 +2,8 @@ package app
 
 import (
 	"fmt"
-	"github.com/drakos74/lachesis/store"
-	"github.com/drakos74/lachesis/store/io/bytes"
+	"github.com/drakos74/lachesis"
+	"github.com/drakos74/lachesis/io/bytes"
 )
 
 // TODO :  make it simpler , if there is no other use fot it
