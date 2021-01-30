@@ -1,4 +1,4 @@
-package store
+package lachesis
 
 import (
 	"bytes"

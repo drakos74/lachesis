@@ -15,8 +15,8 @@ type ClosingPad struct {
 
 // TrieClosingPadFactory generates a file storage implementation
 // with a trie as an index
-func TrieClosingPadFactory(path string) store.StorageFactory {
-	return func() store.Storage {
+func TrieClosingPadFactory(path string) lachesis.StorageFactory {
+	return func() lachesis.Storage {
 		pad, err := NewScratchPad(path, mem.SyncTrieFactory)
 		if err != nil {
 			panic(fmt.Sprintf("error during store creation: %v", err))
@@ -27,8 +27,8 @@ func TrieClosingPadFactory(path string) store.StorageFactory {
 
 // TreeClosingPadFactory generates a file storage implementation
 // with a btree as an index
-func TreeClosingPadFactory(path string) store.StorageFactory {
-	return func() store.Storage {
+func TreeClosingPadFactory(path string) lachesis.StorageFactory {
+	return func() lachesis.Storage {
 		pad, err := NewScratchPad(path, mem.SyncBTreeFactory)
 		if err != nil {
 			panic(fmt.Sprintf("error during store creation: %v", err))
@@ -38,7 +38,7 @@ func TreeClosingPadFactory(path string) store.StorageFactory {
 }
 
 // Put adds an element to the store
-func (s *ClosingPad) Put(element store.Element) error {
+func (s *ClosingPad) Put(element lachesis.Element) error {
 	bb, err := s.concat.Join(element)
 	if err != nil {
 		return fmt.Errorf("could not serialize element '%v' %w", element, err)
@@ -75,5 +75,5 @@ func (s *ClosingPad) Put(element store.Element) error {
 		Msg("Write_Index")
 	// Note : we overwrite the element only in the key struct,
 	// so the old value is not reachable from the outside world
-	return s.index.Put(store.NewElement(element.Key, index.Bytes()))
+	return s.index.Put(lachesis.NewElement(element.Key, index.Bytes()))
 }

@@ -8,7 +8,7 @@ import (
 )
 
 // ElementFactory generates a storage.Element
-type ElementFactory func() store.Element
+type ElementFactory func() lachesis.Element
 
 // RandomFactory is an element factory that generates random byte arrays as entries for the elements of the storage
 type RandomFactory struct {
@@ -28,10 +28,10 @@ func RandomBytes(size int) []byte {
 // key and value sizes are provided as input arguments
 func Random(keySize, valueSize int) RandomFactory {
 	return RandomFactory{
-		ElementFactory: func() store.Element {
+		ElementFactory: func() lachesis.Element {
 			key := RandomBytes(keySize)
 			value := RandomBytes(valueSize)
-			return store.NewElement(key, value)
+			return lachesis.NewElement(key, value)
 		},
 		KeySize:   keySize,
 		ValueSize: valueSize,
@@ -44,8 +44,8 @@ func Random(keySize, valueSize int) RandomFactory {
 func RandomValue(keySize, valueSize int) RandomFactory {
 	key := RandomBytes(keySize)
 	return RandomFactory{
-		ElementFactory: func() store.Element {
-			return store.NewElement(key, RandomBytes(valueSize))
+		ElementFactory: func() lachesis.Element {
+			return lachesis.NewElement(key, RandomBytes(valueSize))
 		},
 		KeySize:   keySize,
 		ValueSize: valueSize,
@@ -56,8 +56,8 @@ func RandomValue(keySize, valueSize int) RandomFactory {
 
 // Elements will create the given number of elements with the provided factory
 // it will return the elements in a slice
-func Elements(n int, generator RandomFactory) []store.Element {
-	elements := make([]store.Element, n)
+func Elements(n int, generator RandomFactory) []lachesis.Element {
+	elements := make([]lachesis.Element, n)
 	for i := 0; i < n; i++ {
 		elements[i] = generator.ElementFactory()
 	}

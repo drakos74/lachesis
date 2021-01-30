@@ -13,30 +13,30 @@ type Btree struct {
 }
 
 // BTreeFactory generates a Cache storage implementation
-func BTreeFactory() store.Storage {
+func BTreeFactory() lachesis.Storage {
 	return &Btree{btree.New(10)}
 }
 
 // Put stores an element in the storage based on the given key
-func (b *Btree) Put(element store.Element) error {
+func (b *Btree) Put(element lachesis.Element) error {
 	b.BTree.ReplaceOrInsert(element)
 	return nil
 }
 
 // Get retrieves an element based on the given key
-func (b *Btree) Get(key store.Key) (store.Element, error) {
-	e := b.BTree.Get(store.NewElement(key, []byte{}))
+func (b *Btree) Get(key lachesis.Key) (lachesis.Element, error) {
+	e := b.BTree.Get(lachesis.NewElement(key, []byte{}))
 	var err error
-	if store.IsNil(e) {
-		err = fmt.Errorf(store.NoValue, key)
+	if lachesis.IsNil(e) {
+		err = fmt.Errorf(lachesis.NoValue, key)
 	}
 	return e, err
 }
 
 // Metadata returns the metadata for the given storage
-func (b *Btree) Metadata() store.Metadata {
+func (b *Btree) Metadata() lachesis.Metadata {
 	c, ks, vs := b.Stats()
-	return store.Metadata{
+	return lachesis.Metadata{
 		Size:        c,
 		KeysBytes:   ks,
 		ValuesBytes: vs,

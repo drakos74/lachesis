@@ -21,25 +21,25 @@ func NewSyncTrie() *SyncTrie {
 }
 
 // SyncTrieFactory generates a SyncTrie storage implementation
-func SyncTrieFactory() store.Storage {
+func SyncTrieFactory() lachesis.Storage {
 	return NewSyncTrie()
 }
 
 // Put adds an element to the trie
-func (st *SyncTrie) Put(element store.Element) error {
+func (st *SyncTrie) Put(element lachesis.Element) error {
 	st.Lock()
 	defer st.Unlock()
 	return st.storage.Commit(element.Key, element.Value)
 }
 
 // Get retrieves and element from the trie
-func (st *SyncTrie) Get(key store.Key) (store.Element, error) {
+func (st *SyncTrie) Get(key lachesis.Key) (lachesis.Element, error) {
 	st.RLock()
 	defer st.RUnlock()
 	if data, ok := st.storage.Read(key); ok {
-		return store.NewElement(key, data), nil
+		return lachesis.NewElement(key, data), nil
 	}
-	return store.Element{}, fmt.Errorf(store.NoValue, key)
+	return lachesis.Element{}, fmt.Errorf(lachesis.NoValue, key)
 }
 
 // Close will run any maintainance operations
@@ -49,6 +49,6 @@ func (st *SyncTrie) Close() error {
 
 // Metadata returns internal statistics about the storage
 // It s not meant to serve anny functionality, but used only for testing
-func (st *SyncTrie) Metadata() store.Metadata {
+func (st *SyncTrie) Metadata() lachesis.Metadata {
 	return trie.Metadata(st.storage)
 }

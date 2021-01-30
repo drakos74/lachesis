@@ -14,13 +14,13 @@ import (
 
 // VoidReadOperation performs a read on a non-existing key
 // expecting the results to be an error and an empty element
-func VoidReadOperation(t *testing.T, storage store.Storage, checkMeta bool) {
+func VoidReadOperation(t *testing.T, storage lachesis.Storage, checkMeta bool) {
 
 	// read path
 	key := RandomBytes(10)
 	testElement, err := storage.Get(key)
 	assert.Error(t, err)
-	assert.Equal(t, store.Element{}, testElement)
+	assert.Equal(t, lachesis.Element{}, testElement)
 
 	if checkMeta {
 		// check if store is empty
@@ -37,7 +37,7 @@ func VoidReadOperation(t *testing.T, storage store.Storage, checkMeta bool) {
 
 // IntermediateReadOperation performs a read on a given key
 // expecting the results to be the expected value
-func IntermediateReadOperation(t *testing.T, storage store.Storage, key store.Key, expectedValue store.Value) store.Element {
+func IntermediateReadOperation(t *testing.T, storage lachesis.Storage, key lachesis.Key, expectedValue lachesis.Value) lachesis.Element {
 
 	testElement, err := storage.Get(key)
 	assert.NoError(t, err)
@@ -49,7 +49,7 @@ func IntermediateReadOperation(t *testing.T, storage store.Storage, key store.Ke
 
 // ReadWriteOperation performs a write and a following read on the storage
 // it asserts that we got back the value that was put into the store
-func ReadWriteOperation(t *testing.T, storage store.Storage, generator RandomFactory, checkMeta bool) {
+func ReadWriteOperation(t *testing.T, storage lachesis.Storage, generator RandomFactory, checkMeta bool) {
 
 	element := generator.ElementFactory()
 
@@ -79,7 +79,7 @@ func ReadWriteOperation(t *testing.T, storage store.Storage, generator RandomFac
 
 // ReadOverwriteOperation performs a write, read and write operation again on the same key
 // to check the overwrite feature of the given storage
-func ReadOverwriteOperation(t *testing.T, storage store.Storage, generator RandomFactory, checkMeta bool) {
+func ReadOverwriteOperation(t *testing.T, storage lachesis.Storage, generator RandomFactory, checkMeta bool) {
 
 	element1 := generator.ElementFactory()
 	element2 := generator.ElementFactory()
@@ -118,12 +118,12 @@ func ReadOverwriteOperation(t *testing.T, storage store.Storage, generator Rando
 const num = 1000
 
 // MultiReadWriteOperations executes multiple read and write operations
-func MultiReadWriteOperations(t *testing.T, storage store.Storage, generator RandomFactory, checkMeta bool) {
+func MultiReadWriteOperations(t *testing.T, storage lachesis.Storage, generator RandomFactory, checkMeta bool) {
 
-	metadata := store.NewMetadata()
+	metadata := lachesis.NewMetadata()
 
 	// generator the elements
-	elements := make([]store.Element, 0)
+	elements := make([]lachesis.Element, 0)
 
 	for i := 0; i < num; i++ {
 		element := generator.ElementFactory()
@@ -158,7 +158,7 @@ func MultiReadWriteOperations(t *testing.T, storage store.Storage, generator Ran
 }
 
 // MultiConcurrentReadWriteOperations executes multiple concurrent read and write operations
-func MultiConcurrentReadWriteOperations(t *testing.T, storage store.Storage, generator RandomFactory) {
+func MultiConcurrentReadWriteOperations(t *testing.T, storage lachesis.Storage, generator RandomFactory) {
 
 	wg := sync.WaitGroup{}
 
@@ -171,7 +171,7 @@ func MultiConcurrentReadWriteOperations(t *testing.T, storage store.Storage, gen
 
 		// TODO : try to make this linear
 		// each element cycle is done in a different routine to generator more contention
-		go func(storage store.Storage) {
+		go func(storage lachesis.Storage) {
 			element := generator.ElementFactory()
 
 			// put
@@ -217,7 +217,7 @@ type Errors struct {
 }
 
 // MultiConcurrentFailureRateOperations executes multiple concurrent operations and track the amount of errors encountered
-func MultiConcurrentFailureRateOperations(t *testing.T, storage store.Storage, generator RandomFactory) (readError, writeError float64) {
+func MultiConcurrentFailureRateOperations(t *testing.T, storage lachesis.Storage, generator RandomFactory) (readError, writeError float64) {
 
 	wg := sync.WaitGroup{}
 
@@ -233,7 +233,7 @@ func MultiConcurrentFailureRateOperations(t *testing.T, storage store.Storage, g
 
 		// TODO : try to make this linear
 		// each element cycle is done in a different routine to generate more contention
-		go func(storage store.Storage) {
+		go func(storage lachesis.Storage) {
 			element := generator.ElementFactory()
 
 			// put
@@ -288,7 +288,7 @@ func MultiConcurrentFailureRateOperations(t *testing.T, storage store.Storage, g
 
 }
 
-func assertMeta(t *testing.T, size, keysSize, vaLuesSize uint64, meta store.Metadata) {
+func assertMeta(t *testing.T, size, keysSize, vaLuesSize uint64, meta lachesis.Metadata) {
 	assert.Equal(t, size, meta.Size)
 	// TODO : assert on the volume of the store
 	//assert.Equal(t, keysSize, meta.KeysBytes)
