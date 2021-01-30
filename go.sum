@@ -26,6 +26,8 @@ github.com/dgraph-io/ristretto v0.0.2-0.20200115201040-8f368f2f2ab3 h1:MQLRM35Pp
 github.com/dgraph-io/ristretto v0.0.2-0.20200115201040-8f368f2f2ab3/go.mod h1:KPxhHT9ZxKefz+PCeOGsrHpl1qZ7i70dGTu2u+Ahh6E=
 github.com/dgryski/go-farm v0.0.0-20190423205320-6a90982ecee2 h1:tdlZCpZ/P9DhczCTSixgIKmwPv6+wP5DGjqLYw5SUiA=
 github.com/dgryski/go-farm v0.0.0-20190423205320-6a90982ecee2/go.mod h1:SqUrOPUnsFjfmXRMNPybcSiG0BgUW2AuFH8PAnS2iTw=
+github.com/drakos74/lachesis/store v0.0.0-20210130093135-2f8391df8409 h1:H1J1C3FirzSiFBfoJWrPwVIsMGxgTRogflMIxopWEbM=
+github.com/drakos74/lachesis/store v0.0.0-20210130093135-2f8391df8409/go.mod h1:Vf3JTBgmkMUkoHtQ9y84pT+OJdULyqy8XTRQvWNR9hw=
 github.com/drakos74/oremi v0.0.3 h1:y2XQNvuvcUeMVHaJnbvaOQvAVveSHQcUY1WvJMGu8qE=
 github.com/drakos74/oremi v0.0.3/go.mod h1:M8fBSVM/0Z7VPyme+E9c5BZflEwSDGfCF1S6ck5QSak=
 github.com/dustin/go-humanize v1.0.0 h1:VSnTsYCnlFHaM2/igO1h6X3HA71jcobQuxemgkq4zYo=
