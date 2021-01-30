@@ -1,10 +1,10 @@
 package file
 
 import (
-	"github.com/drakos74/lachesis/internal/infra/file"
 	"testing"
 
-	"github.com/drakos74/lachesis/benchmarks/store/test"
+	"github.com/drakos74/lachesis/store/io/file"
+	"github.com/drakos74/lachesis/store/test"
 )
 
 func TestFile_KeyValueImplementation(t *testing.T) {

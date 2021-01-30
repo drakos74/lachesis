@@ -4,8 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/drakos74/lachesis/internal/app/store"
-
+	"github.com/drakos74/lachesis/store/app/storage"
 	"github.com/rs/zerolog/log"
 )
 
@@ -59,7 +58,7 @@ type ProtocolFactory func(id uint32) (*Internal, *Peer)
 // NoProtocol represents a void protocol
 // this means there is no inter-node communication in the network
 func NoProtocol(id uint32) (*Internal, *Peer) {
-	return &Internal{ID: id}, &Peer{processor: *ProcessorFactory(func(state *State, node *StorageNode, element store.Element) (rpc interface{}, wait bool) {
+	return &Internal{ID: id}, &Peer{processor: *ProcessorFactory(func(state *State, node *StorageNode, element storage.Element) (rpc interface{}, wait bool) {
 		return nil, false
 	})}
 }

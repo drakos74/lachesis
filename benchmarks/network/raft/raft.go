@@ -5,14 +5,14 @@ import (
 	"reflect"
 
 	"github.com/drakos74/lachesis/benchmarks/network"
-	"github.com/drakos74/lachesis/internal/app/store"
+	"github.com/drakos74/lachesis/store/app/storage"
 )
 
 // Protocol implements the internal cluster communication requirements,
 // e.g. the leader and followers interaction logic
 func Protocol() network.ProtocolFactory {
 
-	processor := network.ProcessorFactory(func(state *network.State, node *network.StorageNode, element store.Element) (rpc interface{}, wait bool) {
+	processor := network.ProcessorFactory(func(state *network.State, node *network.StorageNode, element storage.Element) (rpc interface{}, wait bool) {
 		stMachine, err := retrieveStatMachine(state)
 		if err != nil {
 			return nil, false
@@ -32,7 +32,7 @@ func Protocol() network.ProtocolFactory {
 	})
 
 	// follower phase 1 processing logic
-	processor.Propose(func(state *network.State, storage store.Storage, msg interface{}) (interface{}, error) {
+	processor.Propose(func(state *network.State, storage storage.Storage, msg interface{}) (interface{}, error) {
 		stMachine, err := retrieveStatMachine(state)
 		if err != nil {
 			return nil, fmt.Errorf("could not retrieve state machine '%w'", err)
@@ -57,7 +57,7 @@ func Protocol() network.ProtocolFactory {
 	})
 
 	// leader phase1 processing logic
-	processor.Promise(func(state *network.State, storage store.Storage, msg interface{}) (interface{}, error) {
+	processor.Promise(func(state *network.State, storage storage.Storage, msg interface{}) (interface{}, error) {
 		// we are doing the same work as the follower in the previous step
 		// e.g. appending to our log the same as the follower did, so that we are fully aligned!
 		// create our stateMachine if not already created
@@ -89,7 +89,7 @@ func Protocol() network.ProtocolFactory {
 	})
 
 	// follower phase 2 processing logic
-	processor.Commit(func(state *network.State, storage store.Storage, msg interface{}) (interface{}, error) {
+	processor.Commit(func(state *network.State, store storage.Storage, msg interface{}) (interface{}, error) {
 		// for ease of use, we skip another verify at this stage
 		// we assume the leader is 'sane' in the sense that it will adhere to the protocol
 		if heartbeat, ok := msg.(ResponseRPC); ok {
@@ -98,7 +98,7 @@ func Protocol() network.ProtocolFactory {
 			if stateMachine, ok := wal.(*stateMachine); ok {
 				// get all the pending entries from the state machine and commit them to the store
 				for i := state.Index; i <= heartbeat.logIndex; i++ {
-					resp := network.Execute(storage, stateMachine.states[i].cmd)
+					resp := network.Execute(store, stateMachine.states[i].cmd)
 					if resp.Err == nil {
 						stateMachine.states[i].committed = true
 					}
@@ -110,7 +110,7 @@ func Protocol() network.ProtocolFactory {
 
 				return ResponseRPC{
 					response: network.Response{
-						Element: store.Nil,
+						Element: storage.Nil,
 					},
 				}, nil
 			}
@@ -119,14 +119,14 @@ func Protocol() network.ProtocolFactory {
 		return nil, fmt.Errorf("unexpected message received for commit action '%v'", reflect.TypeOf(msg))
 	})
 
-	processor.Confirm(func(state *network.State, storage store.Storage, msg interface{}) (interface{}, error) {
+	processor.Confirm(func(state *network.State, store storage.Storage, msg interface{}) (interface{}, error) {
 		if heartbeat, ok := msg.(ResponseRPC); ok {
 			wal := state.Log[""]
 
 			if stateMachine, ok := wal.(*stateMachine); ok {
 				// get all the pending entries from the state machine and commit them to the store
 				for i := state.Index; i <= heartbeat.logIndex; i++ {
-					resp := network.Execute(storage, stateMachine.states[i].cmd)
+					resp := network.Execute(store, stateMachine.states[i].cmd)
 					if resp.Err == nil {
 						stateMachine.states[i].committed = true
 					}
@@ -138,7 +138,7 @@ func Protocol() network.ProtocolFactory {
 
 				return ResponseRPC{
 					response: network.Response{
-						Element: store.Nil,
+						Element: storage.Nil,
 					},
 				}, nil
 			}

@@ -3,7 +3,7 @@ package file
 import (
 	"testing"
 
-	"github.com/drakos74/lachesis/benchmarks/store/test"
+	"github.com/drakos74/lachesis/store/test"
 )
 
 func TestFile_SimpleImplementation(t *testing.T) {

@@ -1,1 +1,0 @@
-file storage directory for bolt benchmarks

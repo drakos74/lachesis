@@ -3,7 +3,7 @@ package network
 import (
 	"fmt"
 
-	"github.com/drakos74/lachesis/internal/app/store"
+	"github.com/drakos74/lachesis/store/app/storage"
 	"github.com/google/uuid"
 )
 
@@ -111,7 +111,7 @@ func (t MsgType) Phase() Signal {
 }
 
 // MsgProcessor bears the logic of processing a message
-type MsgProcessor func(state *State, storage store.Storage, msg interface{}) (interface{}, error)
+type MsgProcessor func(state *State, storage storage.Storage, msg interface{}) (interface{}, error)
 
 // State represents the wal of the storage node
 type State struct {
@@ -130,14 +130,14 @@ func NewStateLog() State {
 
 // Processor encapsulates all logic related to the internal cluster communication protocol
 type Processor struct {
-	Store    store.Storage
+	Store    storage.Storage
 	State    State
-	initiate func(state *State, node *StorageNode, element store.Element) (rpc interface{}, wait bool)
+	initiate func(state *State, node *StorageNode, element storage.Element) (rpc interface{}, wait bool)
 	handle   map[MsgType]MsgProcessor
 }
 
 // ProcessorFactory creates a new processor
-func ProcessorFactory(initPut func(state *State, node *StorageNode, element store.Element) (rpc interface{}, wait bool)) *Processor {
+func ProcessorFactory(initPut func(state *State, node *StorageNode, element storage.Element) (rpc interface{}, wait bool)) *Processor {
 	return &Processor{
 		initiate: initPut,
 		handle:   make(map[MsgType]MsgProcessor),
@@ -169,7 +169,7 @@ func (p *Processor) Confirm(handler MsgProcessor) *Processor {
 }
 
 // Storage adds a storage implementation to the processor
-func (p *Processor) Storage(storage store.Storage) *Processor {
+func (p *Processor) Storage(storage storage.Storage) *Processor {
 	p.Store = storage
 	return p
 }
@@ -186,24 +186,24 @@ type Peer struct {
 	processor Processor
 }
 
-func (p *Peer) initPut(node *StorageNode, element store.Element) (rpc interface{}, wait bool) {
+func (p *Peer) initPut(node *StorageNode, element storage.Element) (rpc interface{}, wait bool) {
 	return p.processor.initiate(&p.processor.State, node, element)
 }
 
 func (p *Peer) getProcessor(msgType MsgType) MsgProcessor {
 	if process, ok := p.processor.handle[msgType]; ok {
-		return func(state *State, storage store.Storage, msg interface{}) (interface{}, error) {
+		return func(state *State, storage storage.Storage, msg interface{}) (interface{}, error) {
 			return process(&p.processor.State, p.processor.Store, msg)
 		}
 	}
-	return func(state *State, storage store.Storage, msg interface{}) (interface{}, error) {
+	return func(state *State, storage storage.Storage, msg interface{}) (interface{}, error) {
 		return nil, nil
 	}
 }
 
 // Storage represents a network member node with key-value Storage capabilities
 type Storage interface {
-	store.Storage
+	storage.Storage
 	Cluster() Member
 }
 
@@ -215,14 +215,14 @@ type StorageNode struct {
 }
 
 // NodeFactory is the factory type for a StorageNode
-type NodeFactory func(newStorage store.StorageFactory, newCluster ProtocolFactory) Storage
+type NodeFactory func(newStorage storage.StorageFactory, newCluster ProtocolFactory) Storage
 
 // Node is the factory for creating a cluster node with the given properties
-func Node(newStorage store.StorageFactory, newCluster ProtocolFactory) Storage {
+func Node(newStorage storage.StorageFactory, newCluster ProtocolFactory) Storage {
 	id := uuid.New().ID()
 	protocol, peer := newCluster(id)
-	storage := newStorage()
-	peer.processor.Storage(storage)
+	store := newStorage()
+	peer.processor.Storage(store)
 	peer.processor.State = NewStateLog()
 	return &StorageNode{
 		Member: Member{
@@ -231,7 +231,7 @@ func Node(newStorage store.StorageFactory, newCluster ProtocolFactory) Storage {
 				out: make(chan Response),
 			},
 			Meta: Meta{
-				out: make(chan store.Metadata),
+				out: make(chan storage.Metadata),
 				in:  make(chan struct{}),
 			},
 			Internal: protocol,
@@ -248,14 +248,14 @@ func (n *StorageNode) Cluster() Member {
 }
 
 // Execute will execute the given command and produce the corresponding response
-func Execute(storage store.Storage, cmd Command) Response {
-	element := store.Nil
+func Execute(store storage.Storage, cmd Command) Response {
+	element := storage.Nil
 	var err error
 	switch cmd.Type() {
 	case Put:
-		err = storage.Put(cmd.Element())
+		err = store.Put(cmd.Element())
 	case Get:
-		element, err = storage.Get(cmd.Element().Key)
+		element, err = store.Get(cmd.Element().Key)
 	}
 	return Response{
 		Element: element,
@@ -266,7 +266,7 @@ func Execute(storage store.Storage, cmd Command) Response {
 // Storage interface
 
 // Put writes an element to the Storage
-func (n *StorageNode) Put(element store.Element) error {
+func (n *StorageNode) Put(element storage.Element) error {
 
 	cmd, wait := n.Peer.initPut(n, element)
 
@@ -302,12 +302,12 @@ func (n *StorageNode) Put(element store.Element) error {
 }
 
 // Get retrieves an element from the Storage
-func (n *StorageNode) Get(key store.Key) (store.Element, error) {
+func (n *StorageNode) Get(key storage.Key) (storage.Element, error) {
 	return n.processor.Store.Get(key)
 }
 
 // Metadata returns the metadata for the StorageNode
-func (n *StorageNode) Metadata() store.Metadata {
+func (n *StorageNode) Metadata() storage.Metadata {
 	return n.processor.Store.Metadata()
 }
 

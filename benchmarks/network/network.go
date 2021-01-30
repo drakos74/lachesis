@@ -6,9 +6,8 @@ import (
 	"fmt"
 	"math"
 
+	"github.com/drakos74/lachesis/store/app/storage"
 	"github.com/rs/zerolog/log"
-
-	"github.com/drakos74/lachesis/internal/app/store"
 )
 
 const (
@@ -23,7 +22,7 @@ type Operation struct {
 
 // Meta is the communication channel for metadata about the network
 type Meta struct {
-	out chan store.Metadata
+	out chan storage.Metadata
 	in  chan struct{}
 }
 
@@ -45,7 +44,7 @@ type Network struct {
 // FactoryBuilder is the builder factory for a network
 type FactoryBuilder struct {
 	router      PartitionStrategy
-	storage     store.StorageFactory
+	storage     storage.StorageFactory
 	nodeFactory NodeFactory
 	protocol    ProtocolFactory
 	parallelism int
@@ -62,7 +61,7 @@ func Factory(events ...Event) *FactoryBuilder {
 }
 
 // Storage specifies the underlying Storage implementation for the network
-func (f *FactoryBuilder) Storage(storage store.StorageFactory) *FactoryBuilder {
+func (f *FactoryBuilder) Storage(storage storage.StorageFactory) *FactoryBuilder {
 	f.storage = storage
 	return f
 }
@@ -115,10 +114,10 @@ func (f *FactoryBuilder) validate() {
 }
 
 // Create returns a functioning network implementation that can be used as a distributed Storage
-func (f *FactoryBuilder) Create() store.StorageFactory {
+func (f *FactoryBuilder) Create() storage.StorageFactory {
 	f.validate()
 
-	return func() store.Storage {
+	return func() storage.Storage {
 
 		ctx, cnl := context.WithCancel(context.Background())
 
@@ -147,7 +146,7 @@ func (f *FactoryBuilder) Create() store.StorageFactory {
 				for {
 					select {
 					case cmd := <-node.Cluster().Operation.in:
-						element := store.Nil
+						element := storage.Nil
 						var err error
 						switch cmd.Type() {
 						case Put:
@@ -229,7 +228,7 @@ func (n *Network) trigger(event Event) {
 }
 
 // Put allows clients to initPut a write command to the distributed Storage
-func (n *Network) Put(element store.Element) error {
+func (n *Network) Put(element storage.Element) error {
 
 	cmd := PutCommand{element: element}
 	// emulate a network retry mechanism
@@ -260,12 +259,12 @@ func (n *Network) Put(element store.Element) error {
 }
 
 // Get initiates a read requests to the distributed Storage
-func (n *Network) Get(key store.Key) (store.Element, error) {
+func (n *Network) Get(key storage.Key) (storage.Element, error) {
 	cmd := GetCommand{key: key}
 	// emulate a network retry mechanism
 	ids, err := retry(10, n.Route, cmd.Element().Key)
 	if err != nil {
-		return store.Nil, fmt.Errorf("error during get action: %w", err)
+		return storage.Nil, fmt.Errorf("error during get action: %w", err)
 	}
 
 	var response Response
@@ -298,9 +297,9 @@ func retry(iterations int, apply func(key Key) ([]int, error), key []byte) ([]in
 }
 
 // Metadata returns the network metadata
-func (n *Network) Metadata() store.Metadata {
+func (n *Network) Metadata() storage.Metadata {
 
-	metadata := store.Metadata{}
+	metadata := storage.Metadata{}
 
 	// keep track of our distribution factor
 

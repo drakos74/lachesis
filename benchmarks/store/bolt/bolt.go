@@ -6,11 +6,9 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/rs/zerolog/log"
-
-	"github.com/drakos74/lachesis/internal/app/store"
-
 	"github.com/boltdb/bolt"
+	"github.com/drakos74/lachesis/store/app/storage"
+	"github.com/rs/zerolog/log"
 )
 
 const bucket = "bucket"
@@ -21,7 +19,7 @@ type Store struct {
 }
 
 // Put writes an element to the bolt file storage
-func (s Store) Put(element store.Element) error {
+func (s Store) Put(element storage.Element) error {
 	return s.db.Update(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(bucket))
 		err := b.Put(element.Key, element.Value)
@@ -30,28 +28,28 @@ func (s Store) Put(element store.Element) error {
 }
 
 // Get retrieves a value from the bolt file storage based on the given key
-func (s Store) Get(key store.Key) (store.Element, error) {
+func (s Store) Get(key storage.Key) (storage.Element, error) {
 	var value []byte
 	err := s.db.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(bucket))
 		if b == nil {
 			// no bucket, no value
-			return fmt.Errorf(store.NoValue, key)
+			return fmt.Errorf(storage.NoValue, key)
 		}
 		value = b.Get(key)
 		if value == nil {
-			return fmt.Errorf(store.NoValue, key)
+			return fmt.Errorf(storage.NoValue, key)
 		}
 		return nil
 	})
 	if err != nil {
-		return store.Element{}, err
+		return storage.Element{}, err
 	}
-	return store.NewElement(key, value), nil
+	return storage.NewElement(key, value), nil
 }
 
 // Metadata returns internal stats regarding the bolt file storage implementation
-func (s Store) Metadata() store.Metadata {
+func (s Store) Metadata() storage.Metadata {
 	var count uint64
 	var keyBytes uint64
 	var valueBytes uint64
@@ -75,10 +73,10 @@ func (s Store) Metadata() store.Metadata {
 	})
 
 	if err != nil {
-		panic(fmt.Errorf(store.InternalError, "metadata", bucket, err))
+		panic(fmt.Errorf(storage.InternalError, "metadata", bucket, err))
 	}
 
-	return store.Metadata{
+	return storage.Metadata{
 		Size:        count,
 		KeysBytes:   keyBytes,
 		ValuesBytes: valueBytes,
@@ -116,8 +114,8 @@ func NewFileStore(f string) (*Store, error) {
 }
 
 // FileFactory generates a bolt storage implementation
-func FileFactory(path string) store.StorageFactory {
-	return func() store.Storage {
+func FileFactory(path string) storage.StorageFactory {
+	return func() storage.Storage {
 		// use nano, in order to create a new store each time (we want the tests to remain independent at this stage)
 		s, err := NewFileStore(fmt.Sprintf("%s/%v", path, time.Now().UnixNano()))
 		if err != nil {

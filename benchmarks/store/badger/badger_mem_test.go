@@ -3,7 +3,7 @@ package badger
 import (
 	"testing"
 
-	"github.com/drakos74/lachesis/benchmarks/store/test"
+	"github.com/drakos74/lachesis/store/test"
 )
 
 func TestBadgerInMem_KeyValueImplementation(t *testing.T) {

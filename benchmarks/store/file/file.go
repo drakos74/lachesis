@@ -4,13 +4,12 @@ import (
 	"bufio"
 	"bytes"
 	"fmt"
-	"github.com/drakos74/lachesis/internal/infra/file"
 	"os"
 	"strconv"
 	"sync/atomic"
 	"time"
 
-	"github.com/drakos74/lachesis/internal/app/store"
+	"github.com/drakos74/lachesis/store/app/storage"
 	"github.com/rs/zerolog/log"
 )
 
@@ -19,12 +18,12 @@ type Storage struct {
 	wrFile *os.File
 	rdFile *os.File
 	// we use this to encapsulate our concatenation logic
-	concat   file.ConcatOperator
+	concat   storage.ConcatOperator
 	filename string
 }
 
 // Put adds an element to the file storage
-func (f Storage) Put(element store.Element) error {
+func (f Storage) Put(element storage.Element) error {
 	bytes, err := f.concat.Join(element)
 	if err != nil {
 		return fmt.Errorf("could not noncat element '%v' %w", element, err)
@@ -40,23 +39,23 @@ func (f Storage) Put(element store.Element) error {
 }
 
 // Get retrieves a value from the file storage based on the given key
-func (f Storage) Get(key store.Key) (store.Element, error) {
+func (f Storage) Get(key storage.Key) (storage.Element, error) {
 	scanner := bufio.NewScanner(f.rdFile)
 	for scanner.Scan() {
 		result, err := f.concat.Split(key, scanner.Bytes())
 		if err != nil {
-			return store.Nil, fmt.Errorf("error during deserialisation: %w", err)
+			return storage.Nil, fmt.Errorf("error during deserialisation: %w", err)
 		}
 		if bytes.Compare(result.Key, key) == 0 {
 			// Note : overwrite will fail, as we are returning the first match
 			return result, nil
 		}
 	}
-	return store.Nil, fmt.Errorf(store.NoValue, key)
+	return storage.Nil, fmt.Errorf(storage.NoValue, key)
 }
 
 // Metadata returns the internal stats of the file storage implementation
-func (f Storage) Metadata() store.Metadata {
+func (f Storage) Metadata() storage.Metadata {
 
 	var size uint64
 
@@ -65,7 +64,7 @@ func (f Storage) Metadata() store.Metadata {
 		atomic.AddUint64(&size, 1)
 	}
 
-	return store.Metadata{
+	return storage.Metadata{
 		Size: size,
 	}
 }
@@ -97,12 +96,12 @@ func NewFileStorage(path string) (*Storage, error) {
 	log.Debug().
 		Str("filename", wrFile.Name()).
 		Msg("Open ScratchPad Storage")
-	return &Storage{wrFile: wrFile, rdFile: rdFile, concat: file.RawConcat(), filename: fileName}, nil
+	return &Storage{wrFile: wrFile, rdFile: rdFile, concat: storage.RawConcat(), filename: fileName}, nil
 }
 
 // StorageFactory generates a file storage implementation
-func StorageFactory(path string) store.StorageFactory {
-	return func() store.Storage {
+func StorageFactory(path string) storage.StorageFactory {
+	return func() storage.Storage {
 		pad, err := NewFileStorage(path)
 		if err != nil {
 			panic(fmt.Sprintf("error during store creation: %v", err))

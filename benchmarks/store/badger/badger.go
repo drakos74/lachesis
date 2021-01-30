@@ -6,11 +6,9 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/rs/zerolog/log"
-
-	"github.com/drakos74/lachesis/internal/app/store"
-
 	"github.com/dgraph-io/badger/v2"
+	"github.com/drakos74/lachesis/store/app/storage"
+	"github.com/rs/zerolog/log"
 )
 
 // Store is the storage implementation backed by a badger store
@@ -19,7 +17,7 @@ type Store struct {
 }
 
 // Put writes a key into the badger store
-func (s *Store) Put(element store.Element) error {
+func (s *Store) Put(element storage.Element) error {
 	return s.db.Update(func(txn *badger.Txn) error {
 		err := txn.Set(element.Key, element.Value)
 		return err
@@ -27,31 +25,31 @@ func (s *Store) Put(element store.Element) error {
 }
 
 // Get retrieves a value for the given key from the badger storage implementation
-func (s *Store) Get(key store.Key) (store.Element, error) {
+func (s *Store) Get(key storage.Key) (storage.Element, error) {
 	var value []byte
 
 	err := s.db.View(func(txn *badger.Txn) error {
 		item, err := txn.Get(key)
 		if err != nil {
-			return fmt.Errorf(store.NoValue, key)
+			return fmt.Errorf(storage.NoValue, key)
 		}
 		key = item.KeyCopy(nil)
 		value, err = item.ValueCopy(nil)
 		if err != nil {
-			return fmt.Errorf(store.InternalError, "get", key, err)
+			return fmt.Errorf(storage.InternalError, "get", key, err)
 		}
 
 		return nil
 	})
 	if err != nil {
-		return store.Element{}, err
+		return storage.Element{}, err
 	}
-	return store.NewElement(key, value), nil
+	return storage.NewElement(key, value), nil
 }
 
 // Metadata returns internal statistics about the storage
 // It s not meant to serve anny functionality, but used only for testing
-func (s *Store) Metadata() store.Metadata {
+func (s *Store) Metadata() storage.Metadata {
 	var count uint64
 	var keySize uint64
 	var valueSize uint64
@@ -72,7 +70,7 @@ func (s *Store) Metadata() store.Metadata {
 	}
 
 	// TODO : add also sizes ...
-	return store.Metadata{
+	return storage.Metadata{
 		Size:        count,
 		KeysBytes:   keySize,
 		ValuesBytes: valueSize,
@@ -93,14 +91,14 @@ func newBadger(db *badger.DB, err error) (*Store, error) {
 }
 
 // FileFactory generates a badger file storage implementation with the predefined path.
-func FileStore(path string) store.StorageFactory {
+func FileStore(path string) storage.StorageFactory {
 	// use nano, in order to create a new store each time (we want the tests to remain independent at this stage)
 	dir, err := os.Getwd()
 	if err != nil {
 		panic(fmt.Sprintf("error during badger store creation: %v", err))
 	}
 	log.Info().Str("badger-dir", dir)
-	return func() store.Storage {
+	return func() storage.Storage {
 		s, err := newBadger(badger.Open(badger.DefaultOptions(fmt.Sprintf("%s", path))))
 		if err != nil {
 			panic(fmt.Sprintf("error during badger store creation: %v", err))
@@ -111,14 +109,14 @@ func FileStore(path string) store.StorageFactory {
 
 // FileFactory generates a badger file storage implementation with a unique path.
 // This method should be used for local testing.
-func FileFactory(path string) store.StorageFactory {
+func FileFactory(path string) storage.StorageFactory {
 	// use nano, in order to create a new store each time (we want the tests to remain independent at this stage)
 	dir, err := os.Getwd()
 	if err != nil {
 		panic(fmt.Sprintf("error during badger store creation: %v", err))
 	}
 	log.Info().Str("badger-dir", dir)
-	return func() store.Storage {
+	return func() storage.Storage {
 		s, err := newBadger(badger.Open(badger.DefaultOptions(fmt.Sprintf("%s/%v", path, time.Now().UnixNano()))))
 		if err != nil {
 			panic(fmt.Sprintf("error during badger store creation: %v", err))
@@ -133,7 +131,7 @@ func NewMemoryStore() (*Store, error) {
 }
 
 // MemoryFactory generates a badger in-memory storage implementation
-func MemoryFactory() store.Storage {
+func MemoryFactory() storage.Storage {
 	s, err := NewMemoryStore()
 	if err != nil {
 		panic(fmt.Sprintf("error during store creation: %v", err))

@@ -2,7 +2,6 @@ package test
 
 import (
 	"fmt"
-	"github.com/rs/zerolog"
 	"log"
 	"reflect"
 	"runtime"
@@ -11,10 +10,11 @@ import (
 
 	"github.com/drakos74/lachesis/benchmarks/store/badger"
 	"github.com/drakos74/lachesis/benchmarks/store/bolt"
-	"github.com/drakos74/lachesis/benchmarks/store/test"
-	"github.com/drakos74/lachesis/internal/app/store"
-	"github.com/drakos74/lachesis/internal/infra/file"
-	"github.com/drakos74/lachesis/internal/infra/mem"
+	"github.com/drakos74/lachesis/store/app/storage"
+	"github.com/drakos74/lachesis/store/io/file"
+	"github.com/drakos74/lachesis/store/io/mem"
+	"github.com/drakos74/lachesis/store/test"
+	"github.com/rs/zerolog"
 )
 
 // in-memory
@@ -101,7 +101,7 @@ func BenchmarkFileBolt(b *testing.B) {
 	executeBenchmarks(b, bolt.FileFactory("testdata/bolt"))
 }
 
-func executeBenchmarks(b *testing.B, storageFactory func() store.Storage) {
+func executeBenchmarks(b *testing.B, storageFactory func() storage.Storage) {
 
 	// reduce logging
 	zerolog.SetGlobalLevel(zerolog.InfoLevel)
@@ -134,7 +134,7 @@ func executeBenchmarks(b *testing.B, storageFactory func() store.Storage) {
 
 }
 
-func executeBenchmark(b *testing.B, storage store.Storage, scenario Scenario, execution ...benchmarkExecution) {
+func executeBenchmark(b *testing.B, storage storage.Storage, scenario Scenario, execution ...benchmarkExecution) {
 
 	for scenario.next() {
 		currentScenario := scenario.get()
@@ -156,11 +156,11 @@ func executeBenchmark(b *testing.B, storage store.Storage, scenario Scenario, ex
 
 // benchmark utilities
 
-type benchmarkExecution func(storage store.Storage, elements []store.Element)
+type benchmarkExecution func(storage storage.Storage, elements []storage.Element)
 
-var result store.Element
+var result storage.Element
 
-func put(storage store.Storage, elements []store.Element) {
+func put(storage storage.Storage, elements []storage.Element) {
 	for _, element := range elements {
 		err := storage.Put(element)
 		if err != nil {
@@ -169,7 +169,7 @@ func put(storage store.Storage, elements []store.Element) {
 	}
 }
 
-func get(storage store.Storage, elements []store.Element) {
+func get(storage storage.Storage, elements []storage.Element) {
 	for _, element := range elements {
 		result, err := storage.Get(element.Key)
 		if err != nil {
@@ -189,7 +189,7 @@ func getFuncName(exec benchmarkExecution) string {
 	return execName[idx+1:]
 }
 
-func consume(element store.Element) {
+func consume(element storage.Element) {
 	//... store in a environment variable to avoid optimizations https://stackoverflow.com/questions/36966947/do-go-testing-b-benchmarks-prevent-unwanted-optimizations
 	result = element
 }

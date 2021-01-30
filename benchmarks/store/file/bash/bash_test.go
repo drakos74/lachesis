@@ -5,15 +5,14 @@ import (
 	"testing"
 	"time"
 
-	"github.com/drakos74/lachesis/internal/app/store"
-
+	"github.com/drakos74/lachesis/store/app/storage"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestBash_Put(t *testing.T) {
 	bash := DB{}
 
-	element := store.NewElement([]byte(fmt.Sprintf("key-%d", time.Now().Unix())), []byte(fmt.Sprintf("value-%d", time.Now().Unix())))
+	element := storage.NewElement([]byte(fmt.Sprintf("key-%d", time.Now().Unix())), []byte(fmt.Sprintf("value-%d", time.Now().Unix())))
 
 	err := bash.Put(element)
 	assert.NoError(t, err)
@@ -33,7 +32,7 @@ func TestBash_PutOverwrite(t *testing.T) {
 
 	value2 := fmt.Sprintf("value-2-%d", time.Now().Unix())
 
-	element := store.NewElement([]byte(key), []byte(value1))
+	element := storage.NewElement([]byte(key), []byte(value1))
 
 	err := bash.Put(element)
 	assert.NoError(t, err)
@@ -42,7 +41,7 @@ func TestBash_PutOverwrite(t *testing.T) {
 	assert.Equal(t, element, e)
 	assert.NoError(t, err)
 
-	element2 := store.NewElement([]byte(key), []byte(value2))
+	element2 := storage.NewElement([]byte(key), []byte(value2))
 
 	err2 := bash.Put(element2)
 	assert.NoError(t, err2)

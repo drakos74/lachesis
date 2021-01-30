@@ -1,10 +1,10 @@
 package mem
 
 import (
-	"github.com/drakos74/lachesis/internal/infra/mem"
 	"testing"
 
-	"github.com/drakos74/lachesis/benchmarks/store/test"
+	"github.com/drakos74/lachesis/store/io/mem"
+	"github.com/drakos74/lachesis/store/test"
 )
 
 func TestCache_KeyValueImplementation(t *testing.T) {

@@ -1,1 +1,0 @@
-file storage directory for file benchmarks

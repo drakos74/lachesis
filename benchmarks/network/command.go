@@ -1,7 +1,7 @@
 package network
 
 import (
-	"github.com/drakos74/lachesis/internal/app/store"
+	"github.com/drakos74/lachesis/store/app/storage"
 )
 
 // CmdType specifies the type of command
@@ -17,22 +17,22 @@ const (
 // Command is the interface for every command object
 type Command interface {
 	Type() CmdType
-	Element() store.Element
+	Element() storage.Element
 }
 
 // Response is the result of the Command
 type Response struct {
-	store.Element
+	storage.Element
 	Err error
 }
 
 // PutCommand represents a put action
 type PutCommand struct {
-	element store.Element
+	element storage.Element
 }
 
 // NewPut creates a new PutCommand
-func NewPut(element store.Element) Command {
+func NewPut(element storage.Element) Command {
 	return PutCommand{element: element}
 }
 
@@ -42,17 +42,17 @@ func (p PutCommand) Type() CmdType {
 }
 
 // Element retrieves the element that needs to be written to the Storage
-func (p PutCommand) Element() store.Element {
+func (p PutCommand) Element() storage.Element {
 	return p.element
 }
 
 // GetCommand represents a get action
 type GetCommand struct {
-	key store.Key
+	key storage.Key
 }
 
 // NewGet creates a new GetCommand
-func NewGet(key store.Key) Command {
+func NewGet(key storage.Key) Command {
 	return GetCommand{key: key}
 }
 
@@ -62,6 +62,6 @@ func (p GetCommand) Type() CmdType {
 }
 
 // Element retrieves the element which key needs to be looked up and returned from the Storage
-func (p GetCommand) Element() store.Element {
-	return store.NewElement(p.key, store.NilBytes)
+func (p GetCommand) Element() storage.Element {
+	return storage.NewElement(p.key, storage.NilBytes)
 }

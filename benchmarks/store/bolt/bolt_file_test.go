@@ -3,7 +3,7 @@ package bolt
 import (
 	"testing"
 
-	"github.com/drakos74/lachesis/benchmarks/store/test"
+	"github.com/drakos74/lachesis/store/test"
 )
 
 func TestBoltFile_KeyValueImplementation(t *testing.T) {

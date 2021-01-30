@@ -2,7 +2,7 @@ package paxos
 
 import (
 	"github.com/drakos74/lachesis/benchmarks/network"
-	"github.com/drakos74/lachesis/internal/app/store"
+	"github.com/drakos74/lachesis/store/app/storage"
 )
 
 // Proposal represents the paxos protocol proposal request
@@ -19,5 +19,5 @@ type Promise struct {
 // Commit represents the paxos protocol commit request
 type Commit struct {
 	index int64
-	key   store.Key
+	key   storage.Key
 }

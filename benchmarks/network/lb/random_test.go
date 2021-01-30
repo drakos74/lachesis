@@ -1,13 +1,12 @@
 package lb
 
 import (
-	mem2 "github.com/drakos74/lachesis/internal/infra/mem"
 	"testing"
 
 	"github.com/drakos74/lachesis/benchmarks/network"
-
-	"github.com/drakos74/lachesis/benchmarks/store/test"
-	"github.com/drakos74/lachesis/internal/app/store"
+	"github.com/drakos74/lachesis/store/app/storage"
+	"github.com/drakos74/lachesis/store/io/mem"
+	"github.com/drakos74/lachesis/store/test"
 )
 
 // Note : All the faulty tests should fail
@@ -15,10 +14,10 @@ import (
 // we are using random partitioninng (routing)
 // but have no replication
 // so you put something on one node, but try to retrieve it from another
-func newFaultyNetwork(event ...network.Event) store.StorageFactory {
+func newFaultyNetwork(event ...network.Event) storage.StorageFactory {
 	return network.Factory(event...).
 		Router(RandomPartition).
-		Storage(mem2.CacheFactory).
+		Storage(mem.CacheFactory).
 		Nodes(10).
 		Create()
 }

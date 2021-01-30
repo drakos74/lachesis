@@ -1,20 +1,20 @@
 package paxos
 
 import (
-	mem2 "github.com/drakos74/lachesis/internal/infra/mem"
 	"testing"
 
 	"github.com/drakos74/lachesis/benchmarks/network"
 	"github.com/drakos74/lachesis/benchmarks/network/lb"
-	"github.com/drakos74/lachesis/benchmarks/store/test"
-	"github.com/drakos74/lachesis/internal/app/store"
+	"github.com/drakos74/lachesis/store/app/storage"
+	"github.com/drakos74/lachesis/store/io/mem"
+	"github.com/drakos74/lachesis/store/test"
 	"github.com/stretchr/testify/assert"
 )
 
-func newPaxosNetwork(event ...network.Event) store.StorageFactory {
+func newPaxosNetwork(event ...network.Event) storage.StorageFactory {
 	return network.Factory(event...).
 		Router(lb.RandomPartition).
-		Storage(mem2.CacheFactory).
+		Storage(mem.CacheFactory).
 		Nodes(10).
 		Protocol(Protocol()).
 		Node(network.Node).

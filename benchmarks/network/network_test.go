@@ -1,19 +1,18 @@
 package network
 
 import (
-	mem2 "github.com/drakos74/lachesis/internal/infra/mem"
 	"testing"
 
-	"github.com/drakos74/lachesis/internal/app/store"
-
-	"github.com/drakos74/lachesis/benchmarks/store/test"
+	"github.com/drakos74/lachesis/store/app/storage"
+	mem2 "github.com/drakos74/lachesis/store/io/mem"
+	"github.com/drakos74/lachesis/store/test"
 )
 
 // Note : single node network
 // This network should be consistent in terms of operations
 // in the same way as the individual network implementations
 // but should fail in case of external cluster events i.e. node-down
-func newNetwork(event ...Event) store.StorageFactory {
+func newNetwork(event ...Event) storage.StorageFactory {
 	return Factory(event...).
 		Router(SinglePartition).
 		Storage(mem2.CacheFactory).

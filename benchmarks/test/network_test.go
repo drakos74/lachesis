@@ -5,8 +5,8 @@ import (
 
 	"github.com/drakos74/lachesis/benchmarks/network"
 	"github.com/drakos74/lachesis/benchmarks/network/lb"
-	"github.com/drakos74/lachesis/internal/infra/file"
-	"github.com/drakos74/lachesis/internal/infra/mem"
+	"github.com/drakos74/lachesis/store/io/file"
+	"github.com/drakos74/lachesis/store/io/mem"
 )
 
 // No benefit from distribution
