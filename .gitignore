@@ -20,6 +20,9 @@ benchmarks/test/testdata/sync-treepad/*
 benchmarks/test/testdata/badger/*
 benchmarks/test/testdata/bolt/*
 
+# vendors
+vendor/*
+
 # storage specific test files
 benchmarks/store/file/data/*
 benchmarks/store/file/sync-data/*
