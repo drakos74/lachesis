@@ -1,7 +1,7 @@
 package test
 
 import (
-	"github.com/drakos74/lachesis"
+	"github.com/drakos74/lachesis/store/store"
 	"testing"
 
 	"github.com/rs/zerolog"
@@ -13,7 +13,7 @@ type Suite struct {
 	suite.Suite
 	t          *testing.T
 	limit      Limit
-	newStorage lachesis.StorageFactory
+	newStorage store.StorageFactory
 }
 
 // Limit is used for asserting counts on read and write operations
@@ -53,7 +53,7 @@ func (s *Consistency) TestMultiReadWriteOperations() {
 }
 
 // Run executes the Consistency test suite
-func (s *Consistency) Run(t *testing.T, factory lachesis.StorageFactory) {
+func (s *Consistency) Run(t *testing.T, factory store.StorageFactory) {
 	s.t = t
 	s.newStorage = factory
 	suite.Run(t, s)
@@ -90,7 +90,7 @@ func (s *ConsistencyWithMeta) TestMultiReadWriteOperations() {
 }
 
 // Run executes the ConsistencyWithMeta test suite
-func (s *ConsistencyWithMeta) Run(t *testing.T, factory lachesis.StorageFactory) {
+func (s *ConsistencyWithMeta) Run(t *testing.T, factory store.StorageFactory) {
 	s.t = t
 	s.newStorage = factory
 	suite.Run(t, s)
@@ -108,7 +108,7 @@ func (s *Concurrency) TestMultiConcurrentReadWriteOperations() {
 }
 
 // Run executes the concurrency test suite
-func (s *Concurrency) Run(t *testing.T, factory func() lachesis.Storage) {
+func (s *Concurrency) Run(t *testing.T, factory func() store.Storage) {
 	s.t = t
 	s.newStorage = factory
 	suite.Run(t, s)
@@ -143,7 +143,7 @@ func (s *FailureRate) TestMultiConcurrentFailureRateOperations() {
 }
 
 // Run executes the test suite
-func (s *FailureRate) Run(t *testing.T, factory func() lachesis.Storage, limit Limit) {
+func (s *FailureRate) Run(t *testing.T, factory func() store.Storage, limit Limit) {
 	// reduce logging
 	zerolog.SetGlobalLevel(zerolog.InfoLevel)
 	s.t = t

@@ -1,7 +1,7 @@
 package btree
 
 import (
-	"github.com/drakos74/lachesis/test"
+	"github.com/drakos74/lachesis/store/store/test"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )

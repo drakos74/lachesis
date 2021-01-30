@@ -3,14 +3,14 @@ package file
 import (
 	"bufio"
 	"fmt"
-	"github.com/drakos74/lachesis"
-	"github.com/drakos74/lachesis/app"
+	"github.com/drakos74/lachesis/store/store"
+	"github.com/drakos74/lachesis/store/store/app"
 	"os"
 	"strconv"
 	"time"
 
-	"github.com/drakos74/lachesis/io/bytes"
-	"github.com/drakos74/lachesis/io/mem"
+	"github.com/drakos74/lachesis/store/store/io/bytes"
+	"github.com/drakos74/lachesis/store/store/io/mem"
 	"github.com/rs/zerolog/log"
 )
 
@@ -20,7 +20,7 @@ type ScratchPad struct {
 	wrFile *os.File
 	rdFile *os.File
 	// we store in the fileIndex a slice of bytes representing the stored object [Size,Size]
-	index lachesis.Storage
+	index store.Storage
 	// we use this to encapsulate our concatenation logic
 	concat   app.ConcatOperator
 	offset   int
@@ -28,7 +28,7 @@ type ScratchPad struct {
 }
 
 // NewScratchPad creates a new ScratchPad instance
-func NewScratchPad(path string, index lachesis.StorageFactory) (*ScratchPad, error) {
+func NewScratchPad(path string, index store.StorageFactory) (*ScratchPad, error) {
 	// generate a file name
 	fileName := fmt.Sprintf("%s/%s.%s", path, strconv.FormatInt(time.Now().UnixNano(), 10), "lac")
 	wrFile, err := os.OpenFile(fileName, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
@@ -50,8 +50,8 @@ func NewScratchPad(path string, index lachesis.StorageFactory) (*ScratchPad, err
 
 // TriePadFactory generates a file storage implementation
 // with a trie as an index
-func TriePadFactory(path string) lachesis.StorageFactory {
-	return func() lachesis.Storage {
+func TriePadFactory(path string) store.StorageFactory {
+	return func() store.Storage {
 		pad, err := NewScratchPad(path, mem.SyncTrieFactory)
 		if err != nil {
 			panic(fmt.Sprintf("error during store creation: %v", err))
@@ -62,8 +62,8 @@ func TriePadFactory(path string) lachesis.StorageFactory {
 
 // TreePadFactory generates a file storage implementation
 // with a btree as an index
-func TreePadFactory(path string) lachesis.StorageFactory {
-	return func() lachesis.Storage {
+func TreePadFactory(path string) store.StorageFactory {
+	return func() store.Storage {
 		pad, err := NewScratchPad(path, mem.SyncBTreeFactory)
 		if err != nil {
 			panic(fmt.Sprintf("error during store creation: %v", err))
@@ -73,7 +73,7 @@ func TreePadFactory(path string) lachesis.StorageFactory {
 }
 
 // Put adds an element to the store
-func (s *ScratchPad) Put(element lachesis.Element) error {
+func (s *ScratchPad) Put(element store.Element) error {
 	bb, err := s.concat.Join(element)
 	if err != nil {
 		return fmt.Errorf("could not serialize element '%v' %w", element, err)
@@ -112,20 +112,20 @@ func (s *ScratchPad) Put(element lachesis.Element) error {
 		Msg("Write_Index")
 	// Note : we overwrite the element only in the key struct,
 	// so the old value is not reachable from the outside world
-	return s.index.Put(lachesis.NewElement(element.Key, index.Bytes()))
+	return s.index.Put(store.NewElement(element.Key, index.Bytes()))
 }
 
 // Get retrieves the element corresponding to the provided key
 // if a value is not found, it will return an error
-func (s *ScratchPad) Get(key lachesis.Key) (lachesis.Element, error) {
+func (s *ScratchPad) Get(key store.Key) (store.Element, error) {
 	bb, err := s.index.Get(key)
 	if err != nil {
-		return lachesis.Element{}, fmt.Errorf(lachesis.NoValue, key)
+		return store.Element{}, fmt.Errorf(store.NoValue, key)
 	}
 
 	index, err := bytes.ReadIndex(bb.Value)
 	if err != nil {
-		return lachesis.Element{}, fmt.Errorf("cannot read fileIndex '%v' %w", index, err)
+		return store.Element{}, fmt.Errorf("cannot read fileIndex '%v' %w", index, err)
 	}
 
 	log.Trace().
@@ -137,21 +137,21 @@ func (s *ScratchPad) Get(key lachesis.Key) (lachesis.Element, error) {
 	data := make([]byte, index.Size())
 	n, err := s.rdFile.ReadAt(data, index.Offset())
 	if err != nil {
-		return lachesis.Element{}, fmt.Errorf("cannot read at '%d' bb '%d' found '%d' %w", index.Offset(), index.Size(), n, err)
+		return store.Element{}, fmt.Errorf("cannot read at '%d' bb '%d' found '%d' %w", index.Offset(), index.Size(), n, err)
 	}
 	if n != index.Size() {
-		return lachesis.Element{}, fmt.Errorf("cannot read at '%d' bb '%d' found '%d'", index.Offset(), index.Size(), n)
+		return store.Element{}, fmt.Errorf("cannot read at '%d' bb '%d' found '%d'", index.Offset(), index.Size(), n)
 	}
 	result, err := s.concat.Split(key, data)
 	if err != nil {
-		return lachesis.Element{}, fmt.Errorf("cannot deserialize '%v' %w", data, err)
+		return store.Element{}, fmt.Errorf("cannot deserialize '%v' %w", data, err)
 	}
 	return result, nil
 }
 
 // Metadata returns internal statistics about the storage
 // It s not meant to serve anny functionality, but used only for testing
-func (s *ScratchPad) Metadata() lachesis.Metadata {
+func (s *ScratchPad) Metadata() store.Metadata {
 	file, _ := os.Open(s.filename)
 	fileScanner := bufio.NewScanner(file)
 	l := 0
@@ -161,7 +161,7 @@ func (s *ScratchPad) Metadata() lachesis.Metadata {
 		b += uint64(len(fileScanner.Bytes()))
 	}
 	keyMetadata := s.index.Metadata()
-	return lachesis.Metadata{
+	return store.Metadata{
 		Size:        keyMetadata.Size,
 		KeysBytes:   keyMetadata.ValuesBytes + keyMetadata.KeysBytes,
 		ValuesBytes: b,

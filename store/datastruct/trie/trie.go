@@ -2,7 +2,7 @@ package trie
 
 import (
 	"fmt"
-	"github.com/drakos74/lachesis"
+	"github.com/drakos74/lachesis/store/store"
 )
 
 // Trie is a trie structure with keys and values made of byte arrays
@@ -76,8 +76,8 @@ func (t *Trie) add(key []byte, value []byte) error {
 }
 
 // Metadata returns the internal stats for the Trie storage implementation
-func Metadata(trie *Trie) lachesis.Metadata {
-	metadata := lachesis.NewMetadata()
+func Metadata(trie *Trie) store.Metadata {
+	metadata := store.NewMetadata()
 	for _, t := range trie.tries {
 		metadata.Merge(Metadata(&t))
 		metadata.KeysBytes++

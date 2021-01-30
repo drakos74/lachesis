@@ -1,4 +1,4 @@
-package lachesis
+package store
 
 import (
 	"encoding/json"

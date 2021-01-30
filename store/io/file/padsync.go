@@ -2,10 +2,10 @@ package file
 
 import (
 	"fmt"
-	"github.com/drakos74/lachesis"
+	"github.com/drakos74/lachesis/store/store"
 	"sync"
 
-	"github.com/drakos74/lachesis/io/mem"
+	"github.com/drakos74/lachesis/store/store/io/mem"
 )
 
 // SyncScratchPad is a thread-safe implementation of  file store
@@ -27,8 +27,8 @@ func NewSyncScratchPad(path string) (*SyncScratchPad, error) {
 }
 
 // SyncScratchPadFactory generates a synced file storage implementation
-func SyncScratchPadFactory(path string) lachesis.StorageFactory {
-	return func() lachesis.Storage {
+func SyncScratchPadFactory(path string) store.StorageFactory {
+	return func() store.Storage {
 		pad, err := NewSyncScratchPad(path)
 		if err != nil {
 			panic(fmt.Sprintf("error during store creation: %v", err))
@@ -50,8 +50,8 @@ func NewSyncTreePad(path string) (*SyncScratchPad, error) {
 }
 
 // SyncTreePadFactory generates a synced file storage implementation
-func SyncTreePadFactory(path string) lachesis.StorageFactory {
-	return func() lachesis.Storage {
+func SyncTreePadFactory(path string) store.StorageFactory {
+	return func() store.Storage {
 		pad, err := NewSyncTreePad(path)
 		if err != nil {
 			panic(fmt.Sprintf("error during store creation: %v", err))
@@ -61,14 +61,14 @@ func SyncTreePadFactory(path string) lachesis.StorageFactory {
 }
 
 // Put adds an element to the store while using a write lock
-func (ss *SyncScratchPad) Put(element lachesis.Element) error {
+func (ss *SyncScratchPad) Put(element store.Element) error {
 	ss.mutex.Lock()
 	defer ss.mutex.Unlock()
 	return ss.store.Put(element)
 }
 
 // Get retrieves an element from the store while using a read lock
-func (ss *SyncScratchPad) Get(key lachesis.Key) (lachesis.Element, error) {
+func (ss *SyncScratchPad) Get(key store.Key) (store.Element, error) {
 	ss.mutex.RLock()
 	defer ss.mutex.RUnlock()
 	return ss.store.Get(key)
@@ -81,6 +81,6 @@ func (ss *SyncScratchPad) Close() error {
 
 // Metadata returns internal statistics about the storage
 // It s not meant to serve anny functionality, but used only for testing
-func (ss *SyncScratchPad) Metadata() lachesis.Metadata {
+func (ss *SyncScratchPad) Metadata() store.Metadata {
 	return ss.store.Metadata()
 }

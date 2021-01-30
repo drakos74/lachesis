@@ -1,4 +1,4 @@
-module github.com/drakos74/lachesis
+module github.com/drakos74/lachesis/store/store
 
 go 1.15
 
