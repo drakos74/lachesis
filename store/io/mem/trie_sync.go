@@ -2,9 +2,9 @@ package mem
 
 import (
 	"fmt"
+	"github.com/drakos74/lachesis/store"
 	"sync"
 
-	"github.com/drakos74/lachesis/store/app/storage"
 	"github.com/drakos74/lachesis/store/datastruct/trie"
 )
 
@@ -21,25 +21,25 @@ func NewSyncTrie() *SyncTrie {
 }
 
 // SyncTrieFactory generates a SyncTrie storage implementation
-func SyncTrieFactory() storage.Storage {
+func SyncTrieFactory() store.Storage {
 	return NewSyncTrie()
 }
 
 // Put adds an element to the trie
-func (st *SyncTrie) Put(element storage.Element) error {
+func (st *SyncTrie) Put(element store.Element) error {
 	st.Lock()
 	defer st.Unlock()
 	return st.storage.Commit(element.Key, element.Value)
 }
 
 // Get retrieves and element from the trie
-func (st *SyncTrie) Get(key storage.Key) (storage.Element, error) {
+func (st *SyncTrie) Get(key store.Key) (store.Element, error) {
 	st.RLock()
 	defer st.RUnlock()
 	if data, ok := st.storage.Read(key); ok {
-		return storage.NewElement(key, data), nil
+		return store.NewElement(key, data), nil
 	}
-	return storage.Element{}, fmt.Errorf(storage.NoValue, key)
+	return store.Element{}, fmt.Errorf(store.NoValue, key)
 }
 
 // Close will run any maintainance operations
@@ -49,6 +49,6 @@ func (st *SyncTrie) Close() error {
 
 // Metadata returns internal statistics about the storage
 // It s not meant to serve anny functionality, but used only for testing
-func (st *SyncTrie) Metadata() storage.Metadata {
+func (st *SyncTrie) Metadata() store.Metadata {
 	return trie.Metadata(st.storage)
 }

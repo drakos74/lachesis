@@ -2,8 +2,8 @@ package file
 
 import (
 	"fmt"
+	"github.com/drakos74/lachesis/store"
 
-	"github.com/drakos74/lachesis/store/app/storage"
 	"github.com/drakos74/lachesis/store/io/bytes"
 	"github.com/drakos74/lachesis/store/io/mem"
 	"github.com/rs/zerolog/log"
@@ -15,8 +15,8 @@ type ClosingPad struct {
 
 // TrieClosingPadFactory generates a file storage implementation
 // with a trie as an index
-func TrieClosingPadFactory(path string) storage.StorageFactory {
-	return func() storage.Storage {
+func TrieClosingPadFactory(path string) store.StorageFactory {
+	return func() store.Storage {
 		pad, err := NewScratchPad(path, mem.SyncTrieFactory)
 		if err != nil {
 			panic(fmt.Sprintf("error during store creation: %v", err))
@@ -27,8 +27,8 @@ func TrieClosingPadFactory(path string) storage.StorageFactory {
 
 // TreeClosingPadFactory generates a file storage implementation
 // with a btree as an index
-func TreeClosingPadFactory(path string) storage.StorageFactory {
-	return func() storage.Storage {
+func TreeClosingPadFactory(path string) store.StorageFactory {
+	return func() store.Storage {
 		pad, err := NewScratchPad(path, mem.SyncBTreeFactory)
 		if err != nil {
 			panic(fmt.Sprintf("error during store creation: %v", err))
@@ -38,7 +38,7 @@ func TreeClosingPadFactory(path string) storage.StorageFactory {
 }
 
 // Put adds an element to the store
-func (s *ClosingPad) Put(element storage.Element) error {
+func (s *ClosingPad) Put(element store.Element) error {
 	bb, err := s.concat.Join(element)
 	if err != nil {
 		return fmt.Errorf("could not serialize element '%v' %w", element, err)
@@ -75,5 +75,5 @@ func (s *ClosingPad) Put(element storage.Element) error {
 		Msg("Write_Index")
 	// Note : we overwrite the element only in the key struct,
 	// so the old value is not reachable from the outside world
-	return s.index.Put(storage.NewElement(element.Key, index.Bytes()))
+	return s.index.Put(store.NewElement(element.Key, index.Bytes()))
 }

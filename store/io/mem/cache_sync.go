@@ -2,9 +2,8 @@ package mem
 
 import (
 	"fmt"
+	"github.com/drakos74/lachesis/store"
 	"sync"
-
-	"github.com/drakos74/lachesis/store/app/storage"
 )
 
 // SyncCache is an in memory struct implementing the storage interface
@@ -19,22 +18,22 @@ func NewSyncCache() *SyncCache {
 }
 
 // SyncCacheFactory generates a SyncCache storage implementation
-func SyncCacheFactory() storage.Storage {
+func SyncCacheFactory() store.Storage {
 	return NewSyncCache()
 }
 
 // Put adds an element to the cache
-func (sc *SyncCache) Put(element storage.Element) error {
+func (sc *SyncCache) Put(element store.Element) error {
 	sc.storage.Store(string(element.Key), element.Value)
 	return nil
 }
 
 // Get retrieves and element from the cache
-func (sc *SyncCache) Get(key storage.Key) (storage.Element, error) {
+func (sc *SyncCache) Get(key store.Key) (store.Element, error) {
 	if result, ok := sc.storage.Load(string(key)); ok {
-		return storage.NewElement(key, result.(storage.Value)), nil
+		return store.NewElement(key, result.(store.Value)), nil
 	}
-	return storage.Element{}, fmt.Errorf(storage.NoValue, key)
+	return store.Element{}, fmt.Errorf(store.NoValue, key)
 }
 
 // Close will run any maintenance operations
@@ -44,13 +43,13 @@ func (sc *SyncCache) Close() error {
 
 // Metadata returns internal statistics about the storage
 // It s not meant to serve anny functionality, but used only for testing
-func (sc *SyncCache) Metadata() storage.Metadata {
-	meta := storage.NewMetadata()
+func (sc *SyncCache) Metadata() store.Metadata {
+	meta := store.NewMetadata()
 	sc.storage.Range(func(key, value interface{}) bool {
-		meta.Merge(storage.Metadata{
+		meta.Merge(store.Metadata{
 			Size:        1,
 			KeysBytes:   uint64(len([]byte(key.(string)))),
-			ValuesBytes: uint64(len(value.(storage.Value))),
+			ValuesBytes: uint64(len(value.(store.Value))),
 			Errors:      nil,
 		})
 		return true

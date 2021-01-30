@@ -2,8 +2,8 @@ package mem
 
 import (
 	"fmt"
+	"github.com/drakos74/lachesis/store"
 
-	"github.com/drakos74/lachesis/store/app/storage"
 	"github.com/drakos74/lachesis/store/datastruct/btree"
 )
 
@@ -13,30 +13,30 @@ type Btree struct {
 }
 
 // BTreeFactory generates a Cache storage implementation
-func BTreeFactory() storage.Storage {
+func BTreeFactory() store.Storage {
 	return &Btree{btree.New(10)}
 }
 
 // Put stores an element in the storage based on the given key
-func (b *Btree) Put(element storage.Element) error {
+func (b *Btree) Put(element store.Element) error {
 	b.BTree.ReplaceOrInsert(element)
 	return nil
 }
 
 // Get retrieves an element based on the given key
-func (b *Btree) Get(key storage.Key) (storage.Element, error) {
-	e := b.BTree.Get(storage.NewElement(key, []byte{}))
+func (b *Btree) Get(key store.Key) (store.Element, error) {
+	e := b.BTree.Get(store.NewElement(key, []byte{}))
 	var err error
-	if storage.IsNil(e) {
-		err = fmt.Errorf(storage.NoValue, key)
+	if store.IsNil(e) {
+		err = fmt.Errorf(store.NoValue, key)
 	}
 	return e, err
 }
 
 // Metadata returns the metadata for the given storage
-func (b *Btree) Metadata() storage.Metadata {
+func (b *Btree) Metadata() store.Metadata {
 	c, ks, vs := b.Stats()
-	return storage.Metadata{
+	return store.Metadata{
 		Size:        c,
 		KeysBytes:   ks,
 		ValuesBytes: vs,

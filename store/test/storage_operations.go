@@ -2,42 +2,42 @@ package test
 
 import (
 	"fmt"
+	"github.com/drakos74/lachesis/store"
 	"sync"
 	"sync/atomic"
 	"testing"
 
 	"github.com/rs/zerolog/log"
 
-	"github.com/drakos74/lachesis/store/app/storage"
 	"github.com/stretchr/testify/assert"
 )
 
 // VoidReadOperation performs a read on a non-existing key
 // expecting the results to be an error and an empty element
-func VoidReadOperation(t *testing.T, store storage.Storage, checkMeta bool) {
+func VoidReadOperation(t *testing.T, storage store.Storage, checkMeta bool) {
 
 	// read path
 	key := RandomBytes(10)
-	testElement, err := store.Get(key)
+	testElement, err := storage.Get(key)
 	assert.Error(t, err)
-	assert.Equal(t, storage.Element{}, testElement)
+	assert.Equal(t, store.Element{}, testElement)
 
 	if checkMeta {
 		// check if store is empty
-		assertMeta(t, 0, 0, 0, store.Metadata())
+		assertMeta(t, 0, 0, 0, storage.Metadata())
 	} else {
 		// print just the metadata
-		log.Info().Msg(fmt.Sprintf("metadata = %v", store.Metadata()))
+		log.Info().Msg(fmt.Sprintf("metadata = %v", storage.Metadata()))
 	}
 
 	// wrap up
-	err = store.Close()
+	err = storage.Close()
 	assert.NoError(t, err)
 }
 
 // IntermediateReadOperation performs a read on a given key
 // expecting the results to be the expected value
-func IntermediateReadOperation(t *testing.T, storage storage.Storage, key storage.Key, expectedValue storage.Value) storage.Element {
+func IntermediateReadOperation(t *testing.T, storage store.Storage, key store.Key, expectedValue store.Value) store.Element {
 
 	testElement, err := storage.Get(key)
 	assert.NoError(t, err)
@@ -49,7 +49,7 @@ func IntermediateReadOperation(t *testing.T, storage storage.Storage, key storag
 
 // ReadWriteOperation performs a write and a following read on the storage
 // it asserts that we got back the value that was put into the store
-func ReadWriteOperation(t *testing.T, storage storage.Storage, generator RandomFactory, checkMeta bool) {
+func ReadWriteOperation(t *testing.T, storage store.Storage, generator RandomFactory, checkMeta bool) {
 
 	element := generator.ElementFactory()
 
@@ -79,7 +79,7 @@ func ReadWriteOperation(t *testing.T, storage storage.Storage, generator RandomF
 
 // ReadOverwriteOperation performs a write, read and write operation again on the same key
 // to check the overwrite feature of the given storage
-func ReadOverwriteOperation(t *testing.T, storage storage.Storage, generator RandomFactory, checkMeta bool) {
+func ReadOverwriteOperation(t *testing.T, storage store.Storage, generator RandomFactory, checkMeta bool) {
 
 	element1 := generator.ElementFactory()
 	element2 := generator.ElementFactory()
@@ -118,12 +118,12 @@ func ReadOverwriteOperation(t *testing.T, storage storage.Storage, generator Ran
 const num = 1000
 
 // MultiReadWriteOperations executes multiple read and write operations
-func MultiReadWriteOperations(t *testing.T, store storage.Storage, generator RandomFactory, checkMeta bool) {
+func MultiReadWriteOperations(t *testing.T, storage store.Storage, generator RandomFactory, checkMeta bool) {
 
-	metadata := storage.NewMetadata()
+	metadata := store.NewMetadata()
 
 	// generator the elements
-	elements := make([]storage.Element, 0)
+	elements := make([]store.Element, 0)
 
 	for i := 0; i < num; i++ {
 		element := generator.ElementFactory()
@@ -133,32 +133,32 @@ func MultiReadWriteOperations(t *testing.T, store storage.Storage, generator Ran
 
 	//  write path
 	for _, element := range elements {
-		err := store.Put(element)
+		err := storage.Put(element)
 		assert.NoError(t, err)
 	}
 
 	// read path
 	for _, element := range elements {
-		value, err := store.Get(element.Key)
+		value, err := storage.Get(element.Key)
 		assert.NoError(t, err)
 		assert.Equal(t, element.Value, value.Value)
 	}
 
 	if checkMeta {
 		// assert internal stats
-		assert.Equal(t, metadata.Size, store.Metadata().Size)
+		assert.Equal(t, metadata.Size, storage.Metadata().Size)
 	} else {
 		// print just the metadata
-		log.Info().Msg(fmt.Sprintf("metadata = %v", store.Metadata()))
+		log.Info().Msg(fmt.Sprintf("metadata = %v", storage.Metadata()))
 	}
 
 	// wrap up
-	err := store.Close()
+	err := storage.Close()
 	assert.NoError(t, err)
 }
 
 // MultiConcurrentReadWriteOperations executes multiple concurrent read and write operations
-func MultiConcurrentReadWriteOperations(t *testing.T, store storage.Storage, generator RandomFactory) {
+func MultiConcurrentReadWriteOperations(t *testing.T, storage store.Storage, generator RandomFactory) {
 
 	wg := sync.WaitGroup{}
 
@@ -171,7 +171,7 @@ func MultiConcurrentReadWriteOperations(t *testing.T, store storage.Storage, gen
 
 		// TODO : try to make this linear
 		// each element cycle is done in a different routine to generator more contention
-		go func(storage storage.Storage) {
+		go func(storage store.Storage) {
 			element := generator.ElementFactory()
 
 			// put
@@ -194,14 +194,14 @@ func MultiConcurrentReadWriteOperations(t *testing.T, store storage.Storage, gen
 				assert.Equal(t, element.Value, result.Value)
 			}()
 
-		}(store)
+		}(storage)
 
 	}
 
 	wg.Wait()
 
 	// flush path
-	err := store.Close()
+	err := storage.Close()
 	assert.NoError(t, err)
 
 	// NOTE : We might have key overlaps ... but the different stores will behave differently
@@ -217,7 +217,7 @@ type Errors struct {
 }
 
 // MultiConcurrentFailureRateOperations executes multiple concurrent operations and track the amount of errors encountered
-func MultiConcurrentFailureRateOperations(t *testing.T, store storage.Storage, generator RandomFactory) (readError, writeError float64) {
+func MultiConcurrentFailureRateOperations(t *testing.T, storage store.Storage, generator RandomFactory) (readError, writeError float64) {
 
 	wg := sync.WaitGroup{}
 
@@ -233,7 +233,7 @@ func MultiConcurrentFailureRateOperations(t *testing.T, store storage.Storage, g
 
 		// TODO : try to make this linear
 		// each element cycle is done in a different routine to generate more contention
-		go func(storage storage.Storage) {
+		go func(storage store.Storage) {
 			element := generator.ElementFactory()
 
 			// put
@@ -262,14 +262,14 @@ func MultiConcurrentFailureRateOperations(t *testing.T, store storage.Storage, g
 				wg.Done()
 			}()
 
-		}(store)
+		}(storage)
 
 	}
 
 	wg.Wait()
 
 	// flush path
-	err := store.Close()
+	err := storage.Close()
 	assert.NoError(t, err)
 
 	assert.Equal(t, w, r)
@@ -288,7 +288,7 @@ func MultiConcurrentFailureRateOperations(t *testing.T, store storage.Storage, g
 
 }
 
-func assertMeta(t *testing.T, size, keysSize, vaLuesSize uint64, meta storage.Metadata) {
+func assertMeta(t *testing.T, size, keysSize, vaLuesSize uint64, meta store.Metadata) {
 	assert.Equal(t, size, meta.Size)
 	// TODO : assert on the volume of the store
 	//assert.Equal(t, keysSize, meta.KeysBytes)
