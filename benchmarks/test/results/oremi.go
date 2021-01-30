@@ -3,11 +3,11 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/drakos74/lachesis/benchmarks/test"
 	"log"
 	"strings"
 
 	"gioui.org/layout"
+	"github.com/drakos74/lachesis/benchmarks/test"
 	"github.com/drakos74/oremi"
 	"github.com/drakos74/oremi/bench"
 )
