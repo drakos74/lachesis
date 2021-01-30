@@ -22,10 +22,9 @@ type ValueConstructor func() interface{}
 
 // Repository is the high level implementation  allowing to store arbitrary key value pairs
 type Repository struct {
-	encoder   Encoder
-	decoder   Decoder
-	generator ValueConstructor
-	storage   Storage
+	encoder Encoder
+	decoder Decoder
+	storage Storage
 }
 
 // NewRepository creates a new repository

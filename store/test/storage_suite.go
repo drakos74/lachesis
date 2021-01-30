@@ -1,8 +1,9 @@
 package test
 
 import (
-	"github.com/drakos74/lachesis/store/store"
 	"testing"
+
+	"github.com/drakos74/lachesis/store/store"
 
 	"github.com/rs/zerolog"
 	"github.com/stretchr/testify/suite"
@@ -11,8 +12,11 @@ import (
 // Suite is the testing suite base struct
 type Suite struct {
 	suite.Suite
-	t          *testing.T
-	limit      Limit
+	// nolint:structcheck
+	t *testing.T
+	// nolint:structcheck
+	limit Limit
+	// nolint:structcheck
 	newStorage store.StorageFactory
 }
 

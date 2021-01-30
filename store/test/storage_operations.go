@@ -2,10 +2,11 @@ package test
 
 import (
 	"fmt"
-	"github.com/drakos74/lachesis/store/store"
 	"sync"
 	"sync/atomic"
 	"testing"
+
+	"github.com/drakos74/lachesis/store/store"
 
 	"github.com/rs/zerolog/log"
 
@@ -208,12 +209,6 @@ func MultiConcurrentReadWriteOperations(t *testing.T, storage store.Storage, gen
 	// so for now we just assert based on the read and write operations, and not the embedded metadata
 	assert.Equal(t, w, r)
 
-}
-
-// Errors counts the number of errors during read and write operations
-type Errors struct {
-	write int32
-	read  int32
 }
 
 // MultiConcurrentFailureRateOperations executes multiple concurrent operations and track the amount of errors encountered

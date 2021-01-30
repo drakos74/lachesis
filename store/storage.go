@@ -115,7 +115,7 @@ func IsNil(e Element) bool {
 
 // BytesEqual compares to byte arrays
 func BytesEqual(a, b []byte) bool {
-	return bytes.Compare(a, b) == 0
+	return bytes.Equal(a, b)
 }
 
 // IsEqual tests the equality of 2 elements based on their keys and values
